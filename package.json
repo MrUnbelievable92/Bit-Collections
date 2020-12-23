@@ -1,0 +1,26 @@
+{
+  "name": "bitcollections",
+  "displayName": "Bit Collections",
+  "version": "0.9.9",
+  "unity": "2020.2",
+  "description": "Bit Collections is all about saving as much RAM(-bandwidth) as possible, by providing array value types of single bits, aswell as array value types of signed- and unsigned numbers with a given number of bits.",
+   "keywords": [
+    "Unity"
+  ],
+   "dependencies": {
+    "maxmath" : "1.0.0",
+    "csharpdevtools" : "1.0.5",
+    "com.unity.burst": "1.4.3",
+    "com.unity.mathematics": "1.2.1",
+	"com.unity.collections": "0.14.0-preview.16",
+	"com.unity.jobs": "0.7.0-preview.17"
+	},
+  "author": {
+    "name": "Maximilian Kalimon",
+    "email": "mkalimon@gmx.de"
+  },
+  "repository": {
+    "url": "https://github.com/MrUnbelievable92/Bit-Collections",
+    "type": "git"
+  }
+}
