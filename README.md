@@ -36,7 +36,7 @@ Bit-Number Min- and Max Values:
 
 
 
-Additionally, 3- 5- 6- and 7-Bit Numbers are defined:
+Additionally, 3- 5- 6- and 7-Byte Numbers are defined:
 
 ![alt text](https://i.imgur.com/Gl8eguA.png)
 
