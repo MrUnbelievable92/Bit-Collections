@@ -30,7 +30,7 @@ Bit Arrays:
 
 Generic Bit Arrays:
 
-![alt text](https://i.imgur.com/rs47aGf.png)
+![alt text](https://i.imgur.com/mvWMvll.png)
 
 
 
