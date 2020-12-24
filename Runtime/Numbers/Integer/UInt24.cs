@@ -8,15 +8,15 @@ using MaxMath;
 namespace BitCollections
 {
     [Serializable]  [StructLayout(LayoutKind.Sequential, Size = 3)]
-    unsafe public struct UInt24 : IComparable, IComparable<UInt24>, IConvertible, IEquatable<UInt24>, IFormattable
+    unsafe public readonly struct UInt24 : IComparable, IComparable<UInt24>, IConvertible, IEquatable<UInt24>, IFormattable
     {
         public const uint MinValue = 0;
         public const uint MaxValue = 16_777_215;
     
     
-        private byte byte0;
-        private byte byte1;
-        private byte byte2;
+        private readonly byte byte0;
+        private readonly byte byte1;
+        private readonly byte byte2;
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -258,274 +258,274 @@ namespace BitCollections
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator + (UInt24 lhs, UInt24 rhs)
+        public static UInt24 operator + (UInt24 left, UInt24 right)
         {
-            return (UInt24)(*(uint*)&lhs + *(uint*)&rhs);
+            return (UInt24)(*(uint*)&left + *(uint*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator + (UInt24 lhs, uint rhs)
+        public static UInt24 operator + (UInt24 left, uint right)
         {
-            return (UInt24)(*(uint*)&lhs + rhs);
+            return (UInt24)(*(uint*)&left + right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator + (uint lhs, UInt24 rhs)
+        public static UInt24 operator + (uint left, UInt24 right)
         {
-            return (UInt24)(lhs + *(uint*)&rhs);
+            return (UInt24)(left + *(uint*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator - (UInt24 lhs, UInt24 rhs)
+        public static UInt24 operator - (UInt24 left, UInt24 right)
         {
-            return (UInt24)(*(uint*)&lhs - *(uint*)&rhs);
+            return (UInt24)(*(uint*)&left - *(uint*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator - (UInt24 lhs, uint rhs)
+        public static UInt24 operator - (UInt24 left, uint right)
         {
-            return (UInt24)(*(uint*)&lhs - rhs);
+            return (UInt24)(*(uint*)&left - right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator - (uint lhs, UInt24 rhs)
+        public static UInt24 operator - (uint left, UInt24 right)
         {
-            return (UInt24)(lhs - *(uint*)&rhs);
+            return (UInt24)(left - *(uint*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator * (UInt24 lhs, UInt24 rhs)
+        public static UInt24 operator * (UInt24 left, UInt24 right)
         {
-            return (UInt24)(*(uint*)&lhs * *(uint*)&rhs);
+            return (UInt24)(*(uint*)&left * *(uint*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator * (UInt24 lhs, uint rhs)
+        public static UInt24 operator * (UInt24 left, uint right)
         {
-            return (UInt24)(*(uint*)&lhs * rhs);
+            return (UInt24)(*(uint*)&left * right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator * (uint lhs, UInt24 rhs)
+        public static UInt24 operator * (uint left, UInt24 right)
         {
-            return (UInt24)(lhs * *(uint*)&rhs);
+            return (UInt24)(left * *(uint*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator / (UInt24 lhs, UInt24 rhs)
+        public static UInt24 operator / (UInt24 left, UInt24 right)
         {
-            return (UInt24)((ulong)lhs / (ulong)rhs);
+            return (UInt24)((ulong)left / (ulong)right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator / (UInt24 lhs, uint rhs)
+        public static UInt24 operator / (UInt24 left, uint right)
         {
-            return (UInt24)((uint)lhs / rhs);
+            return (UInt24)((uint)left / right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator / (uint lhs, UInt24 rhs)
+        public static UInt24 operator / (uint left, UInt24 right)
         {
-            return (UInt24)(lhs / (uint)rhs);
+            return (UInt24)(left / (uint)right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator % (UInt24 lhs, UInt24 rhs)
+        public static UInt24 operator % (UInt24 left, UInt24 right)
         {
-            return (UInt24)((uint)lhs % (uint)rhs);
+            return (UInt24)((uint)left % (uint)right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator % (UInt24 lhs, uint rhs)
+        public static UInt24 operator % (UInt24 left, uint right)
         {
-            return (UInt24)((uint)lhs % rhs);
+            return (UInt24)((uint)left % right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator % (uint lhs, UInt24 rhs)
+        public static UInt24 operator % (uint left, UInt24 right)
         {
-            return (UInt24)(lhs % (uint)rhs);
-        }
-    
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator & (UInt24 lhs, UInt24 rhs)
-        {
-            return (UInt24)(*(uint*)&lhs & *(uint*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator & (UInt24 lhs, uint rhs)
-        {
-            return (UInt24)(*(uint*)&lhs & rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator & (uint lhs, UInt24 rhs)
-        {
-            return (UInt24)(lhs & *(uint*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator | (UInt24 lhs, UInt24 rhs)
-        {
-            return (UInt24)(*(uint*)&lhs | *(uint*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator | (UInt24 lhs, uint rhs)
-        {
-            return (UInt24)(*(uint*)&lhs | rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator | (uint lhs, UInt24 rhs)
-        {
-            return (UInt24)(lhs | *(uint*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator ^ (UInt24 lhs, UInt24 rhs)
-        {
-            return (UInt24)(*(uint*)&lhs ^ *(uint*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator ^ (UInt24 lhs, uint rhs)
-        {
-            return (UInt24)(*(uint*)&lhs ^ rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator ^(uint lhs, UInt24 rhs)
-        {
-            return (UInt24)(lhs ^ *(uint*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator << (UInt24 lhs, int rhs)
-        {
-            return (UInt24)(*(uint*)&lhs << rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt24 operator >> (UInt24 lhs, int rhs)
-        {
-            return (UInt24)((uint)lhs >> rhs);
+            return (UInt24)(left % (uint)right);
         }
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator == (UInt24 lhs, UInt24 rhs)
+        public static UInt24 operator & (UInt24 left, UInt24 right)
         {
-            return (uint)lhs == (uint)rhs;
+            return (UInt24)(*(uint*)&left & *(uint*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator == (UInt24 lhs, uint rhs)
+        public static UInt24 operator & (UInt24 left, uint right)
         {
-            return (uint)lhs == rhs;
+            return (UInt24)(*(uint*)&left & right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator == (uint lhs, UInt24 rhs)
+        public static UInt24 operator & (uint left, UInt24 right)
         {
-            return lhs == (uint)rhs;
+            return (UInt24)(left & *(uint*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator != (UInt24 lhs, UInt24 rhs)
+        public static UInt24 operator | (UInt24 left, UInt24 right)
         {
-            return (uint)lhs != (uint)rhs;
+            return (UInt24)(*(uint*)&left | *(uint*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator != (UInt24 lhs, uint rhs)
+        public static UInt24 operator | (UInt24 left, uint right)
         {
-            return (uint)lhs != rhs;
+            return (UInt24)(*(uint*)&left | right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator != (uint lhs, UInt24 rhs)
+        public static UInt24 operator | (uint left, UInt24 right)
         {
-            return lhs != (uint)rhs;
+            return (UInt24)(left | *(uint*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator < (UInt24 lhs, UInt24 rhs)
+        public static UInt24 operator ^ (UInt24 left, UInt24 right)
         {
-            return (uint)lhs < (uint)rhs;
+            return (UInt24)(*(uint*)&left ^ *(uint*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator < (UInt24 lhs, uint rhs)
+        public static UInt24 operator ^ (UInt24 left, uint right)
         {
-            return (uint)lhs < rhs;
+            return (UInt24)(*(uint*)&left ^ right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator < (uint lhs, UInt24 rhs)
+        public static UInt24 operator ^ (uint left, UInt24 right)
         {
-            return lhs < (uint)rhs;
+            return (UInt24)(left ^ *(uint*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator > (UInt24 lhs, UInt24 rhs)
+        public static UInt24 operator << (UInt24 left, int right)
         {
-            return (uint)lhs > (uint)rhs;
+            return (UInt24)(*(uint*)&left << right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator > (UInt24 lhs, uint rhs)
+        public static UInt24 operator >> (UInt24 left, int right)
         {
-            return (uint)lhs > rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator > (uint lhs, UInt24 rhs)
-        {
-            return lhs > (uint)rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <= (UInt24 lhs, UInt24 rhs)
-        {
-            return (uint)lhs <= (uint)rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <= (UInt24 lhs, uint rhs)
-        {
-            return (uint)lhs <= rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <= (uint lhs, UInt24 rhs)
-        {
-            return lhs <= (uint)rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >= (UInt24 lhs, UInt24 rhs)
-        {
-            return (uint)lhs >= (uint)rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >= (UInt24 lhs, uint rhs)
-        {
-            return (uint)lhs >= rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >= (uint lhs, UInt24 rhs)
-        {
-            return lhs >= (uint)rhs;
+            return (UInt24)((uint)left >> right);
         }
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override readonly int GetHashCode()
+        public static bool operator == (UInt24 left, UInt24 right)
+        {
+            return (uint)left == (uint)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator == (UInt24 left, uint right)
+        {
+            return (uint)left == right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator == (uint left, UInt24 right)
+        {
+            return left == (uint)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator != (UInt24 left, UInt24 right)
+        {
+            return (uint)left != (uint)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator != (UInt24 left, uint right)
+        {
+            return (uint)left != right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator != (uint left, UInt24 right)
+        {
+            return left != (uint)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator < (UInt24 left, UInt24 right)
+        {
+            return (uint)left < (uint)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator < (UInt24 left, uint right)
+        {
+            return (uint)left < right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator < (uint left, UInt24 right)
+        {
+            return left < (uint)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator > (UInt24 left, UInt24 right)
+        {
+            return (uint)left > (uint)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator > (UInt24 left, uint right)
+        {
+            return (uint)left > right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator > (uint left, UInt24 right)
+        {
+            return left > (uint)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <= (UInt24 left, UInt24 right)
+        {
+            return (uint)left <= (uint)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <= (UInt24 left, uint right)
+        {
+            return (uint)left <= right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <= (uint left, UInt24 right)
+        {
+            return left <= (uint)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >= (UInt24 left, UInt24 right)
+        {
+            return (uint)left >= (uint)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >= (UInt24 left, uint right)
+        {
+            return (uint)left >= right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >= (uint left, UInt24 right)
+        {
+            return left >= (uint)right;
+        }
+    
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode()
         {
             return (int)this;
         }
@@ -536,11 +536,11 @@ namespace BitCollections
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool Equals(UInt24 other)
+        public bool Equals(UInt24 other)
         {
             return this == other;
         }
-        public override readonly bool Equals(object obj)
+        public override bool Equals(object obj)
         {
             return Equals((UInt24)obj);
         }

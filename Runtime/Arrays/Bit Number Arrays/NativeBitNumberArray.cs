@@ -169,6 +169,7 @@ AtomicSafetyHandle.Release(m_Safety);
         }
 
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override readonly int GetHashCode()
         {
             return ((IntPtr)m_Ptr).GetHashCode();

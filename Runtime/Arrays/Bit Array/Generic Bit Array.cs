@@ -26,6 +26,14 @@ Assert.IsNotGreater(sizeof(T), 8);
             intern = value;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bits(bool value)
+        {
+            ulong temp = (ulong)(-(long)maxmath.touint64(value));
+
+            intern = *(T*)&temp;
+        }
+
 
         public readonly int Length => 8 * sizeof(T);
 
@@ -52,41 +60,41 @@ Assert.IsNotGreater(sizeof(T), 8);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bits<T> operator == (bits<T> lhs, bits<T> rhs)
+        public static bits<T> operator == (bits<T> left, bits<T> right)
         {
-            ulong temp = ~(*(ulong*)&lhs ^ *(ulong*)&rhs);
+            ulong temp = ~(*(ulong*)&left ^ *(ulong*)&right);
 
             return *(bits<T>*)&temp;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bits<T> operator != (bits<T> lhs, bits<T> rhs)
+        public static bits<T> operator != (bits<T> left, bits<T> right)
         {
-            ulong temp = *(ulong*)&lhs ^ *(ulong*)&rhs;
+            ulong temp = *(ulong*)&left ^ *(ulong*)&right;
 
             return *(bits<T>*)&temp;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bits<T> operator & (bits<T> lhs, bits<T> rhs)
+        public static bits<T> operator & (bits<T> left, bits<T> right)
         {
-            ulong temp = *(ulong*)&lhs & *(ulong*)&rhs;
+            ulong temp = *(ulong*)&left & *(ulong*)&right;
 
             return *(bits<T>*)&temp;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bits<T> operator | (bits<T> lhs, bits<T> rhs)
+        public static bits<T> operator | (bits<T> left, bits<T> right)
         {
-            ulong temp = *(ulong*)&lhs | *(ulong*)&rhs;
+            ulong temp = *(ulong*)&left | *(ulong*)&right;
 
             return *(bits<T>*)&temp;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bits<T> operator ^ (bits<T> lhs, bits<T> rhs)
+        public static bits<T> operator ^ (bits<T> left, bits<T> right)
         {
-            ulong temp = *(ulong*)&lhs ^ *(ulong*)&rhs;
+            ulong temp = *(ulong*)&left ^ *(ulong*)&right;
 
             return *(bits<T>*)&temp;
         }
@@ -166,7 +174,7 @@ Assert.IsWithinArrayBounds(index, Length);
 
         public readonly NativeArray<bool> ToArray(Allocator allocator)
         {
-            NativeArray<bool> result = new NativeArray<bool>(Length, allocator);
+            NativeArray<bool> result = new NativeArray<bool>(Length, allocator, NativeArrayOptions.UninitializedMemory);
 
             void* ptr = result.GetUnsafePtr();
 
@@ -362,28 +370,22 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Swap([AssumeRange(0, 63)] int smallerIndex, [AssumeRange(0, 63)] int largerIndex)
         {
-Assert.IsNotSmaller(largerIndex, smallerIndex);
 Assert.IsWithinArrayBounds(smallerIndex, Length);
 Assert.IsWithinArrayBounds(largerIndex, Length);
 
             fixed (void* ptr = &this)
             {
-                ulong val = *(ulong*)ptr;
+                ulong2 field = *(ulong*)ptr;
+                ulong2 packed = (ulong2)new long2(smallerIndex, largerIndex);
 
-                // x: mask for smallerIndex, y: mask for largerIndex, 
-                ulong3 masks = maxmath.shl(1ul, new ulong3((ulong)smallerIndex, (ulong)largerIndex, 0ul));
-                // z: mask for deleting elements in the array
-                masks.z = ~(masks.x | masks.y);
+                ulong2 result = 1 & maxmath.shrl(field, packed);
+                result ^= result.yx;
+                result = maxmath.shl(result, packed);
 
-                // delete in z, grab values in x & y
-                masks &= val;
-
-                // swap positions; blend together
-                int indexDelta = largerIndex - smallerIndex;
-                val = (masks.z | (masks.x << indexDelta)) | (masks.y >> indexDelta);
+                result = field ^ (result | result.yx);
 
 
-                intern = *(T*)&val;
+                intern = *(T*)&result;
             }
         }
 
@@ -482,18 +484,9 @@ Assert.IsDefinedBitShift<ulong>(math.abs(shiftValue));
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public void Shuffle(ref Random32 rngenerator)
         {
-            for (int2 i = new int2(63, Length);     i.x > 0;    i--)
+            for (int2 i = new int2(63, Length);     (i > 0).x;    i--)
             {
-                int randomIndex = rngenerator.NextInt(0, i.y);
-
-                if (i.x > randomIndex)
-                {
-                    Swap(randomIndex, i.x);
-                }
-                else
-                {
-                    Swap(i.x, randomIndex);
-                }
+                Swap(i.x, rngenerator.NextInt(0, i.y));
             }
         }
     
@@ -504,18 +497,9 @@ Assert.IsValidSubarray(index, numBits, Length);
     
             int startingIndex = index + numBits;/* - 1 is actual starting index*/
     
-            for (int2 i = new int2(startingIndex - 1, startingIndex);     i.x > 0;      i--)  
+            for (int2 i = new int2(startingIndex - 1, startingIndex);     (i > 0).x;      i--)  
             {
-                int randomIndex = rngenerator.NextInt(0, i.y);
-
-                if (i.x > randomIndex)
-                {
-                    Swap(randomIndex, i.x);
-                }
-                else
-                {
-                    Swap(i.x, randomIndex);
-                }
+                Swap(i.x, rngenerator.NextInt(0, i.y));
             } 
         }
     
@@ -547,9 +531,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public void SetBits(bool value)
         {
-            ulong newOne = value ? ulong.MaxValue : ulong.MinValue;
-
-            intern = *(T*)&newOne;
+            this = new bits<T>(value);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
@@ -663,32 +645,32 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Overwrite([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, bit8 source, [AssumeRange(0, 7)] int sourceIndex)
         {
-            OverwriteHelper((ulong)source.intern, new bit8().Length, index, numBits, sourceIndex);
+            OverwriteHelper((ulong)source.intern, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Overwrite([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, bit16 source, [AssumeRange(0, 15)] int sourceIndex)
         {
-            OverwriteHelper((ulong)source.intern, new bit16().Length, index, numBits, sourceIndex);
+            OverwriteHelper((ulong)source.intern, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Overwrite([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, bit32 source, [AssumeRange(0, 31)] int sourceIndex)
         {
-            OverwriteHelper((ulong)source.intern, new bit32().Length, index, numBits, sourceIndex);
+            OverwriteHelper((ulong)source.intern, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Overwrite([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, bit64 source, [AssumeRange(0, 63)] int sourceIndex)
         {
-            OverwriteHelper(source.intern, new bit64().Length, index, numBits, sourceIndex);
+            OverwriteHelper(source.intern, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Overwrite<U>([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, bits<U> source, [AssumeRange(0, 63)] int sourceIndex)
             where U : unmanaged
         {
-            OverwriteHelper(*(ulong*)&source, new bits<U>().Length, index, numBits, sourceIndex);
+            OverwriteHelper(*(ulong*)&source, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

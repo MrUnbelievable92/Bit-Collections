@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BitCollections
 {
-    public struct quarter
+    internal struct quarter
     {
         public const float MinValue = 0f;
         public const float MaxValue = 0f;

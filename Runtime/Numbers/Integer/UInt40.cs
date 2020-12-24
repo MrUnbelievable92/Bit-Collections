@@ -9,17 +9,17 @@ using System.Resources;
 namespace BitCollections
 {
     [Serializable]  [StructLayout(LayoutKind.Sequential, Size = 5)]
-    unsafe public struct UInt40 : IComparable, IComparable<UInt40>, IConvertible, IEquatable<UInt40>, IFormattable
+    unsafe public readonly struct UInt40 : IComparable, IComparable<UInt40>, IConvertible, IEquatable<UInt40>, IFormattable
     {
         public const ulong MinValue = 0;
         public const ulong MaxValue = 1_099_511_627_775;
     
     
-        private byte byte0;
-        private byte byte1;
-        private byte byte2;
-        private byte byte3;
-        private byte byte4;
+        private readonly byte byte0;
+        private readonly byte byte1;
+        private readonly byte byte2;
+        private readonly byte byte3;
+        private readonly byte byte4;
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -256,299 +256,442 @@ namespace BitCollections
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator + (UInt40 value)
+        public static UInt40 operator + (UInt40 left, UInt40 right)
         {
-            return (UInt40)(+(*(ulong*)&value));
+            return (UInt40)(*(ulong*)&left + *(ulong*)&right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator + (uint left, UInt40 right)
+        {
+            return (UInt40)(left + *(ulong*)&right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator + (UInt40 left, uint right)
+        {
+            return (UInt40)(*(ulong*)&left + right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator + (UInt40 left, ulong right)
+        {
+            return (UInt40)(*(ulong*)&left + right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator + (ulong left, UInt40 right)
+        {
+            return (UInt40)(left + *(ulong*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator ~ (UInt40 value)
+        public static UInt40 operator - (UInt40 left, UInt40 right)
         {
-            return (UInt40)(~(*(ulong*)&value));
+            return (UInt40)(*(ulong*)&left - *(ulong*)&right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator - (UInt40 left, uint right)
+        {
+            return (UInt40)(*(ulong*)&left - right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator - (uint left, UInt40 right)
+        {
+            return (UInt40)(left - *(ulong*)&right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator - (UInt40 left, ulong right)
+        {
+            return (UInt40)(*(ulong*)&left - right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator ++ (UInt40 value)
+        public static UInt40 operator - (ulong left, UInt40 right)
         {
-            return (UInt40)(++(*(ulong*)&value));
+            return (UInt40)(left - *(ulong*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator -- (UInt40 value)
+        public static UInt40 operator * (UInt40 left, UInt40 right)
         {
-            return (UInt40)(--(*(ulong*)&value));
+            return (UInt40)(*(ulong*)&left * *(ulong*)&right);
         }
-    
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator + (UInt40 lhs, UInt40 rhs)
+        public static UInt40 operator * (UInt40 left, uint right)
         {
-            return (UInt40)(*(ulong*)&lhs + *(ulong*)&rhs); 
+            return (UInt40)(*(ulong*)&left * right);
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator + (UInt40 lhs, ulong rhs)
+        public static UInt40 operator * (uint left, UInt40 right)
         {
-            return (UInt40)(*(ulong*)&lhs + rhs);
+            return (UInt40)(left * *(ulong*)&right);
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator + (ulong lhs, UInt40 rhs)
+        public static UInt40 operator * (UInt40 left, ulong right)
         {
-            return (UInt40)(lhs + *(ulong*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator - (UInt40 lhs, UInt40 rhs)
-        {
-            return (UInt40)(*(ulong*)&lhs - *(ulong*)&rhs); 
+            return (UInt40)(*(ulong*)&left * right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator - (UInt40 lhs, ulong rhs)
+        public static UInt40 operator * (ulong left, UInt40 right)
         {
-            return (UInt40)(*(ulong*)&lhs - rhs);
+            return (UInt40)(left * *(ulong*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator - (ulong lhs, UInt40 rhs)
+        public static UInt40 operator / (UInt40 left, UInt40 right)
         {
-            return (UInt40)(lhs - *(ulong*)&rhs);
+            return (UInt40)((long)left % (long)right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator / (UInt40 left, uint right)
+        {
+            return (UInt40)((ulong)left / right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator / (uint left, UInt40 right)
+        {
+            return (UInt40)(left / (ulong)right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator / (UInt40 left, ulong right)
+        {
+            return (UInt40)((ulong)left / right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator * (UInt40 lhs, UInt40 rhs)
+        public static UInt40 operator / (ulong left, UInt40 right)
         {
-            return (UInt40)(*(ulong*)&lhs * *(ulong*)&rhs);
+            return (UInt40)(left / (ulong)right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator * (UInt40 lhs, ulong rhs)
+        public static UInt40 operator % (UInt40 left, UInt40 right)
         {
-            return (UInt40)(*(ulong*)&lhs * rhs);
+            return (UInt40)((ulong)left % (ulong)right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator % (UInt40 left, uint right)
+        {
+            return (UInt40)((ulong)left % right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator % (uint left, UInt40 right)
+        {
+            return (UInt40)(left % (ulong)right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator % (UInt40 left, ulong right)
+        {
+            return (UInt40)((ulong)left % right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator * (ulong lhs, UInt40 rhs)
+        public static UInt40 operator % (ulong left, UInt40 right)
         {
-            return (UInt40)(lhs * *(ulong*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator / (UInt40 lhs, UInt40 rhs)
-        {
-            return (UInt40)((ulong)lhs / (ulong)rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator / (UInt40 lhs, ulong rhs)
-        {
-            return (UInt40)((ulong)lhs / rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator / (ulong lhs, UInt40 rhs)
-        {
-            return (UInt40)(lhs / (ulong)rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator % (UInt40 lhs, UInt40 rhs)
-        {
-            return (UInt40)((ulong)lhs % (ulong)rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator % (UInt40 lhs, ulong rhs)
-        {
-            return (UInt40)((ulong)lhs % rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator % (ulong lhs, UInt40 rhs)
-        {
-            return (UInt40)(lhs % (ulong)rhs);
-        }
-    
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator & (UInt40 lhs, UInt40 rhs)
-        {
-            return (UInt40)(*(ulong*)&lhs & *(ulong*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator & (UInt40 lhs, ulong rhs)
-        {
-            return (UInt40)(*(ulong*)&lhs & rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator & (ulong lhs, UInt40 rhs)
-        {
-            return (UInt40)(lhs & *(ulong*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator | (UInt40 lhs, UInt40 rhs)
-        {
-            return (UInt40)(*(ulong*)&lhs | *(ulong*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator | (UInt40 lhs, ulong rhs)
-        {
-            return (UInt40)(*(ulong*)&lhs | rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator | (ulong lhs, UInt40 rhs)
-        {
-            return (UInt40)(lhs | *(ulong*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator ^ (UInt40 lhs, UInt40 rhs)
-        {
-            return (UInt40)(*(ulong*)&lhs ^ *(ulong*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator ^ (UInt40 lhs, ulong rhs)
-        {
-            return (UInt40)(*(ulong*)&lhs ^ rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator ^ (ulong lhs, UInt40 rhs)
-        {
-            return (UInt40)(lhs ^ *(ulong*)&rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator << (UInt40 lhs, int rhs)
-        {
-            return (UInt40)(*(ulong*)&lhs << rhs);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt40 operator >> (UInt40 lhs, int rhs)
-        {
-            return (UInt40)((ulong)lhs >> rhs);
+            return (UInt40)(left % (ulong)right);
         }
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator == (UInt40 lhs, UInt40 rhs)
+        public static UInt40 operator & (UInt40 left, UInt40 right)
         {
-            return (ulong)lhs == (ulong)rhs;
+            return (UInt40)(*(ulong*)&left & *(ulong*)&right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator & (UInt40 left, uint right)
+        {
+            return (UInt40)(*(ulong*)&left & right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator & (uint left, UInt40 right)
+        {
+            return (UInt40)(left & *(ulong*)&right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator & (UInt40 left, ulong right)
+        {
+            return (UInt40)(*(ulong*)&left & right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator == (UInt40 lhs, ulong rhs)
+        public static UInt40 operator & (ulong left, UInt40 right)
         {
-            return (ulong)lhs == rhs;
+            return (UInt40)(left & *(ulong*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator == (ulong lhs, UInt40 rhs)
+        public static UInt40 operator | (UInt40 left, UInt40 right)
         {
-            return lhs == (ulong)rhs;
+            return (UInt40)(*(ulong*)&left | *(ulong*)&right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator | (UInt40 left, uint right)
+        {
+            return (UInt40)(*(ulong*)&left | right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator | (uint left, UInt40 right)
+        {
+            return (UInt40)(left | *(ulong*)&right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator | (UInt40 left, ulong right)
+        {
+            return (UInt40)(*(ulong*)&left | right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator != (UInt40 lhs, UInt40 rhs)
+        public static UInt40 operator | (ulong left, UInt40 right)
         {
-            return (ulong)lhs != (ulong)rhs;
+            return (UInt40)(left | *(ulong*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator != (UInt40 lhs, ulong rhs)
+        public static UInt40 operator ^ (UInt40 left, UInt40 right)
         {
-            return (ulong)lhs != rhs;
+            return (UInt40)(*(ulong*)&left ^ *(ulong*)&right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator ^ (UInt40 left, uint right)
+        {
+            return (UInt40)(*(ulong*)&left ^ right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator ^ (uint left, UInt40 right)
+        {
+            return (UInt40)(left ^ *(ulong*)&right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt40 operator ^ (UInt40 left, ulong right)
+        {
+            return (UInt40)(*(ulong*)&left ^ right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator != (ulong lhs, UInt40 rhs)
+        public static UInt40 operator ^ (ulong left, UInt40 right)
         {
-            return lhs != (ulong)rhs;
+            return (UInt40)(left ^ *(ulong*)&right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator < (UInt40 lhs, UInt40 rhs)
+        public static UInt40 operator << (UInt40 left, int right)
         {
-            return (ulong)lhs < (ulong)rhs;
+            return (UInt40)(*(ulong*)&left << right);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator < (UInt40 lhs, ulong rhs)
+        public static UInt40 operator >> (UInt40 left, int right)
         {
-            return (ulong)lhs < rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator < (ulong lhs, UInt40 rhs)
-        {
-            return lhs < (ulong)rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator > (UInt40 lhs, UInt40 rhs)
-        {
-            return (ulong)lhs > (ulong)rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator > (UInt40 lhs, ulong rhs)
-        {
-            return (ulong)lhs > rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator > (ulong lhs, UInt40 rhs)
-        {
-            return lhs > (ulong)rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <= (UInt40 lhs, UInt40 rhs)
-        {
-            return (ulong)lhs <= (ulong)rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <= (UInt40 lhs, ulong rhs)
-        {
-            return (ulong)lhs <= rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <= (ulong lhs, UInt40 rhs)
-        {
-            return lhs <= (ulong)rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >= (UInt40 lhs, UInt40 rhs)
-        {
-            return (ulong)lhs >= (ulong)rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >= (UInt40 lhs, ulong rhs)
-        {
-            return (ulong)lhs >= rhs;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >= (ulong lhs, UInt40 rhs)
-        {
-            return lhs >= (ulong)rhs;
+            return (UInt40)((ulong)left >> right);
         }
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override readonly int GetHashCode()
+        public static bool operator == (UInt40 left, UInt40 right)
+        {
+            return (ulong)left == (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator == (UInt40 left, uint right)
+        {
+            return (ulong)left == right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator == (uint left, UInt40 right)
+        {
+            return left == (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator == (UInt40 left, ulong right)
+        {
+            return (ulong)left == right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator == (ulong left, UInt40 right)
+        {
+            return left == (ulong)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator != (UInt40 left, UInt40 right)
+        {
+            return (ulong)left != (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator != (UInt40 left, uint right)
+        {
+            return (ulong)left != right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator != (uint left, UInt40 right)
+        {
+            return left != (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator != (UInt40 left, ulong right)
+        {
+            return (ulong)left != right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator != (ulong left, UInt40 right)
+        {
+            return left != (ulong)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator < (UInt40 left, UInt40 right)
+        {
+            return (ulong)left < (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator < (UInt40 left, uint right)
+        {
+            return (ulong)left < right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator < (uint left, UInt40 right)
+        {
+            return left < (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator < (UInt40 left, ulong right)
+        {
+            return (ulong)left < right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator < (ulong left, UInt40 right)
+        {
+            return left < (ulong)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator > (UInt40 left, UInt40 right)
+        {
+            return (ulong)left > (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator > (UInt40 left, uint right)
+        {
+            return (ulong)left > right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator > (uint left, UInt40 right)
+        {
+            return left > (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator > (UInt40 left, ulong right)
+        {
+            return (ulong)left > right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator > (ulong left, UInt40 right)
+        {
+            return left > (ulong)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <= (UInt40 left, UInt40 right)
+        {
+            return (ulong)left <= (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <= (UInt40 left, uint right)
+        {
+            return (ulong)left <= right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <= (uint left, UInt40 right)
+        {
+            return left <= (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <= (UInt40 left, ulong right)
+        {
+            return (ulong)left <= right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <= (ulong left, UInt40 right)
+        {
+            return left <= (ulong)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >= (UInt40 left, UInt40 right)
+        {
+            return (ulong)left >= (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >= (UInt40 left, uint right)
+        {
+            return (ulong)left >= right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >= (uint left, UInt40 right)
+        {
+            return left >= (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >= (UInt40 left, ulong right)
+        {
+            return (ulong)left >= right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >= (ulong left, UInt40 right)
+        {
+            return left >= (ulong)right;
+        }
+    
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode()
         {
             return ((ulong)this).GetHashCode();
         }
@@ -559,11 +702,11 @@ namespace BitCollections
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool Equals(UInt40 other)
+        public bool Equals(UInt40 other)
         {
             return this == other;
         }
-        public override readonly bool Equals(object obj)
+        public override bool Equals(object obj)
         {
             return Equals((UInt40)obj);
         }
@@ -572,9 +715,7 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CompareTo(UInt40 other)
         {
-            ulong cmp = this - other;
-
-            return (int)((((long)cmp) >> 63) | maxmath.touint8(cmp != 0));
+            return maxmath.compareto((ulong)this, (ulong)other);
         }
         public int CompareTo(object obj)
         {
