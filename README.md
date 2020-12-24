@@ -4,6 +4,8 @@ Bit Collections for Unity is all about saving as much RAM(-bandwidth) as possibl
 
 Since using less RAM usually comes at the cost of more time (CPU), this library uses SIMD instructions as much possible, resulting in the following dependencies:
 
+Unity 2020.2.0f (C# 8 => unmanaged constructed types)
+
 Unity.Mathematics
 
 Unity.Burst
