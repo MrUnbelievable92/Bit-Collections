@@ -25,7 +25,7 @@ C-Sharp-Dev-Tools (Conditionally compiled runtime-checks)
 
 Bit Arrays:
 
-![alt text](https://i.imgur.com/uStN0LF.png)
+![alt text](https://i.imgur.com/NvwjrnH.png)
 
 
 
