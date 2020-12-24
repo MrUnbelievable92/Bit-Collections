@@ -93,12 +93,15 @@ Assert.IsNotGreater(sizeof(T), 8);
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bits<U> Reinterpret<U>(bits<T> value)
+        public readonly bits<U> Reinterpret<U>()
             where U : unmanaged
         {
 Assert.AreEqual(sizeof(T), sizeof(U));
 
-            return *(bits<U>*)&value;
+            fixed (void* ptr = &this)
+            {
+                return *(bits<U>*)ptr;
+            }
         }
 
 
