@@ -1,6 +1,6 @@
 # Bit-Collections
 
-Bit Collections for Unity is all about saving as much RAM(-bandwidth) as possible, by providing array value types of single bits, aswell as array value types of signed- and unsigned numbers with a given number of bits.
+Bit Collections for Unity is all about saving as much RAM as possible, by providing array value types of single bits, aswell as array value types of signed- and unsigned integers with a given number of bits.
 
 Since using less RAM usually comes at the cost of more time (CPU), this library uses SIMD instructions as much possible, resulting in the following dependencies:
 
