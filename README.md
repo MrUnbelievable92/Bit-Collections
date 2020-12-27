@@ -59,8 +59,9 @@ Additionally, 3- 5- 6- and 7-Byte Numbers are defined:
 
 # How To Install This Library
 
-Disclaimer: I firmly believe in open source - being able to copy/modify/understand other people's code is great :). I also want people to be able to step through code with a debugger.
-For those reasons I usually don't distribute DLLs.
+Disclaimer: I firmly believe in open source - being able to copy/modify/understand other people's code is great :)
+I also want people to be able to step through code with a debugger.
+For these reasons I usually don't distribute DLLs.
 
 - Download the package and unzip it into your "LocalPackages" folder, which is located at the root folder of your Unity project (where your "Assets" folder resides at).
 - Start up Unity. Usually Unity detects new packages and will generate .meta files for you.
