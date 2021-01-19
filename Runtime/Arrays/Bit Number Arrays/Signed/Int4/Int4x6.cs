@@ -101,13 +101,12 @@ Assert.Equals(x0_5.x7, 0);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
             {
-                fixed (void* ptr = &this)
-                {
-                    // manual maxmath.signextend, saving 1 shift
-                    int8 temp = maxmath.shl((int8)(*(int*)ptr), 32 - (BitsPerNumber * new int8(1, 2, 3, 4, 5, 6, 7, 8)));
+                Int24 x = intern;
 
-                    return temp >> (32 - BitsPerNumber);
-                }
+                // manual maxmath.signextend, saving 1 shift
+                int8 temp = maxmath.shl((int8)(*(int*)&x), 32 - (BitsPerNumber * new int8(1, 2, 3, 4, 5, 6, 7, 8)));
+
+                return temp >> (32 - BitsPerNumber);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -118,34 +117,32 @@ Assert.Equals(x0_5.x7, 0);
         }
 
 
-        public int this[[AssumeRange(0, 7)] int index]
+        public int this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(Int4.MinValue, Int4.MaxValue)]
             readonly get
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
-                    return (*(int*)ptr << (32 - ((1 + index) * BitsPerNumber))) >> (32 - BitsPerNumber);
-                }
+                Int24 x = intern;
+
+                // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
+                return (*(int*)&x << (32 - ((1 + index) * BitsPerNumber))) >> (32 - BitsPerNumber);
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [param: AssumeRange(Int4.MinValue, Int4.MaxValue)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
 Assert.IsBetween(value, MinValue, MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    int shiftValue = index * BitsPerNumber;
-                    int newValue = (value & (int)maxmath.bitmask32(BitsPerNumber)) << shiftValue;
-                    int mask = math.rol(~(int)maxmath.bitmask32(BitsPerNumber), shiftValue);
+                Int24 x = intern;
 
-                    intern = (Int24)(((*(int*)ptr) & mask) | newValue);
-                }
+                int shiftValue = index * BitsPerNumber;
+                int newValue = (value & (int)maxmath.bitmask32(BitsPerNumber)) << shiftValue;
+                int mask = math.rol(~(int)maxmath.bitmask32(BitsPerNumber), shiftValue);
+
+                intern = (Int24)(((*(int*)&x) & mask) | newValue);
             }
         }
 

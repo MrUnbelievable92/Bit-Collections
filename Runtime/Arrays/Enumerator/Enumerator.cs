@@ -7,10 +7,10 @@ namespace BitCollections
     public struct Enumerator<T> : IEnumerator, IEnumerator<T>, IDisposable
     {
         private int current;
-        private readonly IArray<T> array;
+        private readonly IReadOnlyArray<T> array;
 
 
-        public Enumerator(IArray<T> array)
+        public Enumerator(IReadOnlyArray<T> array)
         {
             this.current = -1;
             this.array = array;

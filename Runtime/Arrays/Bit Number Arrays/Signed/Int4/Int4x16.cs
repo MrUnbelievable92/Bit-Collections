@@ -191,7 +191,7 @@ Assert.IsBetween(x8_15.x7, Int4.MinValue, Int4.MaxValue);
         }
 
 
-        public int this[[AssumeRange(0, 15)] int index]
+        public int this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(Int4.MinValue, Int4.MaxValue)]
             readonly get
@@ -202,15 +202,15 @@ Assert.IsWithinArrayBounds(index, Length);
                 return (int)((intern << (64 - ((1 + index) * BitsPerNumber))) >> (64 - BitsPerNumber));
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [param: AssumeRange(Int4.MinValue, Int4.MaxValue)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
 Assert.IsBetween(value, MinValue, MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
                 int shiftValue = index * BitsPerNumber;
-                long newValue = ((long)value & (long)maxmath.bitmask64(BitsPerNumber)) << shiftValue;
-                long mask = math.rol(~(long)maxmath.bitmask64(BitsPerNumber), shiftValue);
+                long newValue = ((long)value & maxmath.bitmask64(BitsPerNumber)) << shiftValue;
+                long mask = math.rol(~maxmath.bitmask64(BitsPerNumber), shiftValue);
 
                 intern = (intern & mask) | newValue;
             }
@@ -218,7 +218,7 @@ Assert.IsWithinArrayBounds(index, Length);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public long4 GetSubArray([AssumeRange(0, 12)] int index)
+        public long4 GetSubArray(int index)
         {
 Assert.IsValidSubarray(index, 4, Length);
 
@@ -229,7 +229,7 @@ Assert.IsValidSubarray(index, 4, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetSubArray([AssumeRange(0, 12)] int index, long4 value)
+        public void SetSubArray(int index, long4 value)
         {
 Assert.IsValidSubarray(index, 4, Length);
 Assert.IsBetween(value.x, MinValue, MaxValue);

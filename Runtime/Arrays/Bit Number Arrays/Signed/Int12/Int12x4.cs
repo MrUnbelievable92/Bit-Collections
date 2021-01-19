@@ -93,13 +93,12 @@ Assert.IsBetween(xyzw.w, Int12.MinValue, Int12.MaxValue);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
             {
-                fixed (void* ptr = &this)
-                {
-                    // manual maxmath.signextend, saving 1 shift
-                    long4 temp = maxmath.shl((long4)(*(long*)ptr), 64 - (BitsPerNumber * new int4(1, 2, 3, 4)));
+                Int48 x = intern;
 
-                    return temp >> (64 - BitsPerNumber);
-                }
+                // manual maxmath.signextend, saving 1 shift
+                long4 temp = maxmath.shl((long4)(*(long*)&x), 64 - (BitsPerNumber * new int4(1, 2, 3, 4)));
+
+                return temp >> (64 - BitsPerNumber);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -110,34 +109,32 @@ Assert.IsBetween(xyzw.w, Int12.MinValue, Int12.MaxValue);
         }
     
     
-        public int this[[AssumeRange(0, 3)] int index]
+        public int this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(Int12.MinValue, Int12.MaxValue)]
             readonly get
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
-                    return (int)((*(long*)ptr << (64 - ((1 + index) * BitsPerNumber))) >> (64 - BitsPerNumber));
-                }
+                Int48 x = intern;
+
+                // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
+                return (int)((*(long*)&x << (64 - ((1 + index) * BitsPerNumber))) >> (64 - BitsPerNumber));
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [param: AssumeRange(Int12.MinValue, Int12.MaxValue)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
 Assert.IsBetween(value, MinValue, MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    int shiftValue = index * BitsPerNumber;
-                    long newValue = ((long)value & (long)maxmath.bitmask64(BitsPerNumber)) << shiftValue;
-                    long mask = math.rol(~(long)maxmath.bitmask64(BitsPerNumber), shiftValue);
+                Int48 x = intern;
 
-                    intern = (Int48)((*(long*)ptr & mask) | newValue);
-                }
+                int shiftValue = index * BitsPerNumber;
+                long newValue = ((long)value & maxmath.bitmask64(BitsPerNumber)) << shiftValue;
+                long mask = math.rol(~maxmath.bitmask64(BitsPerNumber), shiftValue);
+
+                intern = (Int48)((*(long*)&x & mask) | newValue);
             }
         }
 

@@ -14,12 +14,9 @@ namespace BitCollections
         public const long MaxValue = 140_737_488_355_327;
     
     
-        private readonly byte byte0;
-        private readonly byte byte1;
-        private readonly byte byte2;
-        private readonly byte byte3;
-        private readonly byte byte4;
-        private readonly byte byte5;
+        private readonly ushort byte0_byte1;
+        private readonly ushort byte2_byte3;
+        private readonly ushort byte4_byte5;
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -167,6 +164,12 @@ namespace BitCollections
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Int48(quarter input)
+        {
+            return (Int48)((float)input);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Int48(half input)
         {
             return (Int48)((long)input);
@@ -194,25 +197,25 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator sbyte(Int48 input)
         {
-            return (sbyte)input.byte0;
+            return (sbyte)input.byte0_byte1;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator byte(Int48 input)
         {
-            return input.byte0;
+            return (byte)input.byte0_byte1;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator short(Int48 input)
         {
-            return *(short*)&input;
+            return (short)input.byte0_byte1;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator ushort(Int48 input)
         {
-            return *(ushort*)&input;
+            return input.byte0_byte1;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -263,6 +266,12 @@ namespace BitCollections
             return (ulong)maxmath.signextend(*(long*)&input, 48);
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator quarter(Int48 input)
+        {
+            return (quarter)((long)input);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator half(Int48 input)
@@ -821,7 +830,7 @@ namespace BitCollections
         {
             return Convert.ToChar((long)this, provider);
         }
-        public System.DateTime ToDateTime(IFormatProvider provider)
+        public DateTime ToDateTime(IFormatProvider provider)
         {
             return Convert.ToDateTime((long)this, provider);
         }

@@ -1,9 +1,9 @@
 {
   "name": "bitcollections",
   "displayName": "Bit Collections",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "unity": "2020.2",
-  "description": "Bit Collections is all about saving as much RAM as possible, by providing array value types of single bits, aswell as array value types of signed- and unsigned integers with a given number of bits.",
+  "description": "Bit Collections is all about saving as much RAM and/or network bandwidth as possible, by providing array value types of single bits, aswell as array value types of signed- and unsigned integers with a given number of bits.",
    "keywords": [
     "Unity"
   ],

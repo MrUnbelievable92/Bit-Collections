@@ -75,9 +75,9 @@ Assert.IsNotGreater(y, UInt4.MaxValue);
         }
 
 
-        public uint this[[AssumeRange(0, 1)] int index]
+        public uint this[int index]
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange((ulong)UInt4.MinValue, (ulong)UInt4.MaxValue)]
             readonly get
             {
 Assert.IsWithinArrayBounds(index, Length);

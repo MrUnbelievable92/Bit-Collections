@@ -298,5 +298,51 @@ namespace BitCollections.Tests
 
             Assert.AreEqual(result, true);
         }
+
+        [Test]
+        public static void Overwrite()
+        {
+            bool result = true;
+
+            bit8 x = TestData_LHS;
+            bit16 y = _bit16.TestData_LHS;
+            bit32 z = _bit32.TestData_LHS;
+            bit64 w = _bit64.TestData_LHS;
+
+            bit8 test = x;
+            test.Overwrite(3, 3, y, 2);
+            result &= test[0] == x[0];
+            result &= test[1] == x[1];
+            result &= test[2] == x[2];
+            result &= test[3] == y[2];
+            result &= test[4] == y[3];
+            result &= test[5] == y[4];
+            result &= test[6] == x[6];
+            result &= test[7] == x[7];
+
+            test = x;
+            test.Overwrite(0, 4, z, 0);
+            result &= test[0] == z[0];
+            result &= test[1] == z[1];
+            result &= test[2] == z[2];
+            result &= test[3] == z[3];
+            result &= test[4] == x[4];
+            result &= test[5] == x[5];
+            result &= test[6] == x[6];
+            result &= test[7] == x[7];
+
+            test = x;
+            test.Overwrite(4, 4, w, 47);
+            result &= test[0] == x[0];
+            result &= test[1] == x[1];
+            result &= test[2] == x[2];
+            result &= test[3] == x[3];
+            result &= test[4] == w[47];
+            result &= test[5] == w[48];
+            result &= test[6] == w[49];
+            result &= test[7] == w[50];
+
+            Assert.AreEqual(result, true);
+        }
     }
 }

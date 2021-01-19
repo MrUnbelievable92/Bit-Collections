@@ -191,7 +191,7 @@ Assert.IsBetween(x8_15.x7, Int2.MinValue, Int2.MaxValue);
         }
 
 
-        public int this[[AssumeRange(0, 15)] int index]
+        public int this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(Int2.MinValue, Int2.MaxValue)]
             readonly get
@@ -202,7 +202,7 @@ Assert.IsWithinArrayBounds(index, Length);
                 return (intern << (32 - ((1 + index) * BitsPerNumber))) >> (32 - BitsPerNumber);
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [param: AssumeRange(Int2.MinValue, Int2.MaxValue)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
 Assert.IsBetween(value, MinValue, MaxValue);
@@ -223,7 +223,7 @@ Assert.IsWithinArrayBounds(index, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int8 GetSubArray([AssumeRange(0, 8)] int index)
+        public int8 GetSubArray(int index)
         {
 Assert.IsValidSubarray(index, 8, Length);
 
@@ -234,7 +234,7 @@ Assert.IsValidSubarray(index, 8, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetSubArray([AssumeRange(0, 8)] int index, int8 value)
+        public void SetSubArray(int index, int8 value)
         {
 Assert.IsValidSubarray(index, 8, Length);
 Assert.IsBetween(value.x0, MinValue, MaxValue);

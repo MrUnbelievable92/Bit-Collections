@@ -155,53 +155,50 @@ Assert.IsBetween(x8_11.w, Int2.MinValue, Int2.MaxValue);
         }
 
 
-        public int this[[AssumeRange(0, 11)] int index]
+        public int this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(Int2.MinValue, Int2.MaxValue)]
             readonly get
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
-                    return (*(int*)ptr << (32 - ((1 + index) * BitsPerNumber))) >> (32 - BitsPerNumber);
-                }
+                Int24 x = intern;
+
+                // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
+                return (*(int*)&x << (32 - ((1 + index) * BitsPerNumber))) >> (32 - BitsPerNumber);
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [param: AssumeRange(Int2.MinValue, Int2.MaxValue)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
 Assert.IsBetween(value, MinValue, MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    int shiftValue = index * BitsPerNumber;
-                    int newValue = (value & (int)maxmath.bitmask32(BitsPerNumber)) << shiftValue;
-                    int mask = math.rol(~(int)maxmath.bitmask32(BitsPerNumber), shiftValue);
+                Int24 x = intern;
 
-                    intern = (Int24)(((*(int*)ptr) & mask) | newValue);
-                }
+                int shiftValue = index * BitsPerNumber;
+                int newValue = (value & (int)maxmath.bitmask32(BitsPerNumber)) << shiftValue;
+                int mask = math.rol(~(int)maxmath.bitmask32(BitsPerNumber), shiftValue);
+
+                intern = (Int24)(((*(int*)&x) & mask) | newValue);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int8 GetSubArray([AssumeRange(0, 4)] int index)
+        public int8 GetSubArray(int index)
         {
 Assert.IsValidSubarray(index, 8, Length);
 
-            fixed (void* ptr = &this)
-            {
-                // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
-                int8 temp = maxmath.shl((int8)(*(int*)ptr), 32 - (BitsPerNumber * (index + new int8(1, 2, 3, 4, 5, 6, 7, 8))));
+            Int24 x = intern;
 
-                return temp >> (32 - BitsPerNumber);
-            }
+            // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
+            int8 temp = maxmath.shl((int8)(*(int*)&x), 32 - (BitsPerNumber * (index + new int8(1, 2, 3, 4, 5, 6, 7, 8))));
+
+            return temp >> (32 - BitsPerNumber);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetSubArray([AssumeRange(0, 4)] int index, int8 value)
+        public void SetSubArray(int index, int8 value)
         {
 Assert.IsValidSubarray(index, 8, Length);
 Assert.IsBetween(value.x0, MinValue, MaxValue);
@@ -213,12 +210,11 @@ Assert.IsBetween(value.x5, MinValue, MaxValue);
 Assert.IsBetween(value.x6, MinValue, MaxValue);
 Assert.IsBetween(value.x7, MinValue, MaxValue);
 
-            fixed (void* ptr = &this)
-            {
-                intern = (Int24)((int)maxmath.andnot(*(uint*)ptr,      maxmath.bitmask32(8 * BitsPerNumber,   index * BitsPerNumber))
+            Int24 x = intern;
+
+            intern = (Int24)((int)maxmath.andnot(*(uint*)&x,      maxmath.bitmask32(8 * BitsPerNumber,   index * BitsPerNumber))
                                  |
                                  maxmath.csum(maxmath.shl((int)maxmath.bitmask32(BitsPerNumber) & value,      BitsPerNumber * (index + new int8(0, 1, 2, 3, 4, 5, 6, 7)))));
-            }
         }
 
 

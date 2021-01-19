@@ -4,18 +4,24 @@ Bit Collections for Unity is all about saving as much RAM and/or network bandwid
 
 Since using less RAM usually comes at the cost of taking more time (CPU), this library uses SIMD instructions as much possible, resulting in the following dependencies:
 
-- Unity 2020.2.0f (C# 8 => unmanaged constructed types)
-- Unity.Mathematics
-- Unity.Burst
-- Unity.Collections (A native bit-array and generic, native "bit-number" arrays are defined)
-- Unity.Jobs (Mainly for de-allocating the mentioned arrays on a worker thread)
-- MaxMath (my SIMD library supplementary to Unity.Mathematics)
-- C-Sharp-Dev-Tools (Conditionally compiled runtime-checks)
+Unity 2020.2.0f (C# 8 => unmanaged constructed types)
+
+Unity.Mathematics
+
+Unity.Burst
+
+Unity.Collections (A native bit-array and generic, native "bit-number" arrays are defined)
+
+Unity.Jobs (Mainly for de-allocating the mentioned arrays on a worker thread)
+
+MaxMath (my SIMD library supplementary to Unity.Mathematics)
+
+C-Sharp-Dev-Tools (Conditionally compiled runtime-checks)
 
 
 
 
-# How To Use This Library: 
+
 
 Bit Arrays:
 
@@ -71,3 +77,4 @@ For these reasons I usually don't distribute DLLs.
 
 - Locate the library's "package.json" file
 - DONE! 
+

@@ -7,24 +7,19 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Burst;
+using Unity.Burst.Intrinsics;
 using MaxMath;
 using System.Runtime.InteropServices;
 
 namespace BitCollections
 {
-    [StructLayout(LayoutKind.Sequential)]   [NativeContainer]    [NativeContainerSupportsDeallocateOnJobCompletion]
-    unsafe public struct NativeBitArray : IArray<bool>, IEquatable<NativeBitArray>, IDisposable, INativeDisposable
+    [StructLayout(LayoutKind.Sequential)]  [NativeContainer]    [NativeContainerSupportsDeallocateOnJobCompletion]
+    unsafe public struct NativeBitArray : IArray<bool>, IEquatable<NativeBitArray>, INativeDisposable
     {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 private AtomicSafetyHandle m_Safety;
 static readonly SharedStatic<int> s_StaticSafetyId = SharedStatic<int>.GetOrCreate<NativeBitArray>();
 [NativeSetClassTypeToNullOnSchedule] private DisposeSentinel m_DisposeSentinel;
-
-[BurstDiscard]
-static void CreateStaticSafetyId()
-{
-    s_StaticSafetyId.Data = AtomicSafetyHandle.NewStaticSafetyId<NativeBitArray>();
-}
 #endif
     
         [NativeDisableUnsafePtrRestriction] private bit64* m_Ptr;
@@ -47,12 +42,10 @@ Assert.IsGreater((int)allocator, (int)Allocator.None);
             m_Allocator = allocator;
             m_Length = numBits;
             
-            int size = maxmath.divrem(numBits, 64, out int remainder);
-            size = sizeof(bit64) * (size + maxmath.touint8(remainder != 0));
+            uint size = maxmath.divrem((uint)numBits, 64, out uint remainder);
+            size = (uint)sizeof(bit64) * (size + maxmath.touint8(remainder != 0));
     
-Assert.IsNotGreater(size, int.MaxValue);
-
-            m_Ptr = (bit64*)UnsafeUtility.Malloc(size, UnsafeUtility.AlignOf<bit64>(), allocator);
+            m_Ptr = (bit64*)UnsafeUtility.Malloc(size, 32, allocator);
     
 Assert.IsNotNull(m_Ptr);
 
@@ -66,62 +59,64 @@ Assert.IsNotNull(m_Ptr);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 DisposeSentinel.Create(out m_Safety, out m_DisposeSentinel, 2, allocator);
 if (s_StaticSafetyId.Data == 0)
-    CreateStaticSafetyId();
+{
+    s_StaticSafetyId.Data = AtomicSafetyHandle.NewStaticSafetyId<NativeBitArray>();
+}
 AtomicSafetyHandle.SetStaticSafetyId(ref m_Safety, s_StaticSafetyId.Data);
 #endif
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bit64* GetUnsafePtr()
+        public readonly void* GetUnsafePtr()
         {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+AtomicSafetyHandle.CheckWriteAndThrow(m_Safety);
+#endif
+            return m_Ptr;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly void* GetUnsafeReadOnlyPtr()
+        {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+#endif
             return m_Ptr;
         }
 
 
-        public bool this[int index]
+        public readonly bool this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            readonly get
+            get
             {
 Assert.IsWithinArrayBounds(index, Length);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
 #endif
-                int outerIndex = maxmath.divrem(index, 64, out int innerIndex);
+                uint outerIndex = maxmath.divrem((uint)index, 64, out uint innerIndex);
 
-                return UnsafeUtility.ReadArrayElement<bit64>(m_Ptr, outerIndex)[innerIndex];
+                return UnsafeUtility.ReadArrayElement<bit64>(m_Ptr, (int)outerIndex)[(int)innerIndex];
             } 
     
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [WriteAccessRequired]
             set
             {
 Assert.IsWithinArrayBounds(index, Length);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 AtomicSafetyHandle.CheckWriteAndThrow(m_Safety);
 #endif
-                int outerIndex = maxmath.divrem(index, 64, out int innerIndex);
+                uint outerIndex = maxmath.divrem((uint)index, 64, out uint innerIndex);
 
-                bit64 newOne = UnsafeUtility.ReadArrayElement<bit64>(m_Ptr, outerIndex);
-                newOne[innerIndex] = value;
-                UnsafeUtility.WriteArrayElement<bit64>(m_Ptr, outerIndex, newOne);
+                bit64 newOne = UnsafeUtility.ReadArrayElement<bit64>(m_Ptr, (int)outerIndex);
+                newOne[(int)innerIndex] = value;
+                UnsafeUtility.WriteArrayElement<bit64>(m_Ptr, (int)outerIndex, newOne);
             } 
         }
     
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly int ToInt32(int index)
-        {
-Assert.IsWithinArrayBounds(index, Length);
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
-#endif
-            int outerIndex = maxmath.divrem(index, 64, out int innerIndex);
-
-            return UnsafeUtility.ReadArrayElement<bit64>(m_Ptr, outerIndex).ToInt32(innerIndex);
-        }
     
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]  [WriteAccessRequired]
         public void Dispose()
         {
 Assert.IsNotNull(m_Ptr);
@@ -195,6 +190,71 @@ AtomicSafetyHandle.Release(m_Safety);
         public IEnumerator<bool> GetEnumerator()
         {
             return new Enumerator<bool>(this);
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnly AsReadOnly()
+        {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+return new ReadOnly(m_Ptr, m_Length, ref m_Safety);
+#else
+return new ReadOnly(m_Ptr, m_Length);
+#endif
+        }
+
+
+        [NativeContainer]  [NativeContainerIsReadOnly]
+        public readonly struct ReadOnly : IReadOnlyArray<bool>
+        {
+            [NativeDisableUnsafePtrRestriction] private readonly bit64* m_Ptr;
+            private readonly int m_Length;
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+private readonly AtomicSafetyHandle m_Safety;
+
+internal ReadOnly(bit64* ptr, int length, ref AtomicSafetyHandle safety)
+{
+    m_Ptr = ptr;
+    m_Length = length;
+    m_Safety = safety;
+}
+#else
+[MethodImpl(MethodImplOptions.AggressiveInlining)]
+internal ReadOnly(bit64* ptr, int length)
+{
+    m_Ptr = ptr;
+    m_Length = length;
+}
+#endif
+            public bool this[int index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get
+                {
+Assert.IsWithinArrayBounds(index, m_Length);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+#endif
+                    uint outerIndex = maxmath.divrem((uint)index, 64, out uint innerIndex);
+
+                    return UnsafeUtility.ReadArrayElement<bit64>(m_Ptr, (int)outerIndex)[(int)innerIndex];
+                } 
+            }
+
+
+            public int Length => m_Length;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public IEnumerator<bool> GetEnumerator()
+            {
+                return new Enumerator<bool>(this);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return new Enumerator<bool>(this);
+            }
         }
     }
 }

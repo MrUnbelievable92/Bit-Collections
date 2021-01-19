@@ -12,21 +12,14 @@ using System.Runtime.InteropServices;
 
 namespace BitCollections
 { 
-    [StructLayout(LayoutKind.Sequential)]   [NativeContainer]    [NativeContainerSupportsDeallocateOnJobCompletion]
-    unsafe public struct NativeBitNumberArray<TCollection, TElement> : IBitNumberArray<TElement>, IEquatable<NativeBitNumberArray<TCollection, TElement>>, IDisposable, INativeDisposable
+    [StructLayout(LayoutKind.Sequential)]  [NativeContainer]    [NativeContainerSupportsDeallocateOnJobCompletion]
+    unsafe public struct NativeBitNumberArray<TCollection, TElement> : IBitNumberArray<TElement>, IEquatable<NativeBitNumberArray<TCollection, TElement>>, INativeDisposable
         where TCollection : unmanaged, IBitNumberArray<TElement>                                                                                  
         where TElement : unmanaged, IComparable, IComparable<TElement>, IConvertible, IEquatable<TElement>, IFormattable      
     {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 private AtomicSafetyHandle m_Safety;
 static readonly SharedStatic<int> s_StaticSafetyId = SharedStatic<int>.GetOrCreate<NativeBitNumberArray<TCollection, TElement>>();
-
-[BurstDiscard]
-static void CreateStaticSafetyId()
-{
-    s_StaticSafetyId.Data = AtomicSafetyHandle.NewStaticSafetyId<NativeBitNumberArray<TCollection, TElement>>();
-}
-
 [NativeSetClassTypeToNullOnSchedule] DisposeSentinel m_DisposeSentinel;
 #endif
     
@@ -35,7 +28,7 @@ static void CreateStaticSafetyId()
         private Allocator m_Allocator;
 
         private readonly int m_Length;
-    
+
     
         public readonly TElement MinValue => new TCollection().MinValue; 
         public readonly TElement MaxValue => new TCollection().MaxValue;
@@ -54,10 +47,8 @@ Assert.IsGreater((int)allocator, (int)Allocator.None);
             m_Length = numNumbers;
             m_Allocator = allocator;
     
-            int size = maxmath.divrem(numNumbers, new TCollection().Length, out int remainder);
-            size = sizeof(TCollection) * (size + maxmath.touint8(remainder != 0));
-
-Assert.IsNotGreater(size, int.MaxValue);
+            uint size = maxmath.divrem((uint)numNumbers, (uint)new TCollection().Length, out uint remainder);
+            size = (uint)sizeof(TCollection) * (size + maxmath.touint8(remainder != 0));
 
             m_Ptr = (TCollection*)UnsafeUtility.Malloc(size, UnsafeUtility.AlignOf<TCollection>(), allocator);
 
@@ -73,50 +64,64 @@ Assert.IsNotNull(m_Ptr);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 DisposeSentinel.Create(out m_Safety, out m_DisposeSentinel, 2, allocator);
 if (s_StaticSafetyId.Data == 0)
-    CreateStaticSafetyId();
+{
+    s_StaticSafetyId.Data = AtomicSafetyHandle.NewStaticSafetyId<NativeBitNumberArray<TCollection, TElement>>();
+}
 AtomicSafetyHandle.SetStaticSafetyId(ref m_Safety, s_StaticSafetyId.Data);
 #endif
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly TCollection* GetUnsafePtr()
+        public readonly void* GetUnsafePtr()
         {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+AtomicSafetyHandle.CheckWriteAndThrow(m_Safety);
+#endif
+            return m_Ptr;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly void* GetUnsafeReadOnlyPtr()
+        {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+#endif
             return m_Ptr;
         }
 
 
-        public TElement this[int index]
+        public readonly TElement this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            readonly get
+            get
             {
 Assert.IsWithinArrayBounds(index, Length);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
 #endif          
-                int outerIndex = maxmath.divrem(index, new TCollection().Length, out int innerIndex);
+                uint outerIndex = maxmath.divrem((uint)index, (uint)new TCollection().Length, out uint innerIndex);
 
-                return UnsafeUtility.ReadArrayElement<TCollection>(m_Ptr, outerIndex)[innerIndex];
+                return UnsafeUtility.ReadArrayElement<TCollection>(m_Ptr, (int)outerIndex)[(int)innerIndex];
             }
     
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [WriteAccessRequired]
             set
             {
 Assert.IsWithinArrayBounds(index, Length);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 AtomicSafetyHandle.CheckWriteAndThrow(m_Safety);
 #endif
-                int outerIndex = maxmath.divrem(index, new TCollection().Length, out int innerIndex);
+                uint outerIndex = maxmath.divrem((uint)index, (uint)new TCollection().Length, out uint innerIndex);
 
-                TCollection newOne = UnsafeUtility.ReadArrayElement<TCollection>(m_Ptr, outerIndex);
-                newOne[innerIndex] = value;
-                UnsafeUtility.WriteArrayElement<TCollection>(m_Ptr, outerIndex, newOne);
+                TCollection newOne = UnsafeUtility.ReadArrayElement<TCollection>(m_Ptr, (int)outerIndex);
+                newOne[(int)innerIndex] = value;
+                UnsafeUtility.WriteArrayElement<TCollection>(m_Ptr, (int)outerIndex, newOne);
             }
         }
     
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]  [WriteAccessRequired]
         public void Dispose()
         {
 Assert.IsNotNull(m_Ptr);
@@ -190,6 +195,74 @@ AtomicSafetyHandle.Release(m_Safety);
         public IEnumerator<TElement> GetEnumerator()
         {
             return new Enumerator<TElement>(this);
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnly AsReadOnly()
+        {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+return new ReadOnly(m_Ptr, m_Length, ref m_Safety);
+#else
+return new ReadOnly(m_Ptr, m_Length);
+#endif
+        }
+
+
+        [NativeContainer]  [NativeContainerIsReadOnly]
+        public readonly struct ReadOnly : IReadOnlyBitNumberArray<TElement>
+        {
+            [NativeDisableUnsafePtrRestriction] private readonly TCollection* m_Ptr;
+            private readonly int m_Length;
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+private readonly AtomicSafetyHandle m_Safety;
+
+internal ReadOnly(TCollection* ptr, int length, ref AtomicSafetyHandle safety)
+{
+    m_Ptr = ptr;
+    m_Length = length;
+    m_Safety = safety;
+}
+#else
+[MethodImpl(MethodImplOptions.AggressiveInlining)]
+internal ReadOnly(TCollection* ptr, int length)
+{
+    m_Ptr = ptr;
+    m_Length = length;
+}
+#endif
+            public TElement this[int index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get
+                {
+Assert.IsWithinArrayBounds(index, m_Length);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+#endif
+                    uint outerIndex = maxmath.divrem((uint)index, (uint)new TCollection().Length, out uint innerIndex);
+
+                    return UnsafeUtility.ReadArrayElement<TCollection>(m_Ptr, (int)outerIndex)[(int)innerIndex];
+                }
+            }
+
+            public TElement MinValue => new TCollection().MinValue;
+            public TElement MaxValue => new TCollection().MaxValue;
+            public int BitsPerNumber => new TCollection().BitsPerNumber;
+            public int Length => m_Length;
+
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public IEnumerator<TElement> GetEnumerator()
+            {
+                return new Enumerator<TElement>(this);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return new Enumerator<TElement>(this);
+            }
         }
     }
 }

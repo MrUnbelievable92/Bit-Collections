@@ -300,17 +300,16 @@ Assert.IsNotGreater(x24_27.w,  UInt2.MaxValue);
         }
 
 
-        public uint this[[AssumeRange(0, 27)] int index]
+        public uint this[int index]
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange((ulong)UInt2.MinValue, (ulong)UInt2.MaxValue)]
             readonly get
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    return MaxValue & (uint)((*(ulong*)ptr) >> (index * BitsPerNumber));
-                }
+                UInt56 x = intern;
+
+                return MaxValue & (uint)((*(ulong*)&x) >> (index * BitsPerNumber));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -319,31 +318,29 @@ Assert.IsWithinArrayBounds(index, Length);
 Assert.IsNotGreater(value, UInt2.MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    int shiftValue = index * BitsPerNumber;
-                    ulong newValue = (ulong)value << shiftValue;
-                    ulong mask = math.rol(~(ulong)MaxValue, shiftValue);
+                UInt56 x = intern;
 
-                    intern = (UInt56)(((*(ulong*)ptr) & mask) | newValue);
-                }
+                int shiftValue = index * BitsPerNumber;
+                ulong newValue = (ulong)value << shiftValue;
+                ulong mask = math.rol(~(ulong)MaxValue, shiftValue);
+
+                intern = (UInt56)(((*(ulong*)&x) & mask) | newValue);
             }
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ulong4 GetSubArray([AssumeRange(0, 24)] int index)
+        public ulong4 GetSubArray(int index)
         {
 Assert.IsValidSubarray(index, 4, Length);
 
-            fixed (void* ptr = &this)
-            {
-                return MaxValue & maxmath.shrl(*(ulong*)ptr, (ulong4)((uint)BitsPerNumber * ((uint)index + new uint4(0u, 1u, 2u, 3u))));
-            }
+            UInt56 x = intern;
+
+            return MaxValue & maxmath.shrl(*(ulong*)&x, (ulong4)((uint)BitsPerNumber * ((uint)index + new uint4(0u, 1u, 2u, 3u))));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetSubArray([AssumeRange(0, 24)] int index, ulong4 value)
+        public void SetSubArray(int index, ulong4 value)
         {
 Assert.IsValidSubarray(index, 4, Length);
 Assert.IsNotGreater(value.x, UInt2.MaxValue);
@@ -351,12 +348,11 @@ Assert.IsNotGreater(value.y, UInt2.MaxValue);
 Assert.IsNotGreater(value.z, UInt2.MaxValue);
 Assert.IsNotGreater(value.w, UInt2.MaxValue);
 
-            fixed (void* ptr = &this)
-            {
-                intern = (UInt56)(maxmath.andnot(*(ulong*)ptr,      (ulong)maxmath.bitmask64(4 * BitsPerNumber,   index * BitsPerNumber))
-                                  |
-                                  maxmath.csum(maxmath.shl(value,      (ulong4)((uint)BitsPerNumber * ((uint)index + new uint4(0u, 1u, 2u, 3u))))));
-            }
+            UInt56 x = intern;
+
+            intern = (UInt56)(maxmath.andnot(*(ulong*)&x,      (ulong)maxmath.bitmask64(4 * BitsPerNumber,   index * BitsPerNumber))
+                              |
+                              maxmath.csum(maxmath.shl(value,      (ulong4)((uint)BitsPerNumber * ((uint)index + new uint4(0u, 1u, 2u, 3u))))));
         }
 
 

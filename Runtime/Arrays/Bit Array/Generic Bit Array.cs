@@ -29,13 +29,44 @@ Assert.IsNotGreater(sizeof(T), 8);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bits(bool value)
         {
-            ulong temp = (ulong)(-(long)maxmath.touint64(value));
+            ulong temp = (ulong)(-maxmath.toint64(value));
 
             intern = *(T*)&temp;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bits(bool[] values, int index = 0)
+        {
+Assert.IsWithinArrayBounds(index + 7, values.Length);
 
-        public readonly int Length => 8 * sizeof(T);
+            fixed (void* ptr = &values[index])
+            {
+                T field = default(T);
+
+                for (int i = 0; i < sizeof(T); i++)
+                {
+                    ((byte*)&field)[i] = (byte)maxmath.bitmask(*((bool8*)ptr + i));
+                }
+
+                intern = field;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bits(NativeArray<bool> values, int index = 0)
+        {
+Assert.IsWithinArrayBounds(index + 7, values.Length);
+
+            T field = default(T);
+            byte* ptr = index + (byte*)values.GetUnsafePtr();
+
+            for (int i = 0; i < sizeof(T); i++)
+            {
+                ((byte*)&field)[i] = (byte)maxmath.bitmask(*((bool8*)ptr + i));
+            }
+
+            intern = field;
+        }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,61 +129,63 @@ Assert.IsNotGreater(sizeof(T), 8);
 
             return *(bits<T>*)&temp;
         }
-    
-    
+
+
+        public readonly int Length
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 64)]
+            get
+            {
+                return 8 * sizeof(T);
+            }
+        }
+
+        private readonly ulong AsULong
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                T temp = intern;
+
+                return *(ulong*)&temp;
+            }
+        }
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bits<U> Reinterpret<U>()
             where U : unmanaged
         {
 Assert.AreEqual(sizeof(T), sizeof(U));
 
-            fixed (void* ptr = &this)
-            {
-                return *(bits<U>*)ptr;
-            }
+            T temp = intern;
+
+            return *(bits<U>*)&temp;
         }
 
 
-        public bool this[[AssumeRange(0, 63)] int index] 
+        public bool this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    ulong result = (*(ulong*)ptr >> index) & 1ul;
+                ulong result = (AsULong >> index) & 1ul;
 
-                    return *(bool*)&result;
-                }
+                return *(bool*)&result;
             }
     
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
+Assert.IsSafeBoolean(value);
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    ulong mask = 1ul << index;
+                ulong mask = 1ul << index;
+                ulong result = maxmath.andnot(AsULong, mask) | ((ulong)-*(byte*)&value & mask);
 
-                    ulong result = value ? *(ulong*)ptr | mask : maxmath.andnot(*(ulong*)ptr, mask);
-
-                    intern = *(T*)&result;
-                }
-            }
-        }
-
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 1)] 
-        public readonly int ToInt32([AssumeRange(0, 63)] int index)
-        {
-Assert.IsWithinArrayBounds(index, Length);
-
-            fixed (void* ptr = &this)
-            {
-                return (int)((*(ulong*)ptr >> index) & 1ul);
+                intern = *(T*)&result;
             }
         }
 
@@ -160,12 +193,14 @@ Assert.IsWithinArrayBounds(index, Length);
         public readonly bool[] ToArray()
         {
             bool[] result = new bool[Length];
+            T temp = intern;
+            byte* internAddress = (byte*)&temp;
 
-            fixed (void* ptr = &result[0], internAddress = &this)
+            fixed (void* ptr = &result[0])
             {
                 for (int i = 0; i < sizeof(T); i++)
                 {
-                    *((bool8*)ptr + i) = maxmath.tobool8(*((byte*)internAddress + i));
+                    *((bool8*)&temp + i) = maxmath.tobool8(*(internAddress + i));
                 }
             }
 
@@ -177,13 +212,12 @@ Assert.IsWithinArrayBounds(index, Length);
             NativeArray<bool> result = new NativeArray<bool>(Length, allocator, NativeArrayOptions.UninitializedMemory);
 
             void* ptr = result.GetUnsafePtr();
+            T temp = intern;
+            byte* internAddress = (byte*)&temp;
 
-            fixed (void* internAddress = &this)
+            for (int i = 0; i < sizeof(T); i++)
             {
-                for (int i = 0; i < sizeof(T); i++)
-                {
-                    *((bool8*)ptr + i) = maxmath.tobool8(*((byte*)internAddress + i));
-                }
+                *((bool8*)&temp + i) = maxmath.tobool8(*((byte*)internAddress + i));
             }
 
             return result;
@@ -194,99 +228,79 @@ Assert.IsWithinArrayBounds(index, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 64)] 
         public readonly int IndexOfFirst()
         {
-            fixed (void* ptr = &this)
-            {
-                return math.tzcnt(*(ulong*)ptr);
-            }
+            return math.tzcnt(AsULong);
         }
 
         /// <summary>       The return value is undefined in case none of the bits are set to 1 (apart from the fact that it will be larger than the largest index of the array)        </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 64)] 
-        public readonly int IndexOfFirst([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits)
+        public readonly int IndexOfFirst(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
-            fixed (void* ptr = &this)
-            {
-                return math.tzcnt(*(ulong*)ptr & (ulong)maxmath.bitmask64(numBits, index));
-            }
+            return math.tzcnt(AsULong & (ulong)maxmath.bitmask64(numBits, index));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(-1, 63)] 
         public readonly int IndexOfLast()
         {
-            fixed (void* ptr = &this)
-            {
-                return Length - 1 - math.lzcnt(*(ulong*)ptr & (ulong)maxmath.bitmask64(Length));
-            }
+            return Length - 1 - math.lzcnt(AsULong & (ulong)maxmath.bitmask64(Length));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(-1, 63)] 
-        public readonly int IndexOfLast([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits)
+        public readonly int IndexOfLast(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
-            fixed (void* ptr = &this)
-            {
-                return Length - 1 - math.lzcnt(*(ulong*)ptr & (ulong)maxmath.bitmask64(numBits, index));
-            }
+            return Length - 1 - math.lzcnt(AsULong & (ulong)maxmath.bitmask64(numBits, index));
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ShiftLeft(int amount)
         {
-            fixed (void* ptr = &this)
-            {
-                ulong shl = *(ulong*)ptr << amount;
+            ulong shl = AsULong << amount;
 
-                intern = *(T*)&shl;
-            }
+            intern = *(T*)&shl;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ShiftLeft([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, int amount)
+        public void ShiftLeft(int index, int numBits, int amount)
         {
 Assert.IsNonNegative(amount);
 Assert.IsValidSubarray(index, numBits, Length);
 
-            fixed (void* ptr = &this)
-            {
-                ulong mask = (ulong)maxmath.bitmask64(numBits, index);
-                ulong maskED = mask & *(ulong*)ptr;
+            ulong temp = AsULong;
 
-                maskED = maxmath.andnot(*(ulong*)ptr, mask) | (mask & (maskED << amount));
+            ulong mask = (ulong)maxmath.bitmask64(numBits, index);
+            ulong maskED = mask & temp;
 
-                intern = *(T*)&maskED;
-            }
+            maskED = maxmath.andnot(temp, mask) | (mask & (maskED << amount));
+
+            intern = *(T*)&maskED;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ShiftRight(int amount)
         {
-            fixed (void* ptr = &this)
-            {
-                ulong shr = *(ulong*)ptr >> amount;
+            ulong shr = AsULong >> amount;
 
-                intern = *(T*)&shr;
-            }
+            intern = *(T*)&shr;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ShiftRight([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, int amount)
+        public void ShiftRight(int index, int numBits, int amount)
         {
 Assert.IsNonNegative(amount);
 Assert.IsValidSubarray(index, numBits, Length);
 
-            fixed (void* ptr = &this)
-            {
-                ulong mask = (ulong)maxmath.bitmask64(numBits, index);
-                ulong maskED = mask & *(ulong*)ptr;
+            ulong temp = AsULong;
 
-                maskED = maxmath.andnot(*(ulong*)ptr, mask) | (mask & (maskED >> amount));
+            ulong mask = (ulong)maxmath.bitmask64(numBits, index);
+            ulong maskED = mask & temp;
 
-                intern = *(T*)&maskED;
-            }
+            maskED = maxmath.andnot(temp, mask) | (mask & (maskED >> amount));
+
+            intern = *(T*)&maskED;
         }
 
 
@@ -295,38 +309,31 @@ Assert.IsValidSubarray(index, numBits, Length);
         {
             amount &= Length - 1;
 
-            fixed (void* ptr = &this)
-            {
-                ulong masked = *(ulong*)ptr & (ulong)maxmath.bitmask64(Length);
+            ulong masked = AsULong & (ulong)maxmath.bitmask64(Length);
+            ulong rol = (masked << amount) | (masked >> (-amount & (Length - 1)));
 
-                ulong rol = (masked << amount) | (masked >> (-amount & (Length - 1)));
-
-                intern = *(T*)&rol;
-            }
+            intern = *(T*)&rol;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RotateLeft([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, int amount)
+        public void RotateLeft(int index, int numBits, int amount)
         {
 Assert.IsNonNegative(amount);
 Assert.IsValidSubarray(index, numBits, Length);
 
-            fixed (void* ptr = &this)
-            {
-                ulong val = *(ulong*)ptr;
+            ulong temp = AsULong;
 
-                ulong mask = (ulong)maxmath.bitmask64(numBits, index);
-                ulong maskED = mask & val;
+            ulong mask = (ulong)maxmath.bitmask64(numBits, index);
+            ulong maskED = mask & temp;
 
-                int remainder = amount % numBits;
+            int remainder = amount % numBits;
 
-                maskED = (mask & (maskED << remainder)) | (mask & (maskED >> (numBits - remainder)));
+            maskED = (mask & (maskED << remainder)) | (mask & (maskED >> (numBits - remainder)));
 
-                maskED = maxmath.andnot(val, mask) | maskED;
+            maskED = maxmath.andnot(temp, mask) | maskED;
 
 
-                intern = *(T*)&maskED;
-            }
+            intern = *(T*)&maskED;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -334,90 +341,77 @@ Assert.IsValidSubarray(index, numBits, Length);
         {
             amount &= Length - 1;
 
-            fixed (void* ptr = &this)
-            {
-                ulong masked = *(ulong*)ptr & (ulong)maxmath.bitmask64(Length);
+            ulong masked = AsULong & (ulong)maxmath.bitmask64(Length);
+            ulong ror = (masked >> amount) | (masked << (-amount & (Length - 1)));
 
-                ulong ror = (masked >> amount) | (masked << (-amount & (Length - 1)));
-
-                intern = *(T*)&ror;
-            }
+            intern = *(T*)&ror;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RotateRight([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, int amount)
+        public void RotateRight(int index, int numBits, int amount)
         {
 Assert.IsNonNegative(amount);
 Assert.IsValidSubarray(index, numBits, Length);
 
-            fixed (void* ptr = &this)
-            {
-                ulong val = *(ulong*)ptr;
+            ulong temp = AsULong;
 
-                ulong mask = (ulong)maxmath.bitmask64(numBits, index);
-                ulong maskED = mask & val;
+            ulong mask = (ulong)maxmath.bitmask64(numBits, index);
+            ulong maskED = mask & temp;
 
-                int remainder = amount % numBits;
+            int remainder = amount % numBits;
 
-                maskED = (mask & (maskED >> remainder)) | (mask & (maskED << (numBits - remainder)));
+            maskED = (mask & (maskED >> remainder)) | (mask & (maskED << (numBits - remainder)));
 
-                maskED = maxmath.andnot(val, mask) | maskED;
+            maskED = maxmath.andnot(temp, mask) | maskED;
 
 
-                intern = *(T*)&maskED;
-            }
+            intern = *(T*)&maskED;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Swap([AssumeRange(0, 63)] int smallerIndex, [AssumeRange(0, 63)] int largerIndex)
+        public void Swap(int smallerIndex, int largerIndex)
         {
 Assert.IsWithinArrayBounds(smallerIndex, Length);
 Assert.IsWithinArrayBounds(largerIndex, Length);
 
-            fixed (void* ptr = &this)
-            {
-                ulong2 field = *(ulong*)ptr;
-                ulong2 packed = (ulong2)new long2(smallerIndex, largerIndex);
+            ulong2 field = AsULong;
+            ulong2 packed = (ulong2)new long2(smallerIndex, largerIndex);
 
-                ulong2 result = 1 & maxmath.shrl(field, packed);
-                result ^= result.yx;
-                result = maxmath.shl(result, packed);
+            ulong2 result = 1 & maxmath.shrl(field, packed);
+            result ^= result.yx;
+            result = maxmath.shl(result, packed);
 
-                result = field ^ (result | result.yx);
+            result = field ^ (result | result.yx);
 
 
-                intern = *(T*)&result;
-            }
+            intern = *(T*)&result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Swap([AssumeRange(0, 63)] int smallerIndex, [AssumeRange(0, 63)] int largerIndex, [AssumeRange(0, 64)] int numBits)
+        public void Swap(int smallerIndex, int largerIndex, int numBits)
         {
 Assert.IsGreater(largerIndex, smallerIndex);
 Assert.IsValidSubarray(smallerIndex, numBits, Length);
 Assert.IsValidSubarray(largerIndex, numBits, Length);
 Assert.SubarraysDoNotOverlap(smallerIndex, largerIndex, numBits, numBits);
 
-            fixed (void* ptr = &this)
-            {
-                ulong val = *(ulong*)ptr;
+            ulong temp = AsULong;
 
-                // inlined bitmask
-                // x: mask for lower subarray, y: mask for upper subarray, 
-                ulong3 masks = maxmath.shl(ulong.MaxValue, new ulong3((ulong)smallerIndex, (ulong)largerIndex, 0ul));
-                masks = maxmath.andnot(masks, masks << numBits);
-                // z: mask for deleting elements in the array
-                masks.z = ~(masks.x | masks.y);
+            // inlined bitmask
+            // x: mask for lower subarray, y: mask for upper subarray, 
+            ulong3 masks = maxmath.shl(ulong.MaxValue, new ulong3((ulong)smallerIndex, (ulong)largerIndex, 0ul));
+            masks = maxmath.andnot(masks, masks << numBits);
+            // z: mask for deleting elements in the array
+            masks.z = ~(masks.x | masks.y);
 
-                // delete in z, grab values in x & y
-                masks &= val;
+            // delete in z, grab values in x & y
+            masks &= temp;
 
-                // swap positions; blend together
-                int indexDelta = largerIndex - smallerIndex;
-                val = ((masks.z | (masks.x << indexDelta)) | (masks.y >> indexDelta));
+            // swap positions; blend together
+            int indexDelta = largerIndex - smallerIndex;
+            temp = ((masks.z | (masks.x << indexDelta)) | (masks.y >> indexDelta));
 
 
-                intern = *(T*)&val;
-            }
+            intern = *(T*)&temp;
         }
 
 
@@ -428,56 +422,45 @@ Assert.SubarraysDoNotOverlap(smallerIndex, largerIndex, numBits, numBits);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Flip([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits)
+        public void Flip(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
-            fixed (void* ptr = &this)
-            {
-                ulong2 invert = new ulong2((ulong)maxmath.bitmask64(numBits, index), *(ulong*)ptr);
+            ulong2 invert = new ulong2((ulong)maxmath.bitmask64(numBits, index), AsULong);
 
-                invert = maxmath.andnot(invert, invert.yx);
+            invert = maxmath.andnot(invert, invert.yx);
 
-                invert = invert | invert.yx;
+            invert = invert | invert.yx;
 
-                intern = *(T*)&invert;
-            }
+            intern = *(T*)&invert;
         }
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reverse()
         {
-            fixed (void* ptr = &this)
-            {
-                ulong reversed = math.reversebits(*(ulong*)ptr) >> (64 - Length);
+            ulong reversed = math.reversebits(AsULong) >> (64 - Length);
 
-                intern = *(T*)&reversed;
-            }
+            intern = *(T*)&reversed;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Reverse([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits)
+        public void Reverse(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
             ulong mask = (ulong)maxmath.bitmask64(numBits, index);
             int shiftValue = math.mad(2, index,      numBits - Length);
-    
-Assert.IsDefinedBitShift<ulong>(math.abs(shiftValue));
 
-            fixed (void* ptr = &this)
-            {
-                ulong val = *(ulong*)ptr;
+            ulong temp = AsULong;
 
-                val = (mask & ((shiftValue < 0)
-                              ? (math.reversebits(val) >> (64 - Length)) >> math.abs(shiftValue)
-                              : (math.reversebits(val) >> (64 - Length)) << shiftValue))
-                      |
-                      maxmath.andnot(val, mask);
+            temp = (mask & ((shiftValue < 0)
+                           ? (math.reversebits(temp) >> (64 - Length)) >> math.abs(shiftValue)
+                           : (math.reversebits(temp) >> (64 - Length)) << shiftValue))
+                   |
+                   maxmath.andnot(temp, mask);
 
-                intern = *(T*)&val;
-            }
+            intern = *(T*)&temp;
         }
     
     
@@ -491,7 +474,7 @@ Assert.IsDefinedBitShift<ulong>(math.abs(shiftValue));
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public void Shuffle([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, ref Random32 rngenerator)
+        public void Shuffle(int index, int numBits, ref Random32 rngenerator)
         {
 Assert.IsValidSubarray(index, numBits, Length);
     
@@ -513,18 +496,15 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public void Randomize([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, ref Random64 rngenerator)
+        public void Randomize(int index, int numBits, ref Random64 rngenerator)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
             ulong mask = (ulong)maxmath.bitmask64(numBits, index);
 
-            fixed (void* ptr = &this)
-            {
-                mask = (rngenerator.NextULong() & mask) | maxmath.andnot(*(ulong*)ptr, mask);
+            mask = (rngenerator.NextULong() & mask) | maxmath.andnot(AsULong, mask);
 
-                intern = *(T*)&mask;
-            }
+            intern = *(T*)&mask;
         }
     
     
@@ -535,146 +515,115 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public void SetBits([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, bool value)
-        {
-Assert.IsValidSubarray(index, numBits, Length);
-
-            ulong mask = (ulong)maxmath.bitmask64(numBits, index);
-    
-            fixed (void* ptr = &this)
-            {
-                mask = value ? *(ulong*)ptr | mask : maxmath.andnot(*(ulong*)ptr, mask);
-
-                intern = *(T*)&mask;
-            }
-        }
-    
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 64)] 
-        public readonly int CountBits()
-        {
-            ulong mask = (ulong)maxmath.bitmask64(Length);
-
-            fixed (void* ptr = &this)
-            {
-                return math.countbits(*(ulong*)ptr & mask);
-            }
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 64)] 
-        public readonly int CountBits([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits)
+        public void SetBits(int index, int numBits, bool value)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
             ulong mask = (ulong)maxmath.bitmask64(numBits, index);
 
-            fixed (void* ptr = &this)
-            {
-                return math.countbits(*(ulong*)ptr & mask);
-            }
+            mask = maxmath.andnot(AsULong, mask) | ((uint)-*(byte*)&value & mask);
+
+            intern = *(T*)&mask;
+        }
+    
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 64)] 
+        public readonly uint CountBits()
+        {
+            return (uint)math.countbits(AsULong & (ulong)maxmath.bitmask64(Length));
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 64)] 
+        public readonly uint CountBits(int index, int numBits)
+        {
+Assert.IsValidSubarray(index, numBits, Length);
+
+            return (uint)math.countbits(AsULong & (ulong)maxmath.bitmask64(numBits, index));
         }
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TestAll()
         {
-            ulong trueMask = (ulong)maxmath.bitmask64(Length);
+            ulong mask = (ulong)maxmath.bitmask64(Length);
 
-            fixed (void* ptr = &this)
-            {
-                return trueMask == (*(ulong*)ptr & trueMask);
-            }
+            return mask == (AsULong & mask);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool TestAll([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits)
+        public readonly bool TestAll(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
-            ulong trueMask = (ulong)maxmath.bitmask64(numBits, index);
+            ulong mask = (ulong)maxmath.bitmask64(numBits, index);
 
-            fixed (void* ptr = &this)
-            {
-                return trueMask == (*(ulong*)ptr & trueMask);
-            }
+            return mask == (AsULong & mask);
         }
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TestAny()
         {
-            fixed (void* ptr = &this)
-            {
-                return 0ul != (*(ulong*)ptr & (ulong)maxmath.bitmask64(Length));
-            }
+            return 0ul != (AsULong & (ulong)maxmath.bitmask64(Length));
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool TestAny([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits)
+        public readonly bool TestAny(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
-            fixed (void* ptr = &this)
-            {
-                return 0ul != (*(ulong*)ptr & (ulong)maxmath.bitmask64(numBits, index));
-            }
+            return 0ul != (AsULong & (ulong)maxmath.bitmask64(numBits, index));
         }
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TestNone()
         {
-            fixed (void* ptr = &this)
-            {
-                return 0ul == (*(ulong*)ptr & (ulong)maxmath.bitmask64(Length));
-            }
+            return 0ul == (AsULong & (ulong)maxmath.bitmask64(Length));
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool TestNone([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits)
+        public readonly bool TestNone(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
-            fixed (void* ptr = &this)
-            {
-                return 0ul == (*(ulong*)ptr & (ulong)maxmath.bitmask64(numBits, index));
-            }
+            return 0ul == (AsULong & (ulong)maxmath.bitmask64(numBits, index));
         }
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Overwrite([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, bit8 source, [AssumeRange(0, 7)] int sourceIndex)
+        public void Overwrite(int index, int numBits, bit8 source, int sourceIndex)
         {
             OverwriteHelper((ulong)source.intern, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Overwrite([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, bit16 source, [AssumeRange(0, 15)] int sourceIndex)
+        public void Overwrite(int index, int numBits, bit16 source, int sourceIndex)
         {
             OverwriteHelper((ulong)source.intern, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Overwrite([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, bit32 source, [AssumeRange(0, 31)] int sourceIndex)
+        public void Overwrite(int index, int numBits, bit32 source, int sourceIndex)
         {
             OverwriteHelper((ulong)source.intern, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Overwrite([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, bit64 source, [AssumeRange(0, 63)] int sourceIndex)
+        public void Overwrite(int index, int numBits, bit64 source, int sourceIndex)
         {
             OverwriteHelper(source.intern, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Overwrite<U>([AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, bits<U> source, [AssumeRange(0, 63)] int sourceIndex)
+        public void Overwrite<U>(int index, int numBits, bits<U> source, int sourceIndex)
             where U : unmanaged
         {
             OverwriteHelper(*(ulong*)&source, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void OverwriteHelper(ulong backingField, [AssumeRange(0, 63)] int sourceLength, [AssumeRange(0, 63)] int index, [AssumeRange(0, 64)] int numBits, [AssumeRange(0, 63)] int sourceIndex)
+        private void OverwriteHelper(ulong backingField, int sourceLength, int index, int numBits, int sourceIndex)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 Assert.IsValidSubarray(sourceIndex, numBits, sourceLength);
@@ -685,14 +634,11 @@ Assert.IsValidSubarray(sourceIndex, numBits, sourceLength);
                                   ? backingField >> sourceIndex - index
                                   : backingField << index - sourceIndex;
 
-            fixed (void* ptr = &this)
-            {
-                ulong val = *(ulong*)ptr;
+            ulong temp = AsULong;
 
-                val = (shiftedSource & mask) | maxmath.andnot(val, mask);
+            temp = (shiftedSource & mask) | maxmath.andnot(temp, mask);
 
-                intern = *(T*)&val;
-            }
+            intern = *(T*)&temp;
         }
 
 
@@ -705,12 +651,9 @@ Assert.IsValidSubarray(sourceIndex, numBits, sourceLength);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override readonly int GetHashCode()
         {
-            fixed (void* ptr = &this)
-            {
-                ulong masked = *(ulong*)ptr & (ulong)maxmath.bitmask64(Length);
+            ulong masked = AsULong & (ulong)maxmath.bitmask64(Length);
 
-                return (int)(masked ^ (masked >> 32));
-            }
+            return (int)(masked ^ (masked >> 32));
         }
     
     
@@ -719,10 +662,7 @@ Assert.IsValidSubarray(sourceIndex, numBits, sourceLength);
         {
             ulong mask = (ulong)maxmath.bitmask64(Length);
 
-            fixed (void* ptr = &this)
-            {
-                return (*(ulong*)ptr & mask) == (*(ulong*)&other & mask);
-            }
+            return (AsULong & mask) == (*(ulong*)&other & mask);
         }
         public override readonly bool Equals(object obj)
         {

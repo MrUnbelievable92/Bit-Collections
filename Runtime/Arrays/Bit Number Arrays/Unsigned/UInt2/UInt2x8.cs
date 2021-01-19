@@ -126,9 +126,9 @@ Assert.IsNotGreater(x0_7.x7, UInt2.MaxValue);
         }
 
 
-        public uint this[[AssumeRange(0, 7)] int index]
+        public uint this[int index]
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange((ulong)UInt2.MinValue, (ulong)UInt2.MaxValue)]
             readonly get
             {
 Assert.IsWithinArrayBounds(index, Length);

@@ -100,10 +100,9 @@ Assert.IsNotGreater(x0_5.x7, 0u);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
             {
-                fixed (void* ptr = &this)
-                {
-                    return Unity.Burst.Intrinsics.X86.Avx.mm256_insert_epi64(MaxValue & maxmath.shrl(*(uint*)ptr, (uint)BitsPerNumber * new uint8(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)), 0L, 3);
-                }
+                UInt24 x = intern;
+
+                return Unity.Burst.Intrinsics.X86.Avx.mm256_insert_epi64(MaxValue & maxmath.shrl(*(uint*)&x, (uint)BitsPerNumber * new uint8(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)), 0L, 3);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -114,17 +113,16 @@ Assert.IsNotGreater(x0_5.x7, 0u);
         }
 
 
-        public uint this[[AssumeRange(0, 7)] int index]
+        public uint this[int index]
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange((ulong)UInt4.MinValue, (ulong)UInt4.MaxValue)]
             readonly get
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    return MaxValue & ((*(uint*)ptr) >> (index * BitsPerNumber));
-                }
+                UInt24 x = intern;
+
+                return MaxValue & ((*(uint*)&x) >> (index * BitsPerNumber));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -133,14 +131,13 @@ Assert.IsWithinArrayBounds(index, Length);
 Assert.IsNotGreater(value, UInt4.MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    int shiftValue = index * BitsPerNumber;
-                    uint newValue = value << shiftValue;
-                    uint mask = math.rol(~MaxValue, shiftValue);
+                UInt24 x = intern;
 
-                    intern = (UInt24)(((*(uint*)ptr) & mask) | newValue);
-                }
+                int shiftValue = index * BitsPerNumber;
+                uint newValue = value << shiftValue;
+                uint mask = math.rol(~MaxValue, shiftValue);
+
+                intern = (UInt24)(((*(uint*)&x) & mask) | newValue);
             }
         }
 

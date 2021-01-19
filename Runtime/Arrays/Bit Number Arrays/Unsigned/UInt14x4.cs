@@ -104,10 +104,9 @@ Assert.IsNotGreater(xyzw.w, UInt14.MaxValue);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
             {
-                fixed (void* ptr = &this)
-                {
-                    return MaxValue & maxmath.shrl(*(ulong*)ptr, (ulong)BitsPerNumber * new ulong4(0ul, 1ul, 2ul, 3ul));
-                }
+                UInt56 x = intern;
+
+                return MaxValue & maxmath.shrl(*(ulong*)&x, (ulong)BitsPerNumber * new ulong4(0ul, 1ul, 2ul, 3ul));
             }
         
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -118,17 +117,16 @@ Assert.IsNotGreater(xyzw.w, UInt14.MaxValue);
         }
     
     
-        public uint this[[AssumeRange(0, 3)] int index]
+        public uint this[int index]
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange((ulong)UInt14.MinValue, (ulong)UInt14.MaxValue)]
             readonly get
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    return MaxValue & (uint)(*(ulong*)ptr >> (index * BitsPerNumber));
-                }
+                UInt56 x = intern;
+
+                return MaxValue & (uint)(*(ulong*)&x >> (index * BitsPerNumber));
             }
     
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -136,15 +134,14 @@ Assert.IsWithinArrayBounds(index, Length);
             {
 Assert.IsNotGreater(value, MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
-    
-                fixed (void* ptr = &this)
-                {
-                    int shiftValue = index * BitsPerNumber;
-                    ulong newValue = (ulong)value << shiftValue;
-                    ulong mask = math.rol(~(ulong)MaxValue, shiftValue);
 
-                    intern = (UInt56)((*(ulong*)ptr & mask) | newValue);
-                }
+                UInt56 x = intern;
+
+                int shiftValue = index * BitsPerNumber;
+                ulong newValue = (ulong)value << shiftValue;
+                ulong mask = math.rol(~(ulong)MaxValue, shiftValue);
+
+                intern = (UInt56)((*(ulong*)&x & mask) | newValue);
             }
         }
 

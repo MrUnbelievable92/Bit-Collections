@@ -5,7 +5,7 @@ using Unity.Burst;
 
 namespace BitCollections
 {
-    [BurstCompile]
+    [BurstCompile]  [NativeContainer]
     unsafe internal struct NativeArrayDisposeJob : IJob
     {
         [NativeDisableUnsafePtrRestriction] public void* ptr;

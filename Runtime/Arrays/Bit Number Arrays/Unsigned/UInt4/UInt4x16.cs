@@ -189,9 +189,9 @@ Assert.IsNotGreater(x8_15.x7, UInt4.MaxValue);
         }
 
 
-        public uint this[[AssumeRange(0, 15)] int index]
+        public uint this[int index]
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange((ulong)UInt4.MinValue, (ulong)UInt4.MaxValue)]
             readonly get
             {
 Assert.IsWithinArrayBounds(index, Length);
@@ -215,7 +215,7 @@ Assert.IsWithinArrayBounds(index, Length);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ulong4 GetSubArray([AssumeRange(0, 12)] int index)
+        public ulong4 GetSubArray(int index)
         {
 Assert.IsValidSubarray(index, 4, Length);
 
@@ -223,7 +223,7 @@ Assert.IsValidSubarray(index, 4, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetSubArray([AssumeRange(0, 12)] int index, ulong4 value)
+        public void SetSubArray(int index, ulong4 value)
         {
 Assert.IsValidSubarray(index, 4, Length);
 Assert.IsNotGreater(value.x, UInt4.MaxValue);

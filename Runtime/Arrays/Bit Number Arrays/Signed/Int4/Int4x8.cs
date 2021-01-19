@@ -131,7 +131,7 @@ Assert.IsBetween(x0_7.x7, Int4.MinValue, Int4.MaxValue);
         }
 
 
-        public int this[[AssumeRange(0, 7)] int index]
+        public int this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(Int4.MinValue, Int4.MaxValue)]
             readonly get
@@ -142,7 +142,7 @@ Assert.IsWithinArrayBounds(index, Length);
                 return (intern << (32 - ((1 + index) * BitsPerNumber))) >> (32 - BitsPerNumber);
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [param: AssumeRange(Int4.MinValue, Int4.MaxValue)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
 Assert.IsBetween(value, MinValue, MaxValue);

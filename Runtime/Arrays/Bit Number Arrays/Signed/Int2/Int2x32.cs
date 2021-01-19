@@ -339,7 +339,7 @@ Assert.IsBetween(x24_31.x7, Int2.MinValue, Int2.MaxValue);
         }
 
 
-        public int this[[AssumeRange(0, 31)] int index]
+        public int this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(Int2.MinValue, Int2.MaxValue)]
             readonly get
@@ -350,15 +350,15 @@ Assert.IsWithinArrayBounds(index, Length);
                 return (int)((intern << (64 - ((1 + index) * BitsPerNumber))) >> (64 - BitsPerNumber));
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [param: AssumeRange(Int2.MinValue, Int2.MaxValue)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
 Assert.IsBetween(value, MinValue, MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
                 int shiftValue = index * BitsPerNumber;
-                long newValue = (long)(value & (long)maxmath.bitmask64(BitsPerNumber)) << shiftValue;
-                long mask = math.rol(~(long)maxmath.bitmask64(BitsPerNumber), shiftValue);
+                long newValue = (long)(value & maxmath.bitmask64(BitsPerNumber)) << shiftValue;
+                long mask = math.rol(~maxmath.bitmask64(BitsPerNumber), shiftValue);
 
                 intern = (intern & mask) | newValue;
             }
@@ -366,7 +366,7 @@ Assert.IsWithinArrayBounds(index, Length);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public long4 GetSubArray([AssumeRange(0, 28)] int index)
+        public long4 GetSubArray(int index)
         {
 Assert.IsValidSubarray(index, 4, Length);
 
@@ -377,7 +377,7 @@ Assert.IsValidSubarray(index, 4, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetSubArray([AssumeRange(0, 28)] int index, long4 value)
+        public void SetSubArray(int index, long4 value)
         {
 Assert.IsValidSubarray(index, 4, Length);
 Assert.IsBetween(value.x, MinValue, MaxValue);
@@ -387,7 +387,7 @@ Assert.IsBetween(value.w, MinValue, MaxValue);
 
             intern = ((long)maxmath.andnot((ulong)intern, (ulong)maxmath.bitmask64(4 * BitsPerNumber, index * BitsPerNumber))
                       |
-                      maxmath.csum(maxmath.shl((long)maxmath.bitmask64(BitsPerNumber) & value,      (long4)(BitsPerNumber * (index + new int4(0, 1, 2, 3))))));
+                      maxmath.csum(maxmath.shl(maxmath.bitmask64(BitsPerNumber) & value,      (long4)(BitsPerNumber * (index + new int4(0, 1, 2, 3))))));
         }
 
 

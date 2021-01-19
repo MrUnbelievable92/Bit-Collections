@@ -22,11 +22,17 @@ namespace BitCollections
         {
             intern = value;
         }
-    
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bit16(short value)
+        {
+            intern = (ushort)value;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bit16(bool value)
         {
-            intern = (ushort)(-(short)maxmath.touint16(value));
+            intern = (ushort)(-maxmath.toint8(value));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -147,7 +153,19 @@ Assert.IsWithinArrayBounds(index + 15, values.Length);
         }
     
     
-        public bool this[[AssumeRange(0, 15)] int index]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bits<T> Reinterpret<T>()
+            where T : unmanaged
+        {
+Assert.AreEqual(sizeof(bit16), sizeof(T));
+
+            ushort temp = intern;
+
+            return *(bits<T>*)&temp;
+        }
+
+
+        public bool this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
@@ -162,21 +180,13 @@ Assert.IsWithinArrayBounds(index, Length);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             { 
+Assert.IsSafeBoolean(value);
 Assert.IsWithinArrayBounds(index, Length);
     
                 uint mask = 1u << index;
-    
-                intern = (ushort)(value ? intern | mask : maxmath.andnot(intern, mask));
+
+                intern = (ushort)(maxmath.andnot(intern, mask) | ((uint)-*(byte*)&value & mask));
             }
-        }
-
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 1)] 
-        public readonly int ToInt32([AssumeRange(0, 15)] int index)
-        {
-Assert.IsWithinArrayBounds(index, Length);
-    
-            return (int)(((uint)intern >> index) & 1u);
         }
 
 
@@ -203,7 +213,7 @@ Assert.IsWithinArrayBounds(index, Length);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bit8 Getbit8SubArray([AssumeRange(0, 8)] int index)
+        public readonly bit8 Getbit8SubArray(int index)
         {
 Assert.IsValidSubarray(index, new bit8().Length, Length);
 
@@ -220,7 +230,7 @@ Assert.IsValidSubarray(index, new bit8().Length, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 32)] 
-        public readonly int IndexOfFirst([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits)
+        public readonly int IndexOfFirst(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
@@ -234,7 +244,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(-1, 15)] 
-        public readonly int IndexOfLast([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits)
+        public readonly int IndexOfLast(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
@@ -249,7 +259,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ShiftLeft([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits, int amount)
+        public void ShiftLeft(int index, int numBits, int amount)
         {
 Assert.IsNonNegative(amount);
 Assert.IsValidSubarray(index, numBits, Length);
@@ -267,7 +277,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ShiftRight([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits, int amount)
+        public void ShiftRight(int index, int numBits, int amount)
         {
 Assert.IsNonNegative(amount);
 Assert.IsValidSubarray(index, numBits, Length);
@@ -286,7 +296,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RotateLeft([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits, int amount)
+        public void RotateLeft(int index, int numBits, int amount)
         {
 Assert.IsNonNegative(amount);
 Assert.IsValidSubarray(index, numBits, Length);
@@ -308,7 +318,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RotateRight([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits, int amount)
+        public void RotateRight(int index, int numBits, int amount)
         {
 Assert.IsNonNegative(amount);
 Assert.IsValidSubarray(index, numBits, Length);
@@ -325,7 +335,7 @@ Assert.IsValidSubarray(index, numBits, Length);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Swap([AssumeRange(0, 15)] int smallerIndex, [AssumeRange(0, 15)] int largerIndex)
+        public void Swap(int smallerIndex, int largerIndex)
         {
 Assert.IsWithinArrayBounds(smallerIndex, Length);
 Assert.IsWithinArrayBounds(largerIndex, Length);
@@ -341,7 +351,7 @@ Assert.IsWithinArrayBounds(largerIndex, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Swap([AssumeRange(0, 15)] int smallerIndex, [AssumeRange(0, 15)] int largerIndex, [AssumeRange(0, 16)] int numBits)
+        public void Swap(int smallerIndex, int largerIndex, int numBits)
         {
 Assert.IsGreater(largerIndex, smallerIndex);
 Assert.IsValidSubarray(smallerIndex, numBits, Length);
@@ -371,7 +381,7 @@ Assert.SubarraysDoNotOverlap(smallerIndex, largerIndex, numBits, numBits);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Flip([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits)
+        public void Flip(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
@@ -390,7 +400,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Reverse([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits)
+        public void Reverse(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
@@ -415,7 +425,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Shuffle([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits, ref Random32 rngenerator)
+        public void Shuffle(int index, int numBits, ref Random32 rngenerator)
         {
 Assert.IsValidSubarray(index, numBits, Length);
     
@@ -435,13 +445,13 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Randomize([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits, ref Random32 rngenerator)
+        public void Randomize(int index, int numBits, ref Random32 rngenerator)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
-            uint maskTRUE = (uint)maxmath.bitmask32(numBits, index);
+            uint mask = (uint)maxmath.bitmask32(numBits, index);
     
-            intern = (ushort)((rngenerator.NextUInt(0u, ushort.MaxValue + 1u) & maskTRUE)    |    maxmath.andnot(intern, maskTRUE));
+            intern = (ushort)((rngenerator.NextUInt(0u, ushort.MaxValue + 1u) & mask)    |    maxmath.andnot(intern, mask));
         }
     
     
@@ -452,28 +462,28 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetBits([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits, bool value)
+        public void SetBits(int index, int numBits, bool value)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
             uint mask = (uint)maxmath.bitmask32(numBits, index);
-    
-            intern = (ushort)(value ? intern | mask : maxmath.andnot(intern, mask));
+
+            intern = (ushort)(maxmath.andnot(intern, mask) | ((uint)-*(byte*)&value & mask));
         }
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 16)] 
-        public readonly int CountBits()
+        public readonly uint CountBits()
         {
-            return math.countbits((uint)intern);
+            return (uint)math.countbits((uint)intern);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 16)] 
-        public readonly int CountBits([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits)
+        public readonly uint CountBits(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
-            return math.countbits(intern & maxmath.bitmask32(numBits, index));
+            return (uint)math.countbits(intern & maxmath.bitmask32(numBits, index));
         }
     
     
@@ -484,13 +494,13 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool TestAll([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits)
+        public readonly bool TestAll(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
-            uint trueMask = (uint)maxmath.bitmask32(numBits, index);
+            uint mask = (uint)maxmath.bitmask32(numBits, index);
     
-            return (intern & trueMask) == trueMask;
+            return (intern & mask) == mask;
         }
     
     
@@ -501,7 +511,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool TestAny([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits)
+        public readonly bool TestAny(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
@@ -516,7 +526,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool TestNone([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits)
+        public readonly bool TestNone(int index, int numBits)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 
@@ -525,38 +535,38 @@ Assert.IsValidSubarray(index, numBits, Length);
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Overwrite([AssumeRange(0, 15)] int index, [AssumeRange(0, 8)] int numBits, bit8 source, [AssumeRange(0, 7)] int sourceIndex)
+        public void Overwrite(int index, int numBits, bit8 source, int sourceIndex)
         {
             OverwriteHelper((uint)source.intern, source.Length, index, numBits, sourceIndex);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Overwrite([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits, bit16 source, [AssumeRange(0, 15)] int sourceIndex)
+        public void Overwrite(int index, int numBits, bit16 source, int sourceIndex)
         {
             OverwriteHelper((uint)source.intern, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Overwrite([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits, bit32 source, [AssumeRange(0, 31)] int sourceIndex)
+        public void Overwrite(int index, int numBits, bit32 source, int sourceIndex)
         {
             OverwriteHelper(source.intern, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Overwrite([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits, bit64 source, [AssumeRange(0, 63)] int sourceIndex)
+        public void Overwrite(int index, int numBits, bit64 source, int sourceIndex)
         {
             OverwriteHelper(source.intern, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Overwrite<T>([AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits, bits<T> source, [AssumeRange(0, 63)] int sourceIndex)
+        public void Overwrite<T>(int index, int numBits, bits<T> source, int sourceIndex)
             where T : unmanaged
         {
             OverwriteHelper(*(ulong*)&source, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void OverwriteHelper(ulong backingField, [AssumeRange(0, 64)] int sourceLength, [AssumeRange(0, 15)] int index, [AssumeRange(0, 16)] int numBits, [AssumeRange(0, 63)] int sourceIndex)
+        private void OverwriteHelper(ulong backingField, int sourceLength, int index, int numBits, int sourceIndex)
         {
 Assert.IsValidSubarray(index, numBits, Length);
 Assert.IsValidSubarray(sourceIndex, numBits, sourceLength);
@@ -592,7 +602,7 @@ Assert.IsValidSubarray(sourceIndex, numBits, sourceLength);
     
         public override readonly bool Equals(object obj)
         {
-            return Equals((bit16)obj); ;
+            return Equals((bit16)obj);
         }
     
     

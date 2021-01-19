@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("BitCollections")]
-[assembly: AssemblyCopyright("Copyright © 2020 Maximilian Kalimon")]
+[assembly: AssemblyCopyright("Copyright © 2020 - 2021 Maximilian Kalimon")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: InternalsVisibleTo("BitCollections.Tests")]
@@ -30,6 +30,6 @@ using System.Runtime.CompilerServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("0.9.9")]
-[assembly: AssemblyFileVersion("0.9.9")]
+[assembly: AssemblyVersion("0.9.10")]
+[assembly: AssemblyFileVersion("0.9.10")]
 [assembly: AssemblyInformationalVersion("0.9 Pre-Release")]

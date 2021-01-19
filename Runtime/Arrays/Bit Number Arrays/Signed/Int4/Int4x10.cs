@@ -137,54 +137,51 @@ Assert.IsBetween(x8_9.y,  Int4.MinValue, Int4.MaxValue);
         }
 
 
-        public int this[[AssumeRange(0, 9)] int index]
+        public int this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(Int4.MinValue, Int4.MaxValue)]
             readonly get
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
-                    return (int)((*(long*)ptr << (64 - ((1 + index) * BitsPerNumber))) >> (64 - BitsPerNumber));
-                }
+                Int40 x = intern;
+
+                // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
+                return (int)((*(long*)&x << (64 - ((1 + index) * BitsPerNumber))) >> (64 - BitsPerNumber));
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]  [param: AssumeRange(Int4.MinValue, Int4.MaxValue)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
 Assert.IsBetween(value, MinValue, MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                fixed (void* ptr = &this)
-                {
-                    int shiftValue = index * BitsPerNumber;
-                    long newValue = ((long)value & (long)maxmath.bitmask64(BitsPerNumber)) << shiftValue;
-                    long mask = math.rol(~(long)maxmath.bitmask64(BitsPerNumber), shiftValue);
+                Int40 x = intern;
 
-                    intern = (Int40)(((*(long*)ptr) & mask) | newValue);
-                }
+                int shiftValue = index * BitsPerNumber;
+                long newValue = ((long)value & maxmath.bitmask64(BitsPerNumber)) << shiftValue;
+                long mask = math.rol(~maxmath.bitmask64(BitsPerNumber), shiftValue);
+
+                intern = (Int40)(((*(long*)&x) & mask) | newValue);
             }
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public long4 GetSubArray([AssumeRange(0, 6)] int index)
+        public long4 GetSubArray(int index)
         {
 Assert.IsValidSubarray(index, 4, Length);
 
-            fixed (void* ptr = &this)
-            {
-                // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
-                long4 temp = maxmath.shl((long4)(*(long*)ptr), (long4)(64 - (BitsPerNumber * (index + new int4(1, 2, 3, 4)))));
+            Int40 x = intern;
 
-                return temp >> (64 - BitsPerNumber);
-            }
+            // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
+            long4 temp = maxmath.shl((long4)(*(long*)&x), (long4)(64 - (BitsPerNumber * (index + new int4(1, 2, 3, 4)))));
+
+            return temp >> (64 - BitsPerNumber);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetSubArray([AssumeRange(0, 6)] int index, long4 value)
+        public void SetSubArray(int index, long4 value)
         {
 Assert.IsValidSubarray(index, 4, Length);
 Assert.IsBetween(value.x, MinValue, MaxValue);
@@ -192,12 +189,11 @@ Assert.IsBetween(value.y, MinValue, MaxValue);
 Assert.IsBetween(value.z, MinValue, MaxValue);
 Assert.IsBetween(value.w, MinValue, MaxValue);
 
-            fixed (void* ptr = &this)
-            {
-                intern = (Int40)((long)maxmath.andnot(*(ulong*)ptr, (ulong)maxmath.bitmask64(4 * BitsPerNumber,   index * BitsPerNumber))
-                                 |
-                                 maxmath.csum(maxmath.shl((int)maxmath.bitmask32(BitsPerNumber) & value, (long4)(BitsPerNumber * (index + new int4(0, 1, 2, 3))))));
-            }
+            Int40 x = intern;
+
+            intern = (Int40)((long)maxmath.andnot(*(ulong*)&x, (ulong)maxmath.bitmask64(4 * BitsPerNumber,   index * BitsPerNumber))
+                             |
+                             maxmath.csum(maxmath.shl((int)maxmath.bitmask32(BitsPerNumber) & value, (long4)(BitsPerNumber * (index + new int4(0, 1, 2, 3))))));
         }
 
 

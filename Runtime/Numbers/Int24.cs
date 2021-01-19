@@ -142,6 +142,12 @@ namespace BitCollections
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Int24(quarter input)
+        {
+            return (Int24)((float)input);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Int24(half input)
         {
             return (Int24)((int)input);
@@ -214,6 +220,12 @@ namespace BitCollections
             return (ulong)maxmath.signextend(*(long*)&input, 24);
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator quarter(Int24 input)
+        {
+            return (quarter)((int)input);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator half(Int24 input)
@@ -635,7 +647,7 @@ namespace BitCollections
         {
             return Convert.ToChar((int)this, provider);
         }
-        public System.DateTime ToDateTime(IFormatProvider provider)
+        public DateTime ToDateTime(IFormatProvider provider)
         {
             return Convert.ToDateTime((int)this, provider);
         }
