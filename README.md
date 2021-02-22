@@ -9,8 +9,8 @@ Since using less RAM usually comes at the cost of taking more time (CPU), this l
 - Unity.Burst
 - Unity.Collections (A native bit-array and generic, native "bit-number" arrays are defined)
 - Unity.Jobs (Mainly for de-allocating the mentioned arrays on a worker thread)
-- MaxMath (my SIMD library supplementary to Unity.Mathematics)
-- C-Sharp-Dev-Tools (Conditionally compiled runtime-checks)
+- [MaxMath](https://github.com/MrUnbelievable92/MaxMath) (my SIMD library supplementary to Unity.Mathematics)
+- [C Sharp Dev Tools](https://github.com/MrUnbelievable92/C-Sharp-Dev-Tools) (Conditionally compiled runtime-checks)
 
 
 
