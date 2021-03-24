@@ -195,7 +195,7 @@ Assert.IsNotGreater(x8_15.x7, UInt2.MaxValue);
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                return MaxValue & (intern >> (index * BitsPerNumber));
+                return (uint)maxmath.bits_extract(intern, index * BitsPerNumber, BitsPerNumber);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -204,11 +204,18 @@ Assert.IsWithinArrayBounds(index, Length);
 Assert.IsNotGreater(value, UInt2.MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                int shiftValue = index * BitsPerNumber;
-                uint newValue = value << shiftValue;
-                uint mask = math.rol(~MaxValue, shiftValue);
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(value) && value == 0 && index == Length - 1)
+                {
+                    intern = maxmath.bits_zerohigh(intern, (Length - 1) * BitsPerNumber);
+                }
+                else
+                {
+                    int shiftValue = index * BitsPerNumber;
+                    uint newValue = value << shiftValue;
+                    uint mask = math.rol(~MaxValue, shiftValue);
 
-                intern = (intern & mask) | newValue;
+                    intern = (intern & mask) | newValue;
+                }
             }
         }
 
@@ -237,6 +244,47 @@ Assert.IsNotGreater(value.x7, UInt2.MaxValue);
             intern = maxmath.andnot(intern,     (uint)maxmath.bitmask32(8 * BitsPerNumber,   index * BitsPerNumber))
                      |
                      maxmath.csum(maxmath.shl(value,     (uint)BitsPerNumber * ((uint)index + new uint8(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u))));
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetAll(int index, int numNumbers, uint value)
+        {
+Assert.IsNotGreater(value, UInt2.MaxValue);
+Assert.IsValidSubarray(index, numNumbers, Length);
+
+            if (Constant.IsConstantExpression(value))
+            {
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(numNumbers) && Constant.IsConstantExpression(index) && index + numNumbers == Length && value == 0)
+                {
+                    if (index == 0)
+                    {
+                        intern = 0u;
+                    }
+                    else
+                    {
+                        intern = maxmath.bits_zerohigh(intern, index * BitsPerNumber);
+                    }
+                }
+                else
+                {
+                    uint mask = (uint)maxmath.bitmask32(numNumbers * BitsPerNumber, index * BitsPerNumber);
+                    uint newValues = new UInt2x16(value).intern & mask;
+                    uint oldValues = maxmath.andnot(intern, mask);
+
+                    intern = newValues | oldValues;
+                }
+            }
+            else
+            {
+                int lastIndex = index + numNumbers;
+
+                while (index <= lastIndex)
+                {
+                    this[index] = value;
+                    index++;
+                }
+            }
         }
 
 

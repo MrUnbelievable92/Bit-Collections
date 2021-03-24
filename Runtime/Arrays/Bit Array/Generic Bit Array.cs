@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.Burst.Intrinsics;
 using Unity.Burst.CompilerServices;
 using Unity.Mathematics;
 using Unity.Collections;
@@ -29,6 +30,8 @@ Assert.IsNotGreater(sizeof(T), 8);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bits(bool value)
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             ulong temp = (ulong)(-maxmath.toint64(value));
 
             intern = *(T*)&temp;
@@ -37,7 +40,8 @@ Assert.IsNotGreater(sizeof(T), 8);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bits(bool[] values, int index = 0)
         {
-Assert.IsWithinArrayBounds(index + 7, values.Length);
+Assert.IsNotGreater(sizeof(T), 8);
+Assert.IsWithinArrayBounds(index + (8 * sizeof(T) - 1), values.Length);
 
             fixed (void* ptr = &values[index])
             {
@@ -55,10 +59,11 @@ Assert.IsWithinArrayBounds(index + 7, values.Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bits(NativeArray<bool> values, int index = 0)
         {
-Assert.IsWithinArrayBounds(index + 7, values.Length);
+Assert.IsNotGreater(sizeof(T), 8);
+Assert.IsWithinArrayBounds(index + (8 * sizeof(T) - 1), values.Length);
 
             T field = default(T);
-            byte* ptr = index + (byte*)values.GetUnsafePtr();
+            byte* ptr = index + (byte*)values.GetUnsafeReadOnlyPtr();
 
             for (int i = 0; i < sizeof(T); i++)
             {
@@ -72,12 +77,16 @@ Assert.IsWithinArrayBounds(index + 7, values.Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator T(bits<T> input)
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             return input.intern;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator bits<T>(T input)
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             return new bits<T>(input);
         }
 
@@ -85,7 +94,9 @@ Assert.IsWithinArrayBounds(index + 7, values.Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bits<T> operator ! (bits<T> value)
         {
-            ulong temp = ~(*(ulong*)&value);
+Assert.IsNotGreater(sizeof(T), 8);
+
+            ulong temp = ~(value.AsULong);
 
             return *(bits<T>*)&temp;
         }
@@ -93,7 +104,9 @@ Assert.IsWithinArrayBounds(index + 7, values.Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bits<T> operator == (bits<T> left, bits<T> right)
         {
-            ulong temp = ~(*(ulong*)&left ^ *(ulong*)&right);
+Assert.IsNotGreater(sizeof(T), 8);
+
+            ulong temp = ~(left.AsULong ^ right.AsULong);
 
             return *(bits<T>*)&temp;
         }
@@ -101,7 +114,9 @@ Assert.IsWithinArrayBounds(index + 7, values.Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bits<T> operator != (bits<T> left, bits<T> right)
         {
-            ulong temp = *(ulong*)&left ^ *(ulong*)&right;
+Assert.IsNotGreater(sizeof(T), 8);
+
+            ulong temp = left.AsULong ^ right.AsULong;
 
             return *(bits<T>*)&temp;
         }
@@ -109,7 +124,9 @@ Assert.IsWithinArrayBounds(index + 7, values.Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bits<T> operator & (bits<T> left, bits<T> right)
         {
-            ulong temp = *(ulong*)&left & *(ulong*)&right;
+Assert.IsNotGreater(sizeof(T), 8);
+
+            ulong temp = left.AsULong & right.AsULong;
 
             return *(bits<T>*)&temp;
         }
@@ -117,7 +134,9 @@ Assert.IsWithinArrayBounds(index + 7, values.Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bits<T> operator | (bits<T> left, bits<T> right)
         {
-            ulong temp = *(ulong*)&left | *(ulong*)&right;
+Assert.IsNotGreater(sizeof(T), 8);
+
+            ulong temp = left.AsULong | right.AsULong;
 
             return *(bits<T>*)&temp;
         }
@@ -125,7 +144,9 @@ Assert.IsWithinArrayBounds(index + 7, values.Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bits<T> operator ^ (bits<T> left, bits<T> right)
         {
-            ulong temp = *(ulong*)&left ^ *(ulong*)&right;
+Assert.IsNotGreater(sizeof(T), 8);
+
+            ulong temp = left.AsULong ^ right.AsULong;
 
             return *(bits<T>*)&temp;
         }
@@ -136,6 +157,8 @@ Assert.IsWithinArrayBounds(index + 7, values.Length);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 64)]
             get
             {
+Assert.IsNotGreater(sizeof(T), 8);
+
                 return 8 * sizeof(T);
             }
         }
@@ -147,7 +170,17 @@ Assert.IsWithinArrayBounds(index + 7, values.Length);
             {
                 T temp = intern;
 
-                return *(ulong*)&temp;
+                switch (sizeof(T))
+                {
+                    case 1:  return *(byte*)&temp;
+                    case 2:  return *(ushort*)&temp;
+                    case 3:  return *(UInt24*)&temp;
+                    case 4:  return *(ushort*)&temp;
+                    case 5:  return *(UInt40*)&temp;
+                    case 6:  return *(UInt48*)&temp;
+                    case 7:  return *(UInt56*)&temp;
+                    default: return *(ulong*)&temp;
+                }
             }
         }
 
@@ -156,6 +189,7 @@ Assert.IsWithinArrayBounds(index + 7, values.Length);
         public readonly bits<U> Reinterpret<U>()
             where U : unmanaged
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.AreEqual(sizeof(T), sizeof(U));
 
             T temp = intern;
@@ -169,6 +203,7 @@ Assert.AreEqual(sizeof(T), sizeof(U));
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
             {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsWithinArrayBounds(index, Length);
 
                 ulong result = (AsULong >> index) & 1ul;
@@ -179,6 +214,7 @@ Assert.IsWithinArrayBounds(index, Length);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsSafeBoolean(value);
 Assert.IsWithinArrayBounds(index, Length);
 
@@ -192,35 +228,143 @@ Assert.IsWithinArrayBounds(index, Length);
 
         public readonly bool[] ToArray()
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             bool[] result = new bool[Length];
             T temp = intern;
             byte* internAddress = (byte*)&temp;
 
             fixed (void* ptr = &result[0])
             {
-                for (int i = 0; i < sizeof(T); i++)
+                switch (sizeof(T))
                 {
-                    *((bool8*)&temp + i) = maxmath.tobool8(*(internAddress + i));
+                    case 1:
+                    {
+                        *(bool8*)ptr = maxmath.tobool8(*internAddress);
+                        
+                        return result;
+                    }
+                    case 2:
+                    {
+                        *(bool16*)ptr = maxmath.tobool16(*((ushort*)internAddress));
+                        
+                        return result;
+                    }
+                    case 3:
+                    {
+                        *(bool16*)ptr      = maxmath.tobool16(*((ushort*)internAddress));
+                        *((bool8*)ptr + 2) = maxmath.tobool8(*(internAddress + 2));
+
+                        return result;
+                    }
+                    case 4:
+                    {
+                        *(bool32*)ptr = maxmath.tobool32(*((int*)internAddress));
+
+                        return result;
+                    }
+                    case 5:
+                    {
+                        *(bool32*)ptr      = maxmath.tobool32(*((int*)internAddress));
+                        *((bool8*)ptr + 4) = maxmath.tobool8(*(internAddress + 4));
+                        
+                        return result;
+                    }
+                    case 6:
+                    {
+                        *(bool32*)ptr       = maxmath.tobool32(*((int*)internAddress));
+                        *((bool16*)ptr + 2) = maxmath.tobool16(*((ushort*)internAddress + 2));
+                        
+                        return result;
+                    }
+                    case 7:
+                    {
+                        *(bool32*)ptr       = maxmath.tobool32(*((int*)internAddress));
+                        *((bool16*)ptr + 2) = maxmath.tobool16(*((ushort*)internAddress + 2));
+                        *((bool8*)ptr + 7)  = maxmath.tobool8(*(internAddress + 7));
+
+                        return result;
+                    }
+                    case 8:
+                    {
+                        *(bool32*)ptr       = maxmath.tobool32(*((int*)internAddress));
+                        *((bool32*)ptr + 1) = maxmath.tobool32(*((int*)internAddress + 1));
+
+                        return result;
+                    }
+                    default: return result;
                 }
             }
-
-            return result;
         }
 
         public readonly NativeArray<bool> ToArray(Allocator allocator)
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             NativeArray<bool> result = new NativeArray<bool>(Length, allocator, NativeArrayOptions.UninitializedMemory);
 
             void* ptr = result.GetUnsafePtr();
             T temp = intern;
             byte* internAddress = (byte*)&temp;
 
-            for (int i = 0; i < sizeof(T); i++)
+            switch (sizeof(T))
             {
-                *((bool8*)&temp + i) = maxmath.tobool8(*((byte*)internAddress + i));
-            }
+                case 1:
+                {
+                    *(bool8*)ptr = maxmath.tobool8(*internAddress);
+                    
+                    return result;
+                }
+                case 2:
+                {
+                    *(bool16*)ptr = maxmath.tobool16(*((ushort*)internAddress));
+                    
+                    return result;
+                }
+                case 3:
+                {
+                    *(bool16*)ptr      = maxmath.tobool16(*((ushort*)internAddress));
+                    *((bool8*)ptr + 2) = maxmath.tobool8(*(internAddress + 2));
 
-            return result;
+                    return result;
+                }
+                case 4:
+                {
+                    *(bool32*)ptr = maxmath.tobool32(*((int*)internAddress));
+
+                    return result;
+                }
+                case 5:
+                {
+                    *(bool32*)ptr      = maxmath.tobool32(*((int*)internAddress));
+                    *((bool8*)ptr + 4) = maxmath.tobool8(*(internAddress + 4));
+                    
+                    return result;
+                }
+                case 6:
+                {
+                    *(bool32*)ptr       = maxmath.tobool32(*((int*)internAddress));
+                    *((bool16*)ptr + 2) = maxmath.tobool16(*((ushort*)internAddress + 2));
+                    
+                    return result;
+                }
+                case 7:
+                {
+                    *(bool32*)ptr       = maxmath.tobool32(*((int*)internAddress));
+                    *((bool16*)ptr + 2) = maxmath.tobool16(*((ushort*)internAddress + 2));
+                    *((bool8*)ptr + 7)  = maxmath.tobool8(*(internAddress + 7));
+
+                    return result;
+                }
+                case 8:
+                {
+                    *(bool32*)ptr       = maxmath.tobool32(*((int*)internAddress));
+                    *((bool32*)ptr + 1) = maxmath.tobool32(*((int*)internAddress + 1));
+
+                    return result;
+                }
+                default: return result;
+            }
         }
 
 
@@ -228,6 +372,8 @@ Assert.IsWithinArrayBounds(index, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 64)] 
         public readonly int IndexOfFirst()
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             return math.tzcnt(AsULong);
         }
 
@@ -235,6 +381,7 @@ Assert.IsWithinArrayBounds(index, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 64)] 
         public readonly int IndexOfFirst(int index, int numBits)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsValidSubarray(index, numBits, Length);
 
             return math.tzcnt(AsULong & (ulong)maxmath.bitmask64(numBits, index));
@@ -243,12 +390,15 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(-1, 63)] 
         public readonly int IndexOfLast()
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             return Length - 1 - math.lzcnt(AsULong & (ulong)maxmath.bitmask64(Length));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(-1, 63)] 
         public readonly int IndexOfLast(int index, int numBits)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsValidSubarray(index, numBits, Length);
 
             return Length - 1 - math.lzcnt(AsULong & (ulong)maxmath.bitmask64(numBits, index));
@@ -258,6 +408,8 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ShiftLeft(int amount)
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             ulong shl = AsULong << amount;
 
             intern = *(T*)&shl;
@@ -266,6 +418,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ShiftLeft(int index, int numBits, int amount)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsNonNegative(amount);
 Assert.IsValidSubarray(index, numBits, Length);
 
@@ -282,6 +435,8 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ShiftRight(int amount)
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             ulong shr = AsULong >> amount;
 
             intern = *(T*)&shr;
@@ -290,6 +445,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ShiftRight(int index, int numBits, int amount)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsNonNegative(amount);
 Assert.IsValidSubarray(index, numBits, Length);
 
@@ -307,6 +463,8 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RotateLeft(int amount)
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             amount &= Length - 1;
 
             ulong masked = AsULong & (ulong)maxmath.bitmask64(Length);
@@ -318,6 +476,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RotateLeft(int index, int numBits, int amount)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsNonNegative(amount);
 Assert.IsValidSubarray(index, numBits, Length);
 
@@ -328,7 +487,7 @@ Assert.IsValidSubarray(index, numBits, Length);
 
             int remainder = amount % numBits;
 
-            maskED = (mask & (maskED << remainder)) | (mask & (maskED >> (numBits - remainder)));
+            maskED = mask & ((maskED << remainder) | (maskED >> (numBits - remainder)));
 
             maskED = maxmath.andnot(temp, mask) | maskED;
 
@@ -339,6 +498,8 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RotateRight(int amount)
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             amount &= Length - 1;
 
             ulong masked = AsULong & (ulong)maxmath.bitmask64(Length);
@@ -350,6 +511,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RotateRight(int index, int numBits, int amount)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsNonNegative(amount);
 Assert.IsValidSubarray(index, numBits, Length);
 
@@ -360,7 +522,7 @@ Assert.IsValidSubarray(index, numBits, Length);
 
             int remainder = amount % numBits;
 
-            maskED = (mask & (maskED >> remainder)) | (mask & (maskED << (numBits - remainder)));
+            maskED = mask & ((maskED >> remainder) | (maskED << (numBits - remainder)));
 
             maskED = maxmath.andnot(temp, mask) | maskED;
 
@@ -370,6 +532,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Swap(int smallerIndex, int largerIndex)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsWithinArrayBounds(smallerIndex, Length);
 Assert.IsWithinArrayBounds(largerIndex, Length);
 
@@ -389,6 +552,7 @@ Assert.IsWithinArrayBounds(largerIndex, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Swap(int smallerIndex, int largerIndex, int numBits)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsGreater(largerIndex, smallerIndex);
 Assert.IsValidSubarray(smallerIndex, numBits, Length);
 Assert.IsValidSubarray(largerIndex, numBits, Length);
@@ -401,7 +565,7 @@ Assert.SubarraysDoNotOverlap(smallerIndex, largerIndex, numBits, numBits);
             ulong3 masks = maxmath.shl(ulong.MaxValue, new ulong3((ulong)smallerIndex, (ulong)largerIndex, 0ul));
             masks = maxmath.andnot(masks, masks << numBits);
             // z: mask for deleting elements in the array
-            masks.z = ~(masks.x | masks.y);
+            masks = maxmath.select(masks, ~(masks.xxx | masks.yyy), new bool3(false, false, true));
 
             // delete in z, grab values in x & y
             masks &= temp;
@@ -418,12 +582,15 @@ Assert.SubarraysDoNotOverlap(smallerIndex, largerIndex, numBits, numBits);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Flip()
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             this = !this;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Flip(int index, int numBits)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsValidSubarray(index, numBits, Length);
 
             ulong2 invert = new ulong2((ulong)maxmath.bitmask64(numBits, index), AsULong);
@@ -439,6 +606,8 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reverse()
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             ulong reversed = math.reversebits(AsULong) >> (64 - Length);
 
             intern = *(T*)&reversed;
@@ -447,6 +616,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reverse(int index, int numBits)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsValidSubarray(index, numBits, Length);
 
             ulong mask = (ulong)maxmath.bitmask64(numBits, index);
@@ -465,31 +635,69 @@ Assert.IsValidSubarray(index, numBits, Length);
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public void Shuffle(ref Random32 rngenerator)
+        public void Shuffle(ref Random64 rngenerator)
         {
-            for (int2 i = new int2(63, Length);     (i > 0).x;    i--)
+Assert.IsNotGreater(sizeof(T), 8);
+
+            if (X86.Bmi2.IsBmi2Supported)
             {
-                Swap(i.x, rngenerator.NextInt(0, i.y));
+                ulong mask = rngenerator.NextULong();
+                ulong notMask = ~mask;
+                ulong _intern = AsULong;
+
+                ulong lo = maxmath.bits_extractparallel(_intern, mask);
+                ulong hi = maxmath.bits_extractparallel(_intern, notMask);
+
+                _intern = lo | (hi << math.countbits(mask));
+                intern = *(T*)&_intern;
+            }
+            else
+            {
+                for (int i = Length - 1, j = Length;        i > 0;      i--, j--)
+                {
+                    Swap(i, (int)rngenerator.NextULong((uint)j));
+                }
             }
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public void Shuffle(int index, int numBits, ref Random32 rngenerator)
+        public void Shuffle(int index, int numBits, ref Random64 rngenerator)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsValidSubarray(index, numBits, Length);
-    
-            int startingIndex = index + numBits;/* - 1 is actual starting index*/
-    
-            for (int2 i = new int2(startingIndex - 1, startingIndex);     (i > 0).x;      i--)  
+
+            if (X86.Bmi2.IsBmi2Supported)
             {
-                Swap(i.x, rngenerator.NextInt(0, i.y));
-            } 
+                ulong extractMask = rngenerator.NextULong();
+                ulong shuffleMask = maxmath.bitmask64((ulong)(uint)numBits, (ulong)(uint)index);
+                extractMask &= shuffleMask;
+                ulong notExtractMask = maxmath.andnot(shuffleMask, extractMask);
+
+                ulong _intern = AsULong;
+
+                ulong lo = maxmath.bits_extractparallel(_intern, extractMask);
+                ulong hi = maxmath.bits_extractparallel(_intern, notExtractMask);
+
+                _intern = ((lo | (hi << math.countbits(extractMask))) << index) | maxmath.andnot(_intern, shuffleMask);
+                intern = *(T*)&_intern;
+            }
+            else
+            {
+                int startingIndex = index + numBits;/* - 1 is actual starting index*/
+
+                for (int i = startingIndex - 1; i > index; i--, startingIndex--)
+                {
+                    Swap(i, (int)rngenerator.NextLong(index, startingIndex));
+                }
+            }
         }
     
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public void Randomize(ref Random64 rngenerator)
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             ulong newOne = rngenerator.NextULong();
 
             intern = *(T*)&newOne;
@@ -498,6 +706,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public void Randomize(int index, int numBits, ref Random64 rngenerator)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsValidSubarray(index, numBits, Length);
 
             ulong mask = (ulong)maxmath.bitmask64(numBits, index);
@@ -511,19 +720,31 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public void SetBits(bool value)
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             this = new bits<T>(value);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public void SetBits(int index, int numBits, bool value)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsValidSubarray(index, numBits, Length);
 
-            ulong mask = (ulong)maxmath.bitmask64(numBits, index);
+            if (Constant.IsConstantExpression(value) && Constant.IsConstantExpression(numBits) && Constant.IsConstantExpression(index) && value == false && index + numBits == Length)
+            {
+                ulong _intern = maxmath.bits_zerohigh(AsULong, index);
 
-            mask = maxmath.andnot(AsULong, mask) | ((uint)-*(byte*)&value & mask);
+                intern = *(T*)&_intern;
+            }
+            else
+            {
+                ulong mask = (ulong)maxmath.bitmask64(numBits, index);
 
-            intern = *(T*)&mask;
+                mask = maxmath.andnot(AsULong, mask) | ((uint)-*(byte*)&value & mask);
+
+                intern = *(T*)&mask;
+            }
         }
     
     
@@ -536,6 +757,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]  [return: AssumeRange(0, 64)] 
         public readonly uint CountBits(int index, int numBits)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsValidSubarray(index, numBits, Length);
 
             return (uint)math.countbits(AsULong & (ulong)maxmath.bitmask64(numBits, index));
@@ -545,6 +767,8 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TestAll()
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             ulong mask = (ulong)maxmath.bitmask64(Length);
 
             return mask == (AsULong & mask);
@@ -553,6 +777,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TestAll(int index, int numBits)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsValidSubarray(index, numBits, Length);
 
             ulong mask = (ulong)maxmath.bitmask64(numBits, index);
@@ -564,12 +789,15 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TestAny()
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             return 0ul != (AsULong & (ulong)maxmath.bitmask64(Length));
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TestAny(int index, int numBits)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsValidSubarray(index, numBits, Length);
 
             return 0ul != (AsULong & (ulong)maxmath.bitmask64(numBits, index));
@@ -585,6 +813,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TestNone(int index, int numBits)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsValidSubarray(index, numBits, Length);
 
             return 0ul == (AsULong & (ulong)maxmath.bitmask64(numBits, index));
@@ -619,12 +848,13 @@ Assert.IsValidSubarray(index, numBits, Length);
         public void Overwrite<U>(int index, int numBits, bits<U> source, int sourceIndex)
             where U : unmanaged
         {
-            OverwriteHelper(*(ulong*)&source, source.Length, index, numBits, sourceIndex);
+            OverwriteHelper(source.AsULong, source.Length, index, numBits, sourceIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void OverwriteHelper(ulong backingField, int sourceLength, int index, int numBits, int sourceIndex)
         {
+Assert.IsNotGreater(sizeof(T), 8);
 Assert.IsValidSubarray(index, numBits, Length);
 Assert.IsValidSubarray(sourceIndex, numBits, sourceLength);
 
@@ -644,6 +874,8 @@ Assert.IsValidSubarray(sourceIndex, numBits, sourceLength);
 
         public override string ToString()
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             return Log.Bits(this);
         }
     
@@ -651,18 +883,29 @@ Assert.IsValidSubarray(sourceIndex, numBits, sourceLength);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override readonly int GetHashCode()
         {
-            ulong masked = AsULong & (ulong)maxmath.bitmask64(Length);
+Assert.IsNotGreater(sizeof(T), 8);
 
-            return (int)(masked ^ (masked >> 32));
+            if (sizeof(T) > 4)
+            {
+                ulong masked = AsULong & (ulong)maxmath.bitmask64(Length);
+
+                return (int)(masked ^ (masked >> 32));
+            }
+            else
+            {
+                return (int)AsULong;
+            }
         }
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(bits<T> other)
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             ulong mask = (ulong)maxmath.bitmask64(Length);
 
-            return (AsULong & mask) == (*(ulong*)&other & mask);
+            return (AsULong & mask) == (other.AsULong & mask);
         }
         public override readonly bool Equals(object obj)
         {
@@ -671,10 +914,14 @@ Assert.IsValidSubarray(sourceIndex, numBits, sourceLength);
     
         public IEnumerator<bool> GetEnumerator()
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             return new Enumerator<bool>(this);
         }
         IEnumerator IEnumerable.GetEnumerator()
         {
+Assert.IsNotGreater(sizeof(T), 8);
+
             return new Enumerator<bool>(this);
         }
     }

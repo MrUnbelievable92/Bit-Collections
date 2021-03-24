@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using MaxMath;
 
 namespace BitCollections.Tests
 {
@@ -343,6 +344,42 @@ namespace BitCollections.Tests
             result &= test[7] == w[50];
 
             Assert.AreEqual(result, true);
+        }
+
+        [Test]
+        public static void Shuffle()
+        {
+            Random8 rng = new Random8(123);
+
+            for (int i = 0; i < 16; i++)
+            {
+                bit8 x = TestData_LHS;
+
+                uint bits = x.CountBits();
+
+                x.Shuffle(ref rng);
+
+                Assert.AreEqual(bits, x.CountBits());
+            }
+        }
+
+        [Test]
+        public static void ShuffleBitField()
+        {
+            Random8 rng = new Random8(123);
+
+            for (int i = 0; i < 16; i++)
+            {
+                bit8 x = TestData_LHS;
+                int index = rng.NextByte(0, (byte)x.Length);
+                int numBits = rng.NextByte(0, (byte)(x.Length - index + 1));
+
+                uint bits = x.CountBits(index, numBits);
+
+                x.Shuffle(index, numBits, ref rng);
+
+                Assert.AreEqual(bits, x.CountBits(index, numBits));
+            }
         }
     }
 }

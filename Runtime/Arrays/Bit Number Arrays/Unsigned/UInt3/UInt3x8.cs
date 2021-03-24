@@ -115,9 +115,7 @@ Assert.IsNotGreater(x0_7.x7, UInt3.MaxValue);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
             {
-                UInt24 x = intern;
-
-                return MaxValue & maxmath.shrl(*(uint*)&x, (uint)BitsPerNumber * new uint8(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u));
+                return MaxValue & maxmath.shrl(intern, (uint)BitsPerNumber * new uint8(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -135,9 +133,7 @@ Assert.IsNotGreater(x0_7.x7, UInt3.MaxValue);
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                UInt24 x = intern;
-
-                return MaxValue & (*(uint*)&x >> (index * BitsPerNumber));
+                return (uint)maxmath.bits_extract(intern, index * BitsPerNumber, BitsPerNumber);
             }
     
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -146,13 +142,59 @@ Assert.IsWithinArrayBounds(index, Length);
 Assert.IsNotGreater(value, UInt3.MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                UInt24 x = intern;
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(value) && value == 0 && index == Length - 1)
+                {
+                    intern = (UInt24)maxmath.bits_zerohigh(intern, (Length - 1) * BitsPerNumber);
+                }
+                else
+                {
+                    int shiftValue = index * BitsPerNumber;
+                    uint newValue = value << shiftValue;
+                    uint mask = math.rol(~MaxValue, shiftValue);
 
-                int shiftValue = index * BitsPerNumber;
-                uint newValue = value << shiftValue;
-                uint mask = math.rol(~MaxValue, shiftValue);
+                    intern = (UInt24)((intern & mask) | newValue);
+                }
+            }
+        }
 
-                intern = (UInt24)((*(uint*)&x & mask) | newValue);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetAll(int index, int numNumbers, uint value)
+        {
+Assert.IsNotGreater(value, UInt3.MaxValue);
+Assert.IsValidSubarray(index, numNumbers, Length);
+
+            if (Constant.IsConstantExpression(value))
+            {
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(numNumbers) && Constant.IsConstantExpression(index) && index + numNumbers == Length && value == 0)
+                {
+                    if (index == 0)
+                    {
+                        intern = 0u;
+                    }
+                    else
+                    {
+                        intern = (UInt24)maxmath.bits_zerohigh(intern, index * BitsPerNumber);
+                    }
+                }
+                else
+                {
+                    uint mask = (uint)maxmath.bitmask32(numNumbers * BitsPerNumber, index * BitsPerNumber);
+                    uint newValues = new UInt3x8(value).intern & mask;
+                    uint oldValues = maxmath.andnot(intern, mask);
+
+                    intern = (UInt24)(newValues | oldValues);
+                }
+            }
+            else
+            {
+                int lastIndex = index + numNumbers;
+
+                while (index <= lastIndex)
+                {
+                    this[index] = value;
+                    index++;
+                }
             }
         }
 

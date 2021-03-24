@@ -12,7 +12,7 @@ namespace BitCollections
     [Serializable]
     unsafe public struct Int4x2 : IBitNumberArray<int>, IEquatable<Int4x2>
     {
-        internal sbyte intern;
+        internal byte intern;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -22,7 +22,7 @@ Assert.IsBetween(xy, Int4.MinValue, Int4.MaxValue);
 
             xy &= (int)maxmath.bitmask32(new Int4x2().BitsPerNumber);
 
-            intern = (sbyte)((xy << new Int4x2().BitsPerNumber) | xy);
+            intern = (byte)((xy << new Int4x2().BitsPerNumber) | xy);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -37,7 +37,7 @@ Assert.IsBetween(xy.y, Int4.MinValue, Int4.MaxValue);
 
             int2 mask = (int)maxmath.bitmask32(new Int4x2().BitsPerNumber);
 
-            intern = (sbyte)math.csum(maxmath.shl(mask & xy, new Int4x2().BitsPerNumber * new int2(0, 1)));
+            intern = (byte)math.csum(maxmath.shl(mask & xy, new Int4x2().BitsPerNumber * new int2(0, 1)));
         }
 
 
@@ -70,7 +70,7 @@ Assert.IsBetween(xy.y, Int4.MinValue, Int4.MaxValue);
             readonly get
             {
                 // manual maxmath.signextend, saving 1 shift
-                int2 temp = maxmath.shl((int2)intern, 32 - (BitsPerNumber * new int2(1, 2)));
+                int2 temp = maxmath.shl((int)intern, 32 - (BitsPerNumber * new int2(1, 2)));
 
                 return temp >> (32 - BitsPerNumber);
             }
@@ -90,8 +90,15 @@ Assert.IsBetween(xy.y, Int4.MinValue, Int4.MaxValue);
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
-                return (intern << (32 - ((1 + index) * BitsPerNumber))) >> (32 - BitsPerNumber);
+                if (Unity.Burst.Intrinsics.X86.Bmi1.IsBmi1Supported)
+                {
+                    return maxmath.signextend((int)maxmath.bits_extract(intern, index * BitsPerNumber, BitsPerNumber), BitsPerNumber);
+                }
+                else
+                {
+                    // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
+                    return (intern << (32 - ((1 + index) * BitsPerNumber))) >> (32 - BitsPerNumber);
+                }
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -100,11 +107,59 @@ Assert.IsWithinArrayBounds(index, Length);
 Assert.IsBetween(value, MinValue, MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                int shiftValue = index * BitsPerNumber;
-                int newValue = (value & (int)maxmath.bitmask32(BitsPerNumber)) << shiftValue;
-                int mask = math.rol(~(int)maxmath.bitmask32(BitsPerNumber), shiftValue);
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(value) && value == 0 && index == Length - 1)
+                {
+                    intern = (byte)maxmath.bits_zerohigh(intern, (Length - 1) * BitsPerNumber);
+                }
+                else
+                {
+                    int shiftValue = index * BitsPerNumber;
+                    int newValue = (value & (int)maxmath.bitmask32(BitsPerNumber)) << shiftValue;
+                    int mask = math.rol(~(int)maxmath.bitmask32(BitsPerNumber), shiftValue);
 
-                intern = (sbyte)((intern & mask) | newValue);
+                    intern = (byte)((intern & mask) | newValue);
+                }
+            }
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetAll(int index, int numNumbers, int value)
+        {
+Assert.IsBetween(value, Int4.MinValue, Int4.MaxValue);
+Assert.IsValidSubarray(index, numNumbers, Length);
+
+            if (Constant.IsConstantExpression(value))
+            {
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(numNumbers) && Constant.IsConstantExpression(index) && index + numNumbers == Length && value == 0)
+                {
+                    if (index == 0)
+                    {
+                        intern = 0;
+                    }
+                    else
+                    {
+                        intern = (byte)maxmath.bits_zerohigh(intern, index * BitsPerNumber);
+                    }
+                }
+                else
+                {
+                    uint mask = (uint)maxmath.bitmask32(numNumbers * BitsPerNumber, index * BitsPerNumber);
+                    uint newValues = new Int4x2(value).intern & mask;
+                    uint oldValues = maxmath.andnot(intern, mask);
+
+                    intern = (byte)(newValues | oldValues);
+                }
+            }
+            else
+            {
+                int lastIndex = index + numNumbers;
+
+                while (index <= lastIndex)
+                {
+                    this[index] = value;
+                    index++;
+                }
             }
         }
 

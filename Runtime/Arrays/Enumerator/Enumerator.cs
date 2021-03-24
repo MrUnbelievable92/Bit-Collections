@@ -20,7 +20,20 @@ namespace BitCollections
         public T Current => array[current];
         object IEnumerator.Current => Current;
 
-        public bool MoveNext() => ++current < array.Length;
+        public bool MoveNext()
+        {
+            int add = current + 1;
+
+            if (add < array.Length)
+            {
+                current = add;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         public void Reset() => current = -1;
         public void Dispose() { }
 

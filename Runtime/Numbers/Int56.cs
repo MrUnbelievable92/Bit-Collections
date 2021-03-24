@@ -21,49 +21,35 @@ namespace BitCollections
         private readonly byte byte4;
         private readonly byte byte5;
         private readonly byte byte6;
-    
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long2 ToLong2(Int56 x, Int56 y)
-        {
-            long2 masked = new long2(*(long*)&x, *(long*)&y);
 
-            return maxmath.signextend(masked, 56);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long3 ToLong3(Int56 x, Int56 y, Int56 z)
-        {
-            long3 masked = new long3(*(long*)&x, *(long*)&y, *(long*)&z);
 
-            return maxmath.signextend(masked, 56);
-        }
-    
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long4 ToLong4(Int56 x, Int56 y, Int56 z, Int56 w)
+        internal static long ToFakeLong(Int56 x)
         {
-            long4 masked = new long4(*(long*)&x, *(long*)&y, *(long*)&z, *(long*)&w);
+            long lo = *(uint*)&x;
+            lo |= ((long)(*(ushort*)&x.byte4)) << 32;
+            lo |= (long)x.byte6 << 48;
 
-            return maxmath.signextend(masked, 56);
+            return lo;
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator long2(Int56 input)
         {
-            return maxmath.signextend(new long2(*(long*)&input), 56);
+            return new long2(input);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator long3(Int56 input)
         {
-            return maxmath.signextend(new long3(*(long*)&input), 56);
+            return new long3(input);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator long4(Int56 input)
         {
-            return maxmath.signextend(new long4(*(long*)&input), 56);
+            return new long4(input);
         }
 
 
@@ -289,13 +275,18 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator long(Int56 input)
         {
-            return maxmath.signextend(*(long*)&input, 56);
+            long lo = *(uint*)&input;
+            lo |= ((long)(*(ushort*)&input.byte4)) << 32;
+            // sign extension
+            lo |= ((long)input.byte6 << 56) >> 8;
+
+            return lo;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ulong(Int56 input)
         {
-            return (ulong)maxmath.signextend(*(long*)&input, 56);
+            return (ulong)(long)input;
         }
 
 
@@ -329,291 +320,287 @@ namespace BitCollections
             return (decimal)((long)input);
         }
     
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator + (Int56 value)
+        public static long operator - (Int56 value)
         {
-            return (Int56)(+(*(long*)&value));
+            return -(ToFakeLong(value));
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator - (Int56 value)
+        public static long operator ~ (Int56 value)
         {
-            return (Int56)(-(*(long*)&value));
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator ~ (Int56 value)
-        {
-            return (Int56)(~(*(long*)&value));
+            return ~(ToFakeLong(value));
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Int56 operator ++ (Int56 value)
         {
-            return (Int56)(++(*(long*)&value));
+            long cast = ToFakeLong(value);
+
+            return (Int56)(++cast);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Int56 operator -- (Int56 value)
         {
-            return (Int56)(--(*(long*)&value));
+            long cast = ToFakeLong(value);
+
+            return (Int56)(--cast);
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator + (Int56 left, Int56 right)
+        public static long operator + (Int56 left, Int56 right)
         {
-            return (Int56)(*(long*)&left + *(long*)&right);
+            return ToFakeLong(left) + ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator + (Int56 left, int right)
+        public static long operator + (Int56 left, int right)
         {
-            return (Int56)(*(long*)&left + right);
+            return ToFakeLong(left) + right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator + (int left, Int56 right)
+        public static long operator + (int left, Int56 right)
         {
-            return (Int56)(left + *(long*)&right);
+            return left + ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator + (Int56 left, long right)
+        public static long operator + (Int56 left, long right)
         {
-            return (Int56)(*(long*)&left + right);
+            return ToFakeLong(left) + right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator + (long left, Int56 right)
+        public static long operator + (long left, Int56 right)
         {
-            return (Int56)(left + *(long*)&right);
+            return left + ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator - (Int56 left, Int56 right)
+        public static long operator - (Int56 left, Int56 right)
         {
-            return (Int56)(*(long*)&left - *(long*)&right);
+            return ToFakeLong(left) - ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator - (Int56 left, int right)
+        public static long operator - (Int56 left, int right)
         {
-            return (Int56)(*(long*)&left - right);
+            return ToFakeLong(left) - right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator - (int left, Int56 right)
+        public static long operator - (int left, Int56 right)
         {
-            return (Int56)(left - *(long*)&right);
+            return left - ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator - (Int56 left, long right)
+        public static long operator - (Int56 left, long right)
         {
-            return (Int56)(*(long*)&left - right);
+            return ToFakeLong(left) - right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator - (long left, Int56 right)
+        public static long operator - (long left, Int56 right)
         {
-            return (Int56)(left - *(long*)&right);
+            return left - ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator * (Int56 left, Int56 right)
+        public static long operator * (Int56 left, Int56 right)
         {
-            return (Int56)(*(long*)&left * *(long*)&right);
+            return ToFakeLong(left) * ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator * (Int56 left, int right)
+        public static long operator * (Int56 left, int right)
         {
-            return (Int56)(*(long*)&left * right);
+            return ToFakeLong(left) * right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator * (int left, Int56 right)
+        public static long operator * (int left, Int56 right)
         {
-            return (Int56)(left * *(long*)&right);
+            return left * ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator * (Int56 left, long right)
+        public static long operator * (Int56 left, long right)
         {
-            return (Int56)(*(long*)&left * right);
+            return ToFakeLong(left) * right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator * (long left, Int56 right)
+        public static long operator * (long left, Int56 right)
         {
-            return (Int56)(left * *(long*)&right);
+            return left * ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator / (Int56 left, Int56 right)
+        public static long operator / (Int56 left, Int56 right)
         {
-            return (Int56)((long)left / (long)right);
+            return (long)left / (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator / (Int56 left, int right)
+        public static long operator / (Int56 left, int right)
         {
-            return (Int56)((long)left / right);
+            return (long)left / right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator / (int left, Int56 right)
+        public static long operator / (int left, Int56 right)
         {
-            return (Int56)(left / (long)right);
+            return left / (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator / (Int56 left, long right)
+        public static long operator / (Int56 left, long right)
         {
-            return (Int56)((long)left / right);
+            return (long)left / right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator / (long left, Int56 right)
+        public static long operator / (long left, Int56 right)
         {
-            return (Int56)(left / (long)right);
+            return left / (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator % (Int56 left, Int56 right)
+        public static long operator % (Int56 left, Int56 right)
         {
-            return (Int56)((long)left % (long)right);
+            return (long)left % (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator % (Int56 left, int right)
+        public static long operator % (Int56 left, int right)
         {
-            return (Int56)((long)left % right);
+            return (long)left % right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator % (int left, Int56 right)
+        public static long operator % (int left, Int56 right)
         {
-            return (Int56)(left % (long)right);
+            return left % (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator % (Int56 left, long right)
+        public static long operator % (Int56 left, long right)
         {
-            return (Int56)((long)left % right);
+            return (long)left % right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator % (long left, Int56 right)
+        public static long operator % (long left, Int56 right)
         {
-            return (Int56)(left % (long)right);
+            return left % (long)right;
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator & (Int56 left, Int56 right)
+        public static long operator & (Int56 left, Int56 right)
         {
-            return (Int56)(*(long*)&left & *(long*)&right);
+            return ToFakeLong(left) & ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator & (Int56 left, int right)
+        public static long operator & (Int56 left, int right)
         {
-            return (Int56)(*(long*)&left & right);
+            return ToFakeLong(left) & right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator & (int left, Int56 right)
+        public static long operator & (int left, Int56 right)
         {
-            return (Int56)(left & *(long*)&right);
+            return left & ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator & (Int56 left, long right)
+        public static long operator & (Int56 left, long right)
         {
-            return (Int56)(*(long*)&left & right);
+            return ToFakeLong(left) & right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator & (long left, Int56 right)
+        public static long operator & (long left, Int56 right)
         {
-            return (Int56)(left & *(long*)&right);
+            return left & ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator | (Int56 left, Int56 right)
+        public static long operator | (Int56 left, Int56 right)
         {
-            return (Int56)(*(long*)&left | *(long*)&right);
+            return ToFakeLong(left) | ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator | (Int56 left, int right)
+        public static long operator | (Int56 left, int right)
         {
-            return (Int56)(*(long*)&left | (long)right);
+            return ToFakeLong(left) | (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator | (int left, Int56 right)
+        public static long operator | (int left, Int56 right)
         {
-            return (Int56)((long)left | *(long*)&right);
+            return (long)left | ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator | (Int56 left, long right)
+        public static long operator | (Int56 left, long right)
         {
-            return (Int56)(*(long*)&left | right);
+            return ToFakeLong(left) | right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator | (long left, Int56 right)
+        public static long operator | (long left, Int56 right)
         {
-            return (Int56)(left | *(long*)&right);
+            return left | ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator ^ (Int56 left, Int56 right)
+        public static long operator ^ (Int56 left, Int56 right)
         {
-            return (Int56)(*(long*)&left ^ *(long*)&right);
+            return ToFakeLong(left) ^ ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator ^ (Int56 left, int right)
+        public static long operator ^ (Int56 left, int right)
         {
-            return (Int56)(*(long*)&left ^ right);
+            return ToFakeLong(left) ^ right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator ^ (int left, Int56 right)
+        public static long operator ^ (int left, Int56 right)
         {
-            return (Int56)(left ^ *(long*)&right);
+            return left ^ ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator ^ (Int56 left, long right)
+        public static long operator ^ (Int56 left, long right)
         {
-            return (Int56)(*(long*)&left ^ right);
+            return ToFakeLong(left) ^ right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator ^ (long left, Int56 right)
+        public static long operator ^ (long left, Int56 right)
         {
-            return (Int56)(left ^ *(long*)&right);
+            return left ^ ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator << (Int56 left, int right)
+        public static long operator << (Int56 left, int right)
         {
-            return (Int56)(*(long*)&left << right);
+            return ToFakeLong(left) << right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int56 operator >> (Int56 left, int right)
+        public static long operator >> (Int56 left, int right)
         {
-            // sign extend
-
-            return (Int56)((*(long*)&left << 24) >> (24 + right));
+            return (long)left >> right;
         }
 
 
@@ -880,14 +867,14 @@ namespace BitCollections
         {
             return ((long)this).ToString(format, provider);
         }
-    
+
         public bool ToBoolean(IFormatProvider provider)
         {
             return Convert.ToBoolean((long)this, provider);
         }
         public byte ToByte(IFormatProvider provider)
         {
-            return Convert.ToByte((long)this, provider);
+            return Convert.ToByte((byte)this, provider);
         }
         public char ToChar(IFormatProvider provider)
         {
@@ -907,11 +894,11 @@ namespace BitCollections
         }
         public short ToInt16(IFormatProvider provider)
         {
-            return Convert.ToInt16((long)this, provider);
+            return Convert.ToInt16((short)this, provider);
         }
         public int ToInt32(IFormatProvider provider)
         {
-            return Convert.ToInt32((long)this, provider);
+            return Convert.ToInt32((int)this, provider);
         }
         public long ToInt64(IFormatProvider provider)
         {
@@ -919,7 +906,7 @@ namespace BitCollections
         }
         public sbyte ToSByte(IFormatProvider provider)
         {
-            return Convert.ToSByte((long)this, provider);
+            return Convert.ToSByte((sbyte)this, provider);
         }
         public float ToSingle(IFormatProvider provider)
         {
@@ -931,11 +918,11 @@ namespace BitCollections
         }
         public ushort ToUInt16(IFormatProvider provider)
         {
-            return Convert.ToUInt16((long)this, provider);
+            return Convert.ToUInt16((ushort)this, provider);
         }
         public uint ToUInt32(IFormatProvider provider)
         {
-            return Convert.ToUInt32((long)this, provider);
+            return Convert.ToUInt32((uint)this, provider);
         }
         public ulong ToUInt64(IFormatProvider provider)
         {

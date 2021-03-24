@@ -20,7 +20,7 @@ namespace BitCollections
         { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UInt4x6(uint x0_5) : this(Unity.Burst.Intrinsics.X86.Avx.mm256_insert_epi64((uint8)x0_5, 0L, 3))
+        public UInt4x6(uint x0_5) : this((uint8)x0_5)
         { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -32,8 +32,6 @@ Assert.IsNotGreater(x0_5.x2, UInt4.MaxValue);
 Assert.IsNotGreater(x0_5.x3, UInt4.MaxValue);
 Assert.IsNotGreater(x0_5.x4, UInt4.MaxValue);
 Assert.IsNotGreater(x0_5.x5, UInt4.MaxValue);
-Assert.IsNotGreater(x0_5.x6, 0u);
-Assert.IsNotGreater(x0_5.x7, 0u);
 
             intern = (UInt24)maxmath.csum(maxmath.shl(x0_5, (uint)new UInt4x6().BitsPerNumber * new uint8(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)));
         }
@@ -100,9 +98,7 @@ Assert.IsNotGreater(x0_5.x7, 0u);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
             {
-                UInt24 x = intern;
-
-                return Unity.Burst.Intrinsics.X86.Avx.mm256_insert_epi64(MaxValue & maxmath.shrl(*(uint*)&x, (uint)BitsPerNumber * new uint8(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)), 0L, 3);
+                return MaxValue & maxmath.shrl(intern, (uint)BitsPerNumber * new uint8(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -120,9 +116,7 @@ Assert.IsNotGreater(x0_5.x7, 0u);
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                UInt24 x = intern;
-
-                return MaxValue & ((*(uint*)&x) >> (index * BitsPerNumber));
+                return (uint)maxmath.bits_extract(intern, index * BitsPerNumber, BitsPerNumber);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -131,13 +125,59 @@ Assert.IsWithinArrayBounds(index, Length);
 Assert.IsNotGreater(value, UInt4.MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                UInt24 x = intern;
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(value) && value == 0 && index == Length - 1)
+                {
+                    intern = (UInt24)maxmath.bits_zerohigh(intern, (Length - 1) * BitsPerNumber);
+                }
+                else
+                {
+                    int shiftValue = index * BitsPerNumber;
+                    uint newValue = value << shiftValue;
+                    uint mask = math.rol(~MaxValue, shiftValue);
 
-                int shiftValue = index * BitsPerNumber;
-                uint newValue = value << shiftValue;
-                uint mask = math.rol(~MaxValue, shiftValue);
+                    intern = (UInt24)((intern & mask) | newValue);
+                }
+            }
+        }
 
-                intern = (UInt24)(((*(uint*)&x) & mask) | newValue);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetAll(int index, int numNumbers, uint value)
+        {
+Assert.IsNotGreater(value, UInt4.MaxValue);
+Assert.IsValidSubarray(index, numNumbers, Length);
+
+            if (Constant.IsConstantExpression(value))
+            {
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(numNumbers) && Constant.IsConstantExpression(index) && index + numNumbers == Length && value == 0)
+                {
+                    if (index == 0)
+                    {
+                        intern = 0u;
+                    }
+                    else
+                    {
+                        intern = (UInt24)maxmath.bits_zerohigh(intern, index * BitsPerNumber);
+                    }
+                }
+                else
+                {
+                    uint mask = (uint)maxmath.bitmask32(numNumbers * BitsPerNumber, index * BitsPerNumber);
+                    uint newValues = new UInt4x6(value).intern & mask;
+                    uint oldValues = maxmath.andnot(intern, mask);
+
+                    intern = (UInt24)(newValues | oldValues);
+                }
+            }
+            else
+            {
+                int lastIndex = index + numNumbers;
+
+                while (index <= lastIndex)
+                {
+                    this[index] = value;
+                    index++;
+                }
             }
         }
 

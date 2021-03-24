@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using Unity.Mathematics;
+using MaxMath;
 
 namespace BitCollections
 {
@@ -64,11 +65,9 @@ Assert.IsNotGreater(y, UInt12.MaxValue);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
             {
-                UInt24 x = intern;
+                uint cast = intern;
 
-                uint deref = *(uint*)&x;
-
-                return MaxValue & new uint2(deref, deref >> BitsPerNumber);
+                return MaxValue & new uint2(cast, cast >> BitsPerNumber);
             }
     
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -86,9 +85,7 @@ Assert.IsNotGreater(y, UInt12.MaxValue);
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                UInt24 x = intern;
-
-                return MaxValue & (*(uint*)&x >> (index * BitsPerNumber));
+                return (uint)maxmath.bits_extract(intern, index * BitsPerNumber, BitsPerNumber);
             }
     
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -97,13 +94,59 @@ Assert.IsWithinArrayBounds(index, Length);
 Assert.IsNotGreater(value, UInt12.MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                UInt24 x = intern;
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(value) && value == 0 && index == Length - 1)
+                {
+                    intern = (UInt24)maxmath.bits_zerohigh(intern, (Length - 1) * BitsPerNumber);
+                }
+                else
+                {
+                    int shiftValue = index * BitsPerNumber;
+                    uint newValue = value << shiftValue;
+                    uint mask = math.rol(~MaxValue, shiftValue);
 
-                int shiftValue = index * BitsPerNumber;
-                uint newValue = value << shiftValue;
-                uint mask = math.rol(~MaxValue, shiftValue);
+                    intern = (UInt24)((intern & mask) | newValue);
+                }
+            }
+        }
 
-                intern = (UInt24)((*(uint*)&x & mask) | newValue);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetAll(int index, int numNumbers, uint value)
+        {
+Assert.IsNotGreater(value, UInt12.MaxValue);
+Assert.IsValidSubarray(index, numNumbers, Length);
+
+            if (Constant.IsConstantExpression(value))
+            {
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(numNumbers) && Constant.IsConstantExpression(index) && index + numNumbers == Length && value == 0)
+                {
+                    if (index == 0)
+                    {
+                        intern = 0u;
+                    }
+                    else
+                    {
+                        intern = (UInt24)maxmath.bits_zerohigh(intern, index * BitsPerNumber);
+                    }
+                }
+                else
+                {
+                    uint mask = (uint)maxmath.bitmask32(numNumbers * BitsPerNumber, index * BitsPerNumber);
+                    uint newValues = new UInt12x2(value).intern & mask;
+                    uint oldValues = maxmath.andnot(intern, mask);
+
+                    intern = (UInt24)(newValues | oldValues);
+                }
+            }
+            else
+            {
+                int lastIndex = index + numNumbers;
+
+                while (index <= lastIndex)
+                {
+                    this[index] = value;
+                    index++;
+                }
             }
         }
 

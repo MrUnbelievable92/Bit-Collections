@@ -21,43 +21,24 @@ namespace BitCollections
         private readonly byte byte4;
         private readonly byte byte5;
         private readonly byte byte6;
-    
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong2 ToULong2(UInt56 x, UInt56 y)
-        {
-            return new ulong2(*(ulong*)&x, *(ulong*)&y) & MaxValue;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong3 ToULong3(UInt56 x, UInt56 y, UInt56 z)
-        {
-            return new ulong3(*(ulong*)&x, *(ulong*)&y, *(ulong*)&z) & MaxValue;
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong4 ToULong4(UInt56 x, UInt56 y, UInt56 z, UInt56 w)
-        {
-            return new ulong4(*(ulong*)&x, *(ulong*)&y, *(ulong*)&z, *(ulong*)&w) & MaxValue;
-        }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ulong2(UInt56 input)
         {
-            return new ulong2(*(ulong*)&input) & MaxValue;
+            return new ulong2(input);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ulong3(UInt56 input)
         {
-            return new ulong3(*(ulong*)&input) & MaxValue;
+            return new ulong3(input);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ulong4(UInt56 input)
         {
-            return new ulong4(*(ulong*)&input) & MaxValue;
+            return new ulong4(input);
         }
 
 
@@ -283,13 +264,17 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator long(UInt56 input)
         {
-            return (long)MaxValue & *(long*)&input;
+            return (long)(ulong)input;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ulong(UInt56 input)
         {
-            return MaxValue & *(ulong*)&input;
+            ulong lo = *(uint*)&input;
+            lo |= ((ulong)(*(ushort*)&input.byte4)) << 32;
+            lo |= (ulong)input.byte6 << 48;
+
+            return lo;
         }
 
 
@@ -322,259 +307,282 @@ namespace BitCollections
         {
             return (decimal)((long)input);
         }
-    
-    
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator + (UInt56 left, UInt56 right)
+        public static ulong operator ~ (UInt56 value)
         {
-            return (UInt56)(*(ulong*)&left + *(ulong*)&right);
+            return ~((ulong)value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator + (uint left, UInt56 right)
+        public static UInt56 operator ++ (UInt56 value)
         {
-            return (UInt56)(left + *(ulong*)&right);
+            ulong cast = (ulong)value;
+
+            return (UInt56)(++cast);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator + (UInt56 left, uint right)
+        public static UInt56 operator -- (UInt56 value)
         {
-            return (UInt56)(*(ulong*)&left + right);
+            ulong cast = (ulong)value;
+
+            return (UInt56)(--cast);
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong operator + (UInt56 left, UInt56 right)
+        {
+            return (ulong)left + (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator + (UInt56 left, ulong right)
+        public static ulong operator + (uint left, UInt56 right)
         {
-            return (UInt56)(*(ulong*)&left + right);
+            return left + (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator + (ulong left, UInt56 right)
+        public static ulong operator + (UInt56 left, uint right)
         {
-            return (UInt56)(left + *(ulong*)&right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator - (UInt56 left, UInt56 right)
-        {
-            return (UInt56)(*(ulong*)&left - *(ulong*)&right);
+            return (ulong)left + right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator - (UInt56 left, uint right)
+        public static ulong operator + (UInt56 left, ulong right)
         {
-            return (UInt56)(*(ulong*)&left - right);
+            return (ulong)left + right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator - (uint left, UInt56 right)
+        public static ulong operator + (ulong left, UInt56 right)
         {
-            return (UInt56)(left - *(ulong*)&right);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator - (UInt56 left, ulong right)
-        {
-            return (UInt56)(*(ulong*)&left - right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator - (ulong left, UInt56 right)
-        {
-            return (UInt56)(left - *(ulong*)&right);
+            return left + (ulong)right;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator * (UInt56 left, UInt56 right)
+        public static ulong operator - (UInt56 left, UInt56 right)
         {
-            return (UInt56)(*(ulong*)&left * *(ulong*)&right);
+            return (ulong)left - (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator * (UInt56 left, uint right)
+        public static ulong operator - (UInt56 left, uint right)
         {
-            return (UInt56)(*(ulong*)&left * right);
+            return (ulong)left - right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator * (uint left, UInt56 right)
+        public static ulong operator - (uint left, UInt56 right)
         {
-            return (UInt56)(left * *(ulong*)&right);
+            return left - (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator * (UInt56 left, ulong right)
+        public static ulong operator - (UInt56 left, ulong right)
         {
-            return (UInt56)(*(ulong*)&left * right);
+            return (ulong)left - right;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator * (ulong left, UInt56 right)
+        public static ulong operator - (ulong left, UInt56 right)
         {
-            return (UInt56)(left * *(ulong*)&right);
+            return left - (ulong)right;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator / (UInt56 left, UInt56 right)
+        public static ulong operator * (UInt56 left, UInt56 right)
         {
-            return (UInt40)((long)left % (long)right);
+            return (ulong)left * (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator / (UInt56 left, uint right)
+        public static ulong operator * (UInt56 left, uint right)
         {
-            return (UInt56)((ulong)left / right);
+            return (ulong)left * right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator / (uint left, UInt56 right)
+        public static ulong operator * (uint left, UInt56 right)
         {
-            return (UInt56)(left / (ulong)right);
+            return left * (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator / (UInt56 left, ulong right)
+        public static ulong operator * (UInt56 left, ulong right)
         {
-            return (UInt56)((ulong)left / right);
+            return (ulong)left * right;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator / (ulong left, UInt56 right)
+        public static ulong operator * (ulong left, UInt56 right)
         {
-            return (UInt56)(left / (ulong)right);
+            return left * (ulong)right;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator % (UInt56 left, UInt56 right)
+        public static ulong operator / (UInt56 left, UInt56 right)
         {
-            return (UInt56)((ulong)left % (ulong)right);
+            return (ulong)left / (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator % (UInt56 left, uint right)
+        public static ulong operator / (UInt56 left, uint right)
         {
-            return (UInt56)((ulong)left % right);
+            return (ulong)left / right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator % (uint left, UInt56 right)
+        public static ulong operator / (uint left, UInt56 right)
         {
-            return (UInt56)(left % (ulong)right);
+            return left / (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator % (UInt56 left, ulong right)
+        public static ulong operator / (UInt56 left, ulong right)
         {
-            return (UInt56)((ulong)left % right);
+            return (ulong)left / right;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator % (ulong left, UInt56 right)
+        public static ulong operator / (ulong left, UInt56 right)
         {
-            return (UInt56)(left % (ulong)right);
+            return left / (ulong)right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong operator % (UInt56 left, UInt56 right)
+        {
+            return (ulong)left % (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong operator % (UInt56 left, uint right)
+        {
+            return (ulong)left % right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong operator % (uint left, UInt56 right)
+        {
+            return left % (ulong)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong operator % (UInt56 left, ulong right)
+        {
+            return (ulong)left % right;
+        }
+    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong operator % (ulong left, UInt56 right)
+        {
+            return left % (ulong)right;
         }
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator & (UInt56 left, UInt56 right)
+        public static ulong operator & (UInt56 left, UInt56 right)
         {
-            return (UInt56)(*(ulong*)&left & *(ulong*)&right);
+            return (ulong)left & (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator & (UInt56 left, uint right)
+        public static ulong operator & (UInt56 left, uint right)
         {
-            return (UInt56)(*(ulong*)&left & right);
+            return (ulong)left & right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator & (uint left, UInt56 right)
+        public static ulong operator & (uint left, UInt56 right)
         {
-            return (UInt56)(left & *(ulong*)&right);
+            return left & (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator & (UInt56 left, ulong right)
+        public static ulong operator & (UInt56 left, ulong right)
         {
-            return (UInt56)(*(ulong*)&left & right);
+            return (ulong)left & right;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator & (ulong left, UInt56 right)
+        public static ulong operator & (ulong left, UInt56 right)
         {
-            return (UInt56)(left & *(ulong*)&right);
+            return left & (ulong)right;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator | (UInt56 left, UInt56 right)
+        public static ulong operator | (UInt56 left, UInt56 right)
         {
-            return (UInt56)(*(ulong*)&left | *(ulong*)&right);
+            return (ulong)left | (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator | (UInt56 left, uint right)
+        public static ulong operator | (UInt56 left, uint right)
         {
-            return (UInt56)(*(ulong*)&left | right);
+            return (ulong)left | right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator | (uint left, UInt56 right)
+        public static ulong operator | (uint left, UInt56 right)
         {
-            return (UInt56)(left | *(ulong*)&right);
+            return left | (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator | (UInt56 left, ulong right)
+        public static ulong operator | (UInt56 left, ulong right)
         {
-            return (UInt56)(*(ulong*)&left | right);
+            return (ulong)left | right;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator | (ulong left, UInt56 right)
+        public static ulong operator | (ulong left, UInt56 right)
         {
-            return (UInt56)(left | *(ulong*)&right);
+            return left | (ulong)right;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator ^ (UInt56 left, UInt56 right)
+        public static ulong operator ^ (UInt56 left, UInt56 right)
         {
-            return (UInt56)(*(ulong*)&left ^ *(ulong*)&right);
+            return (ulong)left ^ (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator ^ (UInt56 left, uint right)
+        public static ulong operator ^ (UInt56 left, uint right)
         {
-            return (UInt56)(*(ulong*)&left ^ right);
+            return (ulong)left ^ right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator ^ (uint left, UInt56 right)
+        public static ulong operator ^ (uint left, UInt56 right)
         {
-            return (UInt56)(left ^ *(ulong*)&right);
+            return left ^ (ulong)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator ^ (UInt56 left, ulong right)
+        public static ulong operator ^ (UInt56 left, ulong right)
         {
-            return (UInt56)(*(ulong*)&left ^ right);
+            return (ulong)left ^ right;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator ^ (ulong left, UInt56 right)
+        public static ulong operator ^ (ulong left, UInt56 right)
         {
-            return (UInt56)(left ^ *(ulong*)&right);
+            return left ^ (ulong)right;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator << (UInt56 left, int right)
+        public static ulong operator << (UInt56 left, int right)
         {
-            return (UInt56)(*(ulong*)&left << right);
+            return (ulong)left << right;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt56 operator >> (UInt56 left, int right)
+        public static ulong operator >> (UInt56 left, int right)
         {
-            return (UInt56)((ulong)left >> right);
+            return (ulong)left >> right;
         }
     
     
@@ -841,14 +849,14 @@ namespace BitCollections
         {
             return ((ulong)this).ToString(format, provider);
         }
-    
+
         public bool ToBoolean(IFormatProvider provider)
         {
             return Convert.ToBoolean((ulong)this, provider);
         }
         public byte ToByte(IFormatProvider provider)
         {
-            return Convert.ToByte((ulong)this, provider);
+            return Convert.ToByte((byte)this, provider);
         }
         public char ToChar(IFormatProvider provider)
         {
@@ -868,11 +876,11 @@ namespace BitCollections
         }
         public short ToInt16(IFormatProvider provider)
         {
-            return Convert.ToInt16((ulong)this, provider);
+            return Convert.ToInt16((short)this, provider);
         }
         public int ToInt32(IFormatProvider provider)
         {
-            return Convert.ToInt32((ulong)this, provider);
+            return Convert.ToInt32((int)this, provider);
         }
         public long ToInt64(IFormatProvider provider)
         {
@@ -880,7 +888,7 @@ namespace BitCollections
         }
         public sbyte ToSByte(IFormatProvider provider)
         {
-            return Convert.ToSByte((ulong)this, provider);
+            return Convert.ToSByte((sbyte)this, provider);
         }
         public float ToSingle(IFormatProvider provider)
         {
@@ -892,11 +900,11 @@ namespace BitCollections
         }
         public ushort ToUInt16(IFormatProvider provider)
         {
-            return Convert.ToUInt16((ulong)this, provider);
+            return Convert.ToUInt16((ushort)this, provider);
         }
         public uint ToUInt32(IFormatProvider provider)
         {
-            return Convert.ToUInt32((ulong)this, provider);
+            return Convert.ToUInt32((uint)this, provider);
         }
         public ulong ToUInt64(IFormatProvider provider)
         {

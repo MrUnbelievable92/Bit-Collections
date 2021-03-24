@@ -307,9 +307,7 @@ Assert.IsNotGreater(x24_27.w,  UInt2.MaxValue);
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                UInt56 x = intern;
-
-                return MaxValue & (uint)((*(ulong*)&x) >> (index * BitsPerNumber));
+                return (uint)maxmath.bits_extract(intern, index * BitsPerNumber, BitsPerNumber);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -318,13 +316,18 @@ Assert.IsWithinArrayBounds(index, Length);
 Assert.IsNotGreater(value, UInt2.MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                UInt56 x = intern;
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(value) && value == 0 && index == Length - 1)
+                {
+                    intern = (UInt56)maxmath.bits_zerohigh(intern, (Length - 1) * BitsPerNumber);
+                }
+                else
+                {
+                    int shiftValue = index * BitsPerNumber;
+                    ulong newValue = (ulong)value << shiftValue;
+                    ulong mask = math.rol(~(ulong)MaxValue, shiftValue);
 
-                int shiftValue = index * BitsPerNumber;
-                ulong newValue = (ulong)value << shiftValue;
-                ulong mask = math.rol(~(ulong)MaxValue, shiftValue);
-
-                intern = (UInt56)(((*(ulong*)&x) & mask) | newValue);
+                    intern = (UInt56)((intern & mask) | newValue);
+                }
             }
         }
 
@@ -334,9 +337,7 @@ Assert.IsWithinArrayBounds(index, Length);
         {
 Assert.IsValidSubarray(index, 4, Length);
 
-            UInt56 x = intern;
-
-            return MaxValue & maxmath.shrl(*(ulong*)&x, (ulong4)((uint)BitsPerNumber * ((uint)index + new uint4(0u, 1u, 2u, 3u))));
+            return MaxValue & maxmath.shrl(intern, (ulong4)((uint)BitsPerNumber * ((uint)index + new uint4(0u, 1u, 2u, 3u))));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -348,11 +349,50 @@ Assert.IsNotGreater(value.y, UInt2.MaxValue);
 Assert.IsNotGreater(value.z, UInt2.MaxValue);
 Assert.IsNotGreater(value.w, UInt2.MaxValue);
 
-            UInt56 x = intern;
-
-            intern = (UInt56)(maxmath.andnot(*(ulong*)&x,      (ulong)maxmath.bitmask64(4 * BitsPerNumber,   index * BitsPerNumber))
+            intern = (UInt56)(maxmath.andnot(intern,      (ulong)maxmath.bitmask64(4 * BitsPerNumber,   index * BitsPerNumber))
                               |
                               maxmath.csum(maxmath.shl(value,      (ulong4)((uint)BitsPerNumber * ((uint)index + new uint4(0u, 1u, 2u, 3u))))));
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetAll(int index, int numNumbers, uint value)
+        {
+Assert.IsNotGreater(value, UInt2.MaxValue);
+Assert.IsValidSubarray(index, numNumbers, Length);
+
+            if (Constant.IsConstantExpression(value))
+            {
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(numNumbers) && Constant.IsConstantExpression(index) && index + numNumbers == Length && value == 0)
+                {
+                    if (index == 0)
+                    {
+                        intern = 0u;
+                    }
+                    else
+                    {
+                        intern = (UInt56)maxmath.bits_zerohigh(intern, index * BitsPerNumber);
+                    }
+                }
+                else
+                {
+                    ulong mask = (ulong)maxmath.bitmask64(numNumbers * BitsPerNumber, index * BitsPerNumber);
+                    ulong newValues = new UInt2x28(value).intern & mask;
+                    ulong oldValues = maxmath.andnot(intern, mask);
+
+                    intern = (UInt56)(newValues | oldValues);
+                }
+            }
+            else
+            {
+                int lastIndex = index + numNumbers;
+
+                while (index <= lastIndex)
+                {
+                    this[index] = value;
+                    index++;
+                }
+            }
         }
 
 

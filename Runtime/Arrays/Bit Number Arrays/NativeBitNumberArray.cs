@@ -41,7 +41,7 @@ static readonly SharedStatic<int> s_StaticSafetyId = SharedStatic<int>.GetOrCrea
     
         public NativeBitNumberArray(int numNumbers,     Allocator allocator,      NativeArrayOptions options = NativeArrayOptions.ClearMemory)
         {
-Assert.IsBetween(numNumbers, new TCollection().Length + 1, int.MaxValue / new TCollection().BitsPerNumber);
+Assert.IsNonNegative(numNumbers);
 Assert.IsGreater((int)allocator, (int)Allocator.None);
 
             m_Length = numNumbers;

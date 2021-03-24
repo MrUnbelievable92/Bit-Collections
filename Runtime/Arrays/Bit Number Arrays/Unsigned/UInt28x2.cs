@@ -65,11 +65,9 @@ Assert.IsNotGreater(y, UInt28.MaxValue);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
             {
-                UInt56 x = intern;
+                ulong cast = intern;
 
-                ulong deref = *(ulong*)&x;
-
-                return MaxValue & new ulong2(deref, deref >> BitsPerNumber);
+                return MaxValue & new ulong2(cast, cast >> BitsPerNumber);
             }
     
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -87,9 +85,7 @@ Assert.IsNotGreater(y, UInt28.MaxValue);
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                UInt56 x = intern;
-
-                return MaxValue & (uint)(*(ulong*)&x >> (index * BitsPerNumber));
+                return (uint)maxmath.bits_extract(intern, index * BitsPerNumber, BitsPerNumber);
             }
     
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,13 +94,59 @@ Assert.IsWithinArrayBounds(index, Length);
 Assert.IsNotGreater(value, MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                UInt56 x = intern;
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(value) && value == 0 && index == Length - 1)
+                {
+                    intern = (UInt56)maxmath.bits_zerohigh(intern, (Length - 1) * BitsPerNumber);
+                }
+                else
+                {
+                    int shiftValue = index * BitsPerNumber;
+                    ulong newValue = (ulong)value << shiftValue;
+                    ulong mask = math.rol(~(ulong)MaxValue, shiftValue);
 
-                int shiftValue = index * BitsPerNumber;
-                ulong newValue = (ulong)value << shiftValue;
-                ulong mask = math.rol(~(ulong)MaxValue, shiftValue);
+                    intern = (UInt56)((intern & mask) | newValue);
+                }
+            }
+        }
 
-                intern = (UInt56)((*(ulong*)&x & mask) | newValue);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetAll(int index, int numNumbers, uint value)
+        {
+Assert.IsNotGreater(value, UInt28.MaxValue);
+Assert.IsValidSubarray(index, numNumbers, Length);
+
+            if (Constant.IsConstantExpression(value))
+            {
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(numNumbers) && Constant.IsConstantExpression(index) && index + numNumbers == Length && value == 0)
+                {
+                    if (index == 0)
+                    {
+                        intern = 0u;
+                    }
+                    else
+                    {
+                        intern = (UInt56)maxmath.bits_zerohigh(intern, index * BitsPerNumber);
+                    }
+                }
+                else
+                {
+                    ulong mask = (ulong)maxmath.bitmask64(numNumbers * BitsPerNumber, index * BitsPerNumber);
+                    ulong newValues = new UInt28x2(value).intern & mask;
+                    ulong oldValues = maxmath.andnot(intern, mask);
+
+                    intern = (UInt56)(newValues | oldValues);
+                }
+            }
+            else
+            {
+                int lastIndex = index + numNumbers;
+
+                while (index <= lastIndex)
+                {
+                    this[index] = value;
+                    index++;
+                }
             }
         }
 

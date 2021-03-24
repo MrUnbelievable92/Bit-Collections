@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using Unity.Mathematics;
+using MaxMath;
 
 namespace BitCollections
 {
@@ -82,7 +83,7 @@ Assert.IsNotGreater(y, UInt4.MaxValue);
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                return MaxValue & ((uint)intern >> (index * BitsPerNumber));
+                return (uint)maxmath.bits_extract(intern, index * BitsPerNumber, BitsPerNumber);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -91,11 +92,59 @@ Assert.IsWithinArrayBounds(index, Length);
 Assert.IsNotGreater(value, UInt4.MaxValue);
 Assert.IsWithinArrayBounds(index, Length);
 
-                int shiftValue = index * BitsPerNumber;
-                uint newValue = value << shiftValue;
-                uint mask = math.rol(~MaxValue, shiftValue);
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(value) && value == 0 && index == Length - 1)
+                {
+                    intern = (byte)maxmath.bits_zerohigh(intern, (Length - 1) * BitsPerNumber);
+                }
+                else
+                {
+                    int shiftValue = index * BitsPerNumber;
+                    uint newValue = value << shiftValue;
+                    uint mask = math.rol(~MaxValue, shiftValue);
 
-                intern = (byte)((intern & mask) | newValue);
+                    intern = (byte)((intern & mask) | newValue);
+                }
+            }
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetAll(int index, int numNumbers, uint value)
+        {
+Assert.IsNotGreater(value, UInt4.MaxValue);
+Assert.IsValidSubarray(index, numNumbers, Length);
+
+            if (Constant.IsConstantExpression(value))
+            {
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(numNumbers) && Constant.IsConstantExpression(index) && index + numNumbers == Length && value == 0)
+                {
+                    if (index == 0)
+                    {
+                        intern = 0;
+                    }
+                    else
+                    {
+                        intern = (byte)maxmath.bits_zerohigh(intern, index * BitsPerNumber);
+                    }
+                }
+                else
+                {
+                    uint mask = (uint)maxmath.bitmask32(numNumbers * BitsPerNumber, index * BitsPerNumber);
+                    uint newValues = new UInt4x2(value).intern & mask;
+                    uint oldValues = maxmath.andnot(intern, mask);
+
+                    intern = (byte)(newValues | oldValues);
+                }
+            }
+            else
+            {
+                int lastIndex = index + numNumbers;
+
+                while (index <= lastIndex)
+                {
+                    this[index] = value;
+                    index++;
+                }
             }
         }
 

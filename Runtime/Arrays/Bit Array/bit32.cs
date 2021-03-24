@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.Burst.Intrinsics;
 using Unity.Burst.CompilerServices;
 using Unity.Mathematics;
 using Unity.Collections;
@@ -87,7 +88,7 @@ Assert.IsWithinArrayBounds(index + 31, values.Length);
         {
 Assert.IsWithinArrayBounds(index + 31, values.Length);
 
-            intern = (uint)maxmath.bitmask(*(bool32*)((bool*)values.GetUnsafePtr() + index));
+            intern = (uint)maxmath.bitmask(*(bool32*)((bool*)values.GetUnsafeReadOnlyPtr() + index));
         }
 
 
@@ -116,13 +117,13 @@ Assert.IsWithinArrayBounds(index + 31, values.Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator bit32(uint input)
         {
-            return *(bit32*)&input;
+            return new bit32 { intern = input };
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator bit32(int input)
         {
-            return *(bit32*)&input;
+            return new bit32 { intern = (uint)input };
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -340,7 +341,7 @@ Assert.IsValidSubarray(index, numBits, Length);
 
             int remainder = amount % numBits;
 
-            maskED = (mask & (maskED << remainder))   |   (mask & (maskED >> (numBits - remainder)));
+            maskED = mask & ((maskED << remainder) | (maskED >> (numBits - remainder)));
 
             intern = maxmath.andnot(intern, mask) | maskED;
         }
@@ -362,7 +363,7 @@ Assert.IsValidSubarray(index, numBits, Length);
 
             int remainder = amount % numBits;
 
-            maskED = (mask & (maskED >> remainder))   |   (mask & (maskED << (numBits - remainder)));
+            maskED = mask & ((maskED >> remainder) | (maskED << (numBits - remainder)));
 
             intern = maxmath.andnot(intern, mask) | maskED;
         }
@@ -397,7 +398,8 @@ Assert.SubarraysDoNotOverlap(smallerIndex, largerIndex, numBits, numBits);
             uint3 masks = maxmath.shl(uint.MaxValue, (uint3)new int3(smallerIndex, largerIndex, 0));
             masks = maxmath.andnot(masks, masks << numBits);
             // z: mask for deleting elements in the array
-            masks.z = ~(masks.x | masks.y);
+            // masks.z = ~(masks.x | masks.y);
+            masks = math.select(masks, ~(masks.xxx | masks.yyy), new bool3(false, false, true));
 
             // delete in z, grab values in x & y
             masks &= intern;
@@ -452,9 +454,22 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Shuffle(ref Random32 rngenerator)
         {
-            for (int2 i = new int2(31, Length);     (i > 0).x;      i--)
+            if (X86.Bmi2.IsBmi2Supported)
             {
-                Swap(i.x, rngenerator.NextInt(0, i.y));
+                uint mask = rngenerator.NextUInt();
+                uint notMask = ~mask;
+
+                uint lo = maxmath.bits_extractparallel(intern, mask);
+                uint hi = maxmath.bits_extractparallel(intern, notMask);
+
+                intern = lo | (hi << math.countbits(mask));
+            }
+            else
+            {
+                for (int i = Length - 1, j = Length;    i > 0;      i--, j--)
+                {
+                    Swap(i, (int)rngenerator.NextUInt((uint)j));
+                }
             }
         }
     
@@ -462,12 +477,27 @@ Assert.IsValidSubarray(index, numBits, Length);
         public void Shuffle(int index, int numBits, ref Random32 rngenerator)
         {
 Assert.IsValidSubarray(index, numBits, Length);
-    
-            int startingIndex = index + numBits;/* - 1 is actual starting index*/
-    
-            for (int2 i = new int2(startingIndex - 1, startingIndex);       (i > 0).x;      i--)
+
+            if (X86.Bmi2.IsBmi2Supported)
             {
-                Swap(i.x, rngenerator.NextInt(0, i.y));
+                uint extractMask = rngenerator.NextUInt();
+                uint shuffleMask = maxmath.bitmask32((uint)numBits, (uint)index);
+                extractMask &= shuffleMask;
+                uint notExtractMask = maxmath.andnot(shuffleMask, extractMask);
+
+                uint lo = maxmath.bits_extractparallel(intern, extractMask);
+                uint hi = maxmath.bits_extractparallel(intern, notExtractMask);
+
+                intern = ((lo | (hi << math.countbits(extractMask))) << index) | maxmath.andnot(intern, shuffleMask);
+            }
+            else
+            {
+                int startingIndex = index + numBits;/* - 1 is actual starting index*/
+
+                for (int i = startingIndex - 1; i > index; i--, startingIndex--)
+                {
+                    Swap(i, rngenerator.NextInt(index, startingIndex));
+                }
             }
         }
     

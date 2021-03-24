@@ -22,46 +22,31 @@ namespace BitCollections
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long2 ToLong2(Int40 x, Int40 y)
+        internal static long ToFakeLong(Int40 x)
         {
-            long2 masked = new long2(*(long*)&x, *(long*)&y);
+            long lo = *(uint*)&x;
+            lo |= ((long)x.byte4 << 32);
 
-            return maxmath.signextend(masked, 40);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long3 ToLong3(Int40 x, Int40 y, Int40 z)
-        {
-            long3 masked = new long3(*(long*)&x, *(long*)&y, *(long*)&z);
-
-            return maxmath.signextend(masked, 40);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long4 ToLong4(Int40 x, Int40 y, Int40 z, Int40 w)
-        {
-            long4 masked = new long4(*(long*)&x, *(long*)&y, *(long*)&z, *(long*)&w);
-
-            return maxmath.signextend(masked, 40);
+            return lo;
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator long2(Int40 input)
         {
-            return maxmath.signextend(new long2(*(long*)&input), 40);
+            return new long2(input);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator long3(Int40 input)
         {
-            return maxmath.signextend(new long3(*(long*)&input), 40);
+            return new long3(input);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator long4(Int40 input)
         {
-            return maxmath.signextend(new long4(*(long*)&input), 40);
+            return new long4(input);
         }
 
 
@@ -231,13 +216,17 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator long(Int40 input)
         {
-            return maxmath.signextend(*(long*)&input, 40);
+
+            long lo = *(uint*)&input;
+            lo |= ((long)input.byte4 << 56) >> 24;
+
+            return lo;
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ulong(Int40 input)
         {
-            return (ulong)maxmath.signextend(*(long*)&input, 40);
+            return (ulong)(long)input;
         }
 
 
@@ -273,292 +262,288 @@ namespace BitCollections
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator + (Int40 value)
+        public static long operator - (Int40 value)
         {
-            return (Int40)(+(*(long*)&value));
+            return -(ToFakeLong(value));
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator - (Int40 value)
+        public static long operator ~ (Int40 value)
         {
-            return (Int40)(-(*(long*)&value));
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator ~ (Int40 value)
-        {
-            return (Int40)(~(*(long*)&value));
+            return ~(ToFakeLong(value));
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Int40 operator ++ (Int40 value)
         {
-            return (Int40)(++(*(long*)&value));
+            long cast = ToFakeLong(value);
+
+            return (Int40)(++cast);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Int40 operator -- (Int40 value)
         {
-            return (Int40)(--(*(long*)&value));
+            long cast = ToFakeLong(value);
+
+            return (Int40)(--cast);
         }
-    
-    
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator + (Int40 left, Int40 right)
+        public static long operator + (Int40 left, Int40 right)
         {
-            return (Int40)(*(long*)&left + *(long*)&right);
+            return ToFakeLong(left) + ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator + (Int40 left, int right)
+        public static long operator + (Int40 left, int right)
         {
-            return (Int40)(*(long*)&left + right);
+            return ToFakeLong(left) + right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator + (int left, Int40 right)
+        public static long operator + (int left, Int40 right)
         {
-            return (Int40)(left + *(long*)&right);
+            return left + ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator + (Int40 left, long right)
+        public static long operator + (Int40 left, long right)
         {
-            return (Int40)(*(long*)&left + right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator + (long left, Int40 right)
-        {
-            return (Int40)(left + *(long*)&right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator - (Int40 left, Int40 right)
-        {
-            return (Int40)(*(long*)&left - *(long*)&right);
+            return ToFakeLong(left) + right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator - (Int40 left, int right)
+        public static long operator + (long left, Int40 right)
         {
-            return (Int40)(*(long*)&left - right);
+            return left + ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator - (int left, Int40 right)
+        public static long operator - (Int40 left, Int40 right)
         {
-            return (Int40)(left - *(long*)&right);
+            return ToFakeLong(left) - ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator - (Int40 left, long right)
+        public static long operator - (Int40 left, int right)
         {
-            return (Int40)(*(long*)&left - right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator - (long left, Int40 right)
-        {
-            return (Int40)(left - *(long*)&right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator * (Int40 left, Int40 right)
-        {
-            return (Int40)(*(long*)&left * *(long*)&right);
+            return ToFakeLong(left) - right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator * (Int40 left, int right)
+        public static long operator - (int left, Int40 right)
         {
-            return (Int40)(*(long*)&left * right);
+            return left - ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator * (int left, Int40 right)
+        public static long operator - (Int40 left, long right)
         {
-            return (Int40)(left * *(long*)&right);
+            return ToFakeLong(left) - right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator * (Int40 left, long right)
+        public static long operator - (long left, Int40 right)
         {
-            return (Int40)(*(long*)&left * right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator * (long left, Int40 right)
-        {
-            return (Int40)(left * *(long*)&right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator / (Int40 left, Int40 right)
-        {
-            return (Int40)((long)left / (long)right);
+            return left - ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator / (Int40 left, int right)
+        public static long operator * (Int40 left, Int40 right)
         {
-            return (Int40)((long)left / right);
+            return ToFakeLong(left) * ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator / (int left, Int40 right)
+        public static long operator * (Int40 left, int right)
         {
-            return (Int40)(left / (long)right);
+            return ToFakeLong(left) * right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator / (Int40 left, long right)
+        public static long operator * (int left, Int40 right)
         {
-            return (Int40)((long)left / right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator / (long left, Int40 right)
-        {
-            return (Int40)(left / (long)right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator % (Int40 left, Int40 right)
-        {
-            return (Int40)((long)left % (long)right);
+            return left * ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator % (Int40 left, int right)
+        public static long operator * (Int40 left, long right)
         {
-            return (Int40)((long)left % right);
+            return ToFakeLong(left) * right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator % (int left, Int40 right)
+        public static long operator * (long left, Int40 right)
         {
-            return (Int40)(left % (long)right);
+            return left * ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator % (Int40 left, long right)
+        public static long operator / (Int40 left, Int40 right)
         {
-            return (Int40)((long)left % right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator % (long left, Int40 right)
-        {
-            return (Int40)(left % (long)right);
-        }
-    
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator & (Int40 left, Int40 right)
-        {
-            return (Int40)(*(long*)&left & *(long*)&right);
+            return (long)left / (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator & (Int40 left, int right)
+        public static long operator / (Int40 left, int right)
         {
-            return (Int40)(*(long*)&left & right);
+            return (long)left / right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator & (int left, Int40 right)
+        public static long operator / (int left, Int40 right)
         {
-            return (Int40)(left & *(long*)&right);
+            return left / (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator & (Int40 left, long right)
+        public static long operator / (Int40 left, long right)
         {
-            return (Int40)(*(long*)&left & right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator & (long left, Int40 right)
-        {
-            return (Int40)(left & *(long*)&right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator | (Int40 left, Int40 right)
-        {
-            return (Int40)(*(long*)&left | *(long*)&right);
+            return (long)left / right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator | (Int40 left, int right)
+        public static long operator / (long left, Int40 right)
         {
-            return (Int40)(*(long*)&left | (long)right);
+            return left / (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator | (int left, Int40 right)
+        public static long operator % (Int40 left, Int40 right)
         {
-            return (Int40)((long)left | *(long*)&right);
+            return (long)left % (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator | (Int40 left, long right)
+        public static long operator % (Int40 left, int right)
         {
-            return (Int40)(*(long*)&left | right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator | (long left, Int40 right)
-        {
-            return (Int40)(left | *(long*)&right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator ^ (Int40 left, Int40 right)
-        {
-            return (Int40)(*(long*)&left ^ *(long*)&right);
+            return (long)left % right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator ^ (Int40 left, int right)
+        public static long operator % (int left, Int40 right)
         {
-            return (Int40)(*(long*)&left ^ right);
+            return left % (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator ^ (int left, Int40 right)
+        public static long operator % (Int40 left, long right)
         {
-            return (Int40)(left ^ *(long*)&right);
+            return (long)left % right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator ^ (Int40 left, long right)
+        public static long operator % (long left, Int40 right)
         {
-            return (Int40)(*(long*)&left ^ right);
+            return left % (long)right;
         }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator ^ (long left, Int40 right)
-        {
-            return (Int40)(left ^ *(long*)&right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator << (Int40 left, int right)
-        {
-            return (Int40)(*(long*)&left << right);
-        }
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int40 operator >> (Int40 left, int right)
-        {
-            // sign extend
 
-            return (Int40)((*(long*)&left << 24) >> (24 + right));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator & (Int40 left, Int40 right)
+        {
+            return ToFakeLong(left) & ToFakeLong(right);
         }
-    
-    
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator & (Int40 left, int right)
+        {
+            return ToFakeLong(left) & right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator & (int left, Int40 right)
+        {
+            return left & ToFakeLong(right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator & (Int40 left, long right)
+        {
+            return ToFakeLong(left) & right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator & (long left, Int40 right)
+        {
+            return left & ToFakeLong(right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator | (Int40 left, Int40 right)
+        {
+            return ToFakeLong(left) | ToFakeLong(right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator | (Int40 left, int right)
+        {
+            return ToFakeLong(left) | (long)right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator | (int left, Int40 right)
+        {
+            return (long)left | ToFakeLong(right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator | (Int40 left, long right)
+        {
+            return ToFakeLong(left) | right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator | (long left, Int40 right)
+        {
+            return left | ToFakeLong(right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator ^ (Int40 left, Int40 right)
+        {
+            return ToFakeLong(left) ^ ToFakeLong(right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator ^ (Int40 left, int right)
+        {
+            return ToFakeLong(left) ^ right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator ^ (int left, Int40 right)
+        {
+            return left ^ ToFakeLong(right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator ^ (Int40 left, long right)
+        {
+            return ToFakeLong(left) ^ right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator ^ (long left, Int40 right)
+        {
+            return left ^ ToFakeLong(right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator << (Int40 left, int right)
+        {
+            return ToFakeLong(left) << right;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long operator >> (Int40 left, int right)
+        {
+            return (long)left >> right;
+        }
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator == (Int40 left, Int40 right)
         {
@@ -582,13 +567,13 @@ namespace BitCollections
         {
             return (long)left == right;
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator == (long left, Int40 right)
         {
             return left == (long)right;
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator != (Int40 left, Int40 right)
         {
@@ -612,13 +597,13 @@ namespace BitCollections
         {
             return (long)left != right;
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator != (long left, Int40 right)
         {
             return left != (long)right;
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator < (Int40 left, Int40 right)
         {
@@ -642,13 +627,13 @@ namespace BitCollections
         {
             return (long)left < right;
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator < (long left, Int40 right)
         {
             return left < (long)right;
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator > (Int40 left, Int40 right)
         {
@@ -672,13 +657,13 @@ namespace BitCollections
         {
             return (long)left > right;
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator > (long left, Int40 right)
         {
             return left > (long)right;
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator <= (Int40 left, Int40 right)
         {
@@ -702,13 +687,13 @@ namespace BitCollections
         {
             return (long)left <= right;
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator <= (long left, Int40 right)
         {
             return left <= (long)right;
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator >= (Int40 left, Int40 right)
         {
@@ -732,7 +717,7 @@ namespace BitCollections
         {
             return (long)left >= right;
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator >= (long left, Int40 right)
         {
@@ -829,7 +814,7 @@ namespace BitCollections
         }
         public byte ToByte(IFormatProvider provider)
         {
-            return Convert.ToByte((long)this, provider);
+            return Convert.ToByte((byte)this, provider);
         }
         public char ToChar(IFormatProvider provider)
         {
@@ -849,11 +834,11 @@ namespace BitCollections
         }
         public short ToInt16(IFormatProvider provider)
         {
-            return Convert.ToInt16((long)this, provider);
+            return Convert.ToInt16((short)this, provider);
         }
         public int ToInt32(IFormatProvider provider)
         {
-            return Convert.ToInt32((long)this, provider);
+            return Convert.ToInt32((int)this, provider);
         }
         public long ToInt64(IFormatProvider provider)
         {
@@ -861,7 +846,7 @@ namespace BitCollections
         }
         public sbyte ToSByte(IFormatProvider provider)
         {
-            return Convert.ToSByte((long)this, provider);
+            return Convert.ToSByte((sbyte)this, provider);
         }
         public float ToSingle(IFormatProvider provider)
         {
@@ -873,11 +858,11 @@ namespace BitCollections
         }
         public ushort ToUInt16(IFormatProvider provider)
         {
-            return Convert.ToUInt16((long)this, provider);
+            return Convert.ToUInt16((ushort)this, provider);
         }
         public uint ToUInt32(IFormatProvider provider)
         {
-            return Convert.ToUInt32((long)this, provider);
+            return Convert.ToUInt32((uint)this, provider);
         }
         public ulong ToUInt64(IFormatProvider provider)
         {

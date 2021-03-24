@@ -27,7 +27,20 @@ Assert.IsNotSmaller(length, 0);
         public T Current => start[current];
         object IEnumerator.Current =>(object)Current;
 
-        public bool MoveNext() => ++current < length;
+        public bool MoveNext()
+        {
+            int add = current + 1;
+
+            if (add < length)
+            {
+                current = add;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         public void Reset() => current = -1;
         public void Dispose() => start = null;
 

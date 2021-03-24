@@ -7,7 +7,6 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Burst;
-using Unity.Burst.Intrinsics;
 using MaxMath;
 using System.Runtime.InteropServices;
 
@@ -36,7 +35,7 @@ static readonly SharedStatic<int> s_StaticSafetyId = SharedStatic<int>.GetOrCrea
 
         public NativeBitArray(int numBits,      Allocator allocator,      NativeArrayOptions options = NativeArrayOptions.ClearMemory)
         {
-Assert.IsBetween(numBits, 64 + 1, int.MaxValue);
+Assert.IsNonNegative(numBits);
 Assert.IsGreater((int)allocator, (int)Allocator.None);
 
             m_Allocator = allocator;
