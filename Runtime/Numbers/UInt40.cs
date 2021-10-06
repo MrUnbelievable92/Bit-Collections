@@ -15,11 +15,11 @@ namespace BitCollections
         public const ulong MaxValue = 1_099_511_627_775;
     
     
-        private readonly byte byte0;
-        private readonly byte byte1;
-        private readonly byte byte2;
-        private readonly byte byte3;
-        private readonly byte byte4;
+        internal readonly byte byte0;
+        internal readonly byte byte1;
+        internal readonly byte byte2;
+        internal readonly byte byte3;
+        internal readonly byte byte4;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

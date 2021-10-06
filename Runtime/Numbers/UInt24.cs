@@ -14,9 +14,9 @@ namespace BitCollections
         public const uint MaxValue = 16_777_215;
     
     
-        private readonly byte byte0;
-        private readonly byte byte1;
-        private readonly byte byte2;
+        internal readonly byte byte0;
+        internal readonly byte byte1;
+        internal readonly byte byte2;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

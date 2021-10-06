@@ -12,22 +12,25 @@ using System.Runtime.InteropServices;
 
 namespace BitCollections
 { 
-    [StructLayout(LayoutKind.Sequential)]  [NativeContainer]    [NativeContainerSupportsDeallocateOnJobCompletion]
+    [StructLayout(LayoutKind.Sequential)] 
+    [NativeContainer]    
+    [NativeContainerSupportsDeallocateOnJobCompletion]
     unsafe public struct NativeBitNumberArray<TCollection, TElement> : IBitNumberArray<TElement>, IEquatable<NativeBitNumberArray<TCollection, TElement>>, INativeDisposable
         where TCollection : unmanaged, IBitNumberArray<TElement>                                                                                  
         where TElement : unmanaged, IComparable, IComparable<TElement>, IConvertible, IEquatable<TElement>, IFormattable      
     {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-private AtomicSafetyHandle m_Safety;
+internal AtomicSafetyHandle m_Safety;
 static readonly SharedStatic<int> s_StaticSafetyId = SharedStatic<int>.GetOrCreate<NativeBitNumberArray<TCollection, TElement>>();
 [NativeSetClassTypeToNullOnSchedule] DisposeSentinel m_DisposeSentinel;
 #endif
     
-        [NativeDisableUnsafePtrRestriction] private TCollection* m_Ptr;
+        [NativeDisableUnsafePtrRestriction] 
+        internal TCollection* m_Ptr;
     
-        private Allocator m_Allocator;
+        internal Allocator m_Allocator;
 
-        private readonly int m_Length;
+        internal readonly int m_Length;
 
     
         public readonly TElement MinValue => new TCollection().MinValue; 
@@ -48,7 +51,7 @@ Assert.IsGreater((int)allocator, (int)Allocator.None);
             m_Allocator = allocator;
     
             uint size = maxmath.divrem((uint)numNumbers, (uint)new TCollection().Length, out uint remainder);
-            size = (uint)sizeof(TCollection) * (size + maxmath.touint8(remainder != 0));
+            size = (uint)sizeof(TCollection) * (size + maxmath.tobyte(remainder != 0));
 
             m_Ptr = (TCollection*)UnsafeUtility.Malloc(size, UnsafeUtility.AlignOf<TCollection>(), allocator);
 
@@ -76,6 +79,7 @@ AtomicSafetyHandle.SetStaticSafetyId(ref m_Safety, s_StaticSafetyId.Data);
         public readonly void* GetUnsafePtr()
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
+AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
 AtomicSafetyHandle.CheckWriteAndThrow(m_Safety);
 #endif
             return m_Ptr;
@@ -146,7 +150,7 @@ DisposeSentinel.Dispose(ref m_Safety, ref m_DisposeSentinel);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 DisposeSentinel.Clear(ref m_DisposeSentinel);
 #endif
-            inputDeps = new NativeArrayDisposeJob
+            inputDeps = new NativeCollectionDisposeJob
             {
                 ptr = m_Ptr,
                 allocator = m_Allocator
@@ -180,21 +184,21 @@ AtomicSafetyHandle.Release(m_Safety);
             return ((IntPtr)m_Ptr).GetHashCode();
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return GetEnumerator().ToString();
         }
 
 
-        IEnumerator IEnumerable.GetEnumerator()
+        readonly IEnumerator IEnumerable.GetEnumerator()
         {
-            return new Enumerator<TElement>(this);
+            return new ArrayEnumerator<TElement>(this);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerator<TElement> GetEnumerator()
+        public readonly IEnumerator<TElement> GetEnumerator()
         {
-            return new Enumerator<TElement>(this);
+            return new ArrayEnumerator<TElement>(this);
         }
 
 
@@ -209,14 +213,17 @@ return new ReadOnly(m_Ptr, m_Length);
         }
 
 
-        [NativeContainer]  [NativeContainerIsReadOnly]
+        [NativeContainer] 
+        [NativeContainerIsReadOnly]
         public readonly struct ReadOnly : IReadOnlyBitNumberArray<TElement>
         {
-            [NativeDisableUnsafePtrRestriction] private readonly TCollection* m_Ptr;
-            private readonly int m_Length;
+            [NativeDisableUnsafePtrRestriction] 
+            internal readonly TCollection* m_Ptr;
+
+            internal readonly int m_Length;
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-private readonly AtomicSafetyHandle m_Safety;
+internal readonly AtomicSafetyHandle m_Safety;
 
 internal ReadOnly(TCollection* ptr, int length, ref AtomicSafetyHandle safety)
 {
@@ -247,21 +254,21 @@ AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
                 }
             }
 
-            public TElement MinValue => new TCollection().MinValue;
-            public TElement MaxValue => new TCollection().MaxValue;
-            public int BitsPerNumber => new TCollection().BitsPerNumber;
-            public int Length => m_Length;
+            public readonly TElement MinValue => new TCollection().MinValue;
+            public readonly TElement MaxValue => new TCollection().MaxValue;
+            public readonly int BitsPerNumber => new TCollection().BitsPerNumber;
+            public readonly int Length => m_Length;
 
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public IEnumerator<TElement> GetEnumerator()
+            public readonly IEnumerator<TElement> GetEnumerator()
             {
-                return new Enumerator<TElement>(this);
+                return new ArrayEnumerator<TElement>(this);
             }
 
-            IEnumerator IEnumerable.GetEnumerator()
+            readonly IEnumerator IEnumerable.GetEnumerator()
             {
-                return new Enumerator<TElement>(this);
+                return new ArrayEnumerator<TElement>(this);
             }
         }
     }

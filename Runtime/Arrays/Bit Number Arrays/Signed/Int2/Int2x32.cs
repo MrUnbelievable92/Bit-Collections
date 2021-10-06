@@ -346,15 +346,15 @@ Assert.IsBetween(x24_31.x7, Int2.MinValue, Int2.MaxValue);
             {
 Assert.IsWithinArrayBounds(index, Length);
 
-                if (Unity.Burst.Intrinsics.X86.Bmi1.IsBmi1Supported)
+                if (Constant.IsConstantExpression(index) && index == Length - 1)
                 {
-                    return maxmath.signextend((int)maxmath.bits_extract(intern, index * BitsPerNumber, BitsPerNumber), BitsPerNumber);
+                    return (int)((long)intern >> (index * BitsPerNumber));
                 }
-                else
-                {
-                    // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
-                    return (int)(((long)intern << (64 - ((1 + index) * BitsPerNumber))) >> (64 - BitsPerNumber));
-                }
+                else { }
+
+
+                // manual sign extend => 1 bitshift less; same if 'index' is not a compile time constant
+                return (int)(((long)intern << (64 - ((1 + index) * BitsPerNumber))) >> (64 - BitsPerNumber));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -413,7 +413,7 @@ Assert.IsValidSubarray(index, numNumbers, Length);
 
             if (Constant.IsConstantExpression(value))
             {
-                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(numNumbers) && Constant.IsConstantExpression(index) && index + numNumbers == Length && value == 0)
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(numNumbers) && index + numNumbers == Length && value == 0)
                 {
                     if (index == 0)
                     {
@@ -467,18 +467,18 @@ Assert.IsValidSubarray(index, numNumbers, Length);
 
         public override string ToString()
         {
-            return new Enumerator<int>(this).ToString();
+            return new ArrayEnumerator<int>(this).ToString();
         }
 
 
         public IEnumerator<int> GetEnumerator()
         {
-            return new Enumerator<int>(this);
+            return new ArrayEnumerator<int>(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new Enumerator<int>(this);
+            return new ArrayEnumerator<int>(this);
         }
     }
 }

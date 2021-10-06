@@ -1,30 +1,37 @@
-﻿using System;
+﻿using DevTools;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace BitCollections
 {
-    public struct Enumerator<T> : IEnumerator, IEnumerator<T>, IDisposable
+    unsafe public struct NativeArrayEnumerator<T> : IEnumerator, IEnumerator<T>, IDisposable
+        where T : unmanaged
     {
+        private T* start;
         private int current;
-        private readonly IReadOnlyArray<T> array;
+        private readonly int length;
 
 
-        public Enumerator(IReadOnlyArray<T> array)
+        public NativeArrayEnumerator(T* ptr, int length)
         {
+Assert.IsNotNull(ptr);
+Assert.IsNotSmaller(length, 0);
+
+            this.start = ptr;
+            this.length = length;
             this.current = -1;
-            this.array = array;
         }
 
 
-        public T Current => array[current];
-        object IEnumerator.Current => Current;
+        public T Current => start[current];
+        object IEnumerator.Current =>(object)Current;
 
         public bool MoveNext()
         {
             int add = current + 1;
 
-            if (add < array.Length)
+            if (add < length)
             {
                 current = add;
                 return true;
@@ -35,15 +42,19 @@ namespace BitCollections
             }
         }
         public void Reset() => current = -1;
-        public void Dispose() { }
+        public void Dispose() => start = null;
 
         public override readonly int GetHashCode()
         {
-            return array.GetHashCode() ^ current;
+            return ((IntPtr)start).GetHashCode() ^ (length ^ current);
         }
         public override readonly bool Equals(object obj)
         {
-            return this.GetHashCode() == ((Enumerator<T>)obj).GetHashCode();
+            NativeArrayEnumerator<T> other = (NativeArrayEnumerator<T>)obj;
+
+            return this.start == other.start &
+                   this.current == other.current &
+                   this.length == other.length;
         }
         public override string ToString()
         {
@@ -56,7 +67,6 @@ namespace BitCollections
             {
                 values += $"{ current }: { Current }\n";
             }
-
 
             current = previous;
 

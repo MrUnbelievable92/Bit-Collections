@@ -1,15 +1,15 @@
 {
   "name": "bitcollections",
   "displayName": "Bit Collections",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "unity": "2020.2",
   "description": "Bit Collections is all about saving as much RAM and/or network bandwidth as possible, by providing array value types of single bits, aswell as array value types of signed- and unsigned integers with a given number of bits.",
    "keywords": [
     "Unity"
   ],
    "dependencies": {
-    "maxmath" : "2.1.2",
-    "csharpdevtools" : "1.0.5",
+    "maxmath" : "2.2.0",
+    "csharpdevtools" : "1.0.6",
     "com.unity.burst": "1.4.3",
     "com.unity.mathematics": "1.2.1",
 	"com.unity.collections": "0.14.0-preview.16",

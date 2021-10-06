@@ -1,37 +1,30 @@
-﻿using DevTools;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace BitCollections
 {
-    unsafe public struct NativeEnumerator<T> : IEnumerator, IEnumerator<T>, IDisposable
-        where T : unmanaged
+    public struct ArrayEnumerator<T> : IEnumerator, IEnumerator<T>, IDisposable
     {
-        private T* start;
         private int current;
-        private readonly int length;
+        private readonly IReadOnlyArray<T> array;
 
 
-        public NativeEnumerator(T* ptr, int length)
+        public ArrayEnumerator(IReadOnlyArray<T> array)
         {
-Assert.IsNotNull(ptr);
-Assert.IsNotSmaller(length, 0);
-
-            this.start = ptr;
-            this.length = length;
             this.current = -1;
+            this.array = array;
         }
 
 
-        public T Current => start[current];
-        object IEnumerator.Current =>(object)Current;
+        public T Current => array[current];
+        object IEnumerator.Current => Current;
 
         public bool MoveNext()
         {
             int add = current + 1;
 
-            if (add < length)
+            if (add < array.Length)
             {
                 current = add;
                 return true;
@@ -42,21 +35,23 @@ Assert.IsNotSmaller(length, 0);
             }
         }
         public void Reset() => current = -1;
-        public void Dispose() => start = null;
+        public void Dispose() { }
 
         public override readonly int GetHashCode()
         {
-            return ((IntPtr)start).GetHashCode() ^ (length ^ current);
+            return array.GetHashCode() ^ current;
         }
         public override readonly bool Equals(object obj)
         {
-            return this.GetHashCode() == ((Enumerator<T>)obj).GetHashCode();
+            ArrayEnumerator<T> other = (ArrayEnumerator<T>)obj;
+
+            return this.array.GetHashCode() == other.array.GetHashCode() &
+                   this.current == other.current;
         }
         public override string ToString()
         {
             int previous = current;
             Reset();
-
 
             string values = string.Empty;
 
@@ -64,7 +59,6 @@ Assert.IsNotSmaller(length, 0);
             {
                 values += $"{ current }: { Current }\n";
             }
-
 
             current = previous;
 

@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using MaxMath;
+using Unity.Collections;
 
 namespace BitCollections.Tests
 {
@@ -122,6 +123,110 @@ namespace BitCollections.Tests
         }
 
         [Test]
+        public static void ResetFirst()
+        {
+            bool result = true;
+
+
+            bit16 _0 = TestData_LHS;
+            bit16 _1 = TestData_RHS;
+
+            _0.ResetFirst();
+            result &= _0.intern == 0b0010_1011_1001_1100;
+            _1.ResetFirst();
+            result &= _1.intern == 0b1011_0001_1101_0000;
+
+            _0 = TestData_LHS;
+            _1 = TestData_RHS;
+
+            _0.ResetFirst(2, 3);
+            result &= _0.intern == 0b0010_1011_1001_1010;
+            _1.ResetFirst(4, 4);
+            result &= _1.intern == 0b1011_0001_1100_0010;
+
+
+            Assert.AreEqual(result, true);
+        }
+
+        [Test]
+        public static void SetFirst()
+        {
+            bool result = true;
+
+
+            bit16 _0 = TestData_LHS;
+            bit16 _1 = TestData_RHS;
+
+            _0.SetFirst();
+            result &= _0.intern == 0b0010_1011_1001_1111;
+            _1.SetFirst();
+            result &= _1.intern == 0b1011_0001_1101_0011;
+
+            _0 = TestData_LHS;
+            _1 = TestData_RHS;
+            
+            _0.SetFirst(2, 3);
+            result &= _0.intern == 0b0010_1011_1001_1110;
+            _1.SetFirst(4, 4);
+            result &= _1.intern == 0b1011_0001_1111_0010;
+
+
+            Assert.AreEqual(result, true);
+        }
+
+        [Test]
+        public static void ResetLast()
+        {
+            bool result = true;
+
+
+            bit16 _0 = TestData_LHS;
+            bit16 _1 = TestData_RHS;
+
+            _0.ResetLast();
+            result &= _0.intern == 0b0000_1011_1001_1110;
+            _1.ResetLast();
+            result &= _1.intern == 0b0011_0001_1101_0010;
+
+            _0 = TestData_LHS;
+            _1 = TestData_RHS;
+
+            _0.ResetLast(2, 3);
+            result &= _0.intern == 0b0010_1011_1000_1110;
+            _1.ResetLast(4, 8);
+            result &= _1.intern == 0b1011_0000_1101_0010;
+
+
+            Assert.AreEqual(result, true);
+        }
+
+        [Test]
+        public static void SetLast()
+        {
+            bool result = true;
+
+
+            bit16 _0 = TestData_LHS;
+            bit16 _1 = TestData_RHS;
+
+            _0.SetLast();
+            result &= _0.intern == 0b1010_1011_1001_1110;
+            _1.SetLast();
+            result &= _1.intern == 0b1111_0001_1101_0010;
+
+            _0 = TestData_LHS;
+            _1 = TestData_RHS;
+
+            _0.SetLast(2, 3);
+            result &= _0.intern == 0b0010_1011_1001_1110;
+            _1.SetLast(4, 4);
+            result &= _1.intern == 0b1011_0001_1111_0010;
+
+
+            Assert.AreEqual(result, true);
+        }
+
+        [Test]
         public static void ShiftLeft()
         {
             bool result = true;
@@ -202,7 +307,7 @@ namespace BitCollections.Tests
             x = TestData_LHS;
             x.Swap(2, 6, 3);
             result &= x.intern == 0b0010_1011_1101_1010;
-
+            
             x = TestData_RHS;
             x.Swap(1, 9, 5);
             result &= x.intern == 0b1001_0011_1111_0000;
@@ -354,13 +459,208 @@ namespace BitCollections.Tests
             {
                 bit16 x = TestData_LHS;
                 int index = rng.NextUShort(0, (ushort)x.Length);
-                int numBits = rng.NextUShort(0, (ushort)(x.Length - index + 1));
+                int numBits = rng.NextUShort(1, (ushort)(x.Length - index + 1));
 
                 uint bits = x.CountBits(index, numBits);
 
                 x.Shuffle(index, numBits, ref rng);
 
                 Assert.AreEqual(bits, x.CountBits(index, numBits));
+            }
+        }
+
+        public static void CopyToArray_Base(int srcIndex = 0)
+        {
+            Random32 rng = new Random32(265);
+
+            for (int i = 0; i < 16; i++)
+            {
+                bit16 bits = (bit16)(ushort)rng.NextInt();
+                NativeArray<bool> array = new NativeArray<bool>(rng.NextInt(bits.Length, 200), Allocator.Temp);
+                NativeArray<bool> arrayCpy = new NativeArray<bool>(array.Length, Allocator.Temp);
+
+                for (int j = 0; j < array.Length; j++)
+                {
+                    bool next = rng.NextBool();
+                    array[j] = next;
+                    arrayCpy[j] = next;
+                }
+
+                for (int numValues = 1; numValues <= bits.Length - srcIndex; numValues++)
+                {
+                    int dstIndex = rng.NextInt(0, array.Length - (numValues - 1));
+                    bits.CopyTo(array, dstIndex, numValues, srcIndex);
+
+                    for (int k = 0;k < array.Length;k++)
+                    {
+                        if (k >= dstIndex && k <= dstIndex + (numValues - 1))
+                        {
+                            Assert.AreEqual(array[k], bits[k - dstIndex + srcIndex]);
+                        }
+                        else
+                        {
+                            Assert.AreEqual(array[k], arrayCpy[k]);
+                        }
+                    }
+                    
+                    for (int j = dstIndex; j < dstIndex + numValues; j++)
+                    {
+                        array[j] = arrayCpy[j];
+                    }
+                }
+
+                array.Dispose();
+                arrayCpy.Dispose();
+            }
+        }
+
+        public static void CopyToBitArray_IndexIsMultipleOf8_Base(int srcIndex = 0)
+        {
+            Random32 rng = new Random32(265);
+
+            for (int i = 0; i < 16; i++)
+            {
+                bit16 bits = (bit16)(ushort)rng.NextInt();
+                NativeBitArray array = new NativeBitArray(rng.NextInt(bits.Length, 200), Allocator.Temp);
+                NativeBitArray arrayCpy = new NativeBitArray(array.Length, Allocator.Temp);
+
+                for (int j = 0; j < array.Length; j++)
+                {
+                    bool next = rng.NextBool();
+                    array[j] = next;
+                    arrayCpy[j] = next;
+                }
+
+                for (int numValues = 1; numValues <= bits.Length - srcIndex; numValues++)
+                {
+                    int dstIndex = 8 * rng.NextInt(0, (array.Length - (numValues - 1)) / 8);
+                    bits.CopyTo(array, dstIndex, numValues, srcIndex);
+
+                    for (int k = 0;k < array.Length;k++)
+                    {
+                        if (k >= dstIndex && k <= dstIndex + (numValues - 1))
+                        {
+                            Assert.AreEqual(array[k], bits[k - dstIndex + srcIndex]);
+                        }
+                        else
+                        {
+                            Assert.AreEqual(array[k], arrayCpy[k]);
+                        }
+                    }
+                    
+                    for (int j = dstIndex; j < dstIndex + numValues; j++)
+                    {
+                        array[j] = arrayCpy[j];
+                    }
+                }
+
+                array.Dispose();
+                arrayCpy.Dispose();
+            }
+        }
+
+        public static void CopyToBitArray_IndexIsNotMultipleOf8_Base(int srcIndex = 0)
+        {
+            Random32 rng = new Random32(265);
+
+            for (int i = 0; i < 16; i++)
+            {
+                bit16 bits = (bit16)(ushort)rng.NextInt();
+                NativeBitArray array = new NativeBitArray(rng.NextInt(bits.Length, 200), Allocator.Temp);
+                NativeBitArray arrayCpy = new NativeBitArray(array.Length, Allocator.Temp);
+
+                for (int j = 0; j < array.Length; j++)
+                {
+                    bool next = rng.NextBool();
+                    array[j] = next;
+                    arrayCpy[j] = next;
+                }
+
+                for (int numValues = 1; numValues <= bits.Length - srcIndex; numValues++)
+                {
+                    int dstIndex = rng.NextInt(0, array.Length - (numValues - 1));
+                    if (dstIndex % 8 == 0)
+                    {
+                        if (dstIndex == 0)
+                        {
+                            if (numValues != bits.Length)
+                            {
+                                dstIndex++;
+                            }
+                        }
+                        else
+                        {
+                            dstIndex--;
+                        }
+                    }
+
+                    bits.CopyTo(array, dstIndex, numValues, srcIndex);
+
+                    for (int k = 0;k < array.Length;k++)
+                    {
+                        if (k >= dstIndex && k <= dstIndex + (numValues - 1))
+                        {
+                            Assert.AreEqual(array[k], bits[k - dstIndex + srcIndex]);
+                        }
+                        else
+                        {
+                            Assert.AreEqual(array[k], arrayCpy[k]);
+                        }
+                    }
+                    
+                    for (int j = dstIndex; j < dstIndex + numValues; j++)
+                    {
+                        array[j] = arrayCpy[j];
+                    }
+                }
+
+                array.Dispose();
+                arrayCpy.Dispose();
+            }
+        }
+
+        [Test]
+        public static void CopyToArray()
+        {
+            CopyToArray_Base(0);
+        }
+
+        [Test]
+        public static void CopyToBitArray_IndexIsMultipleOf8()
+        {
+            CopyToBitArray_IndexIsMultipleOf8_Base(0);
+        }
+
+        [Test]
+        public static void CopyToBitArray_IndexIsNotMultipleOf8()
+        {
+            CopyToBitArray_IndexIsNotMultipleOf8_Base(0);
+        }
+
+        [Test]
+        public static void CopyToArray_VaryingSourceIndex()
+        {
+            for (int i = 1; i < 16; i++)
+            {
+                CopyToArray_Base(i);
+            }
+        }
+
+        [Test]
+        public static void CopyToBitArray_IndexIsMultipleOf8_VaryingSourceIndex()
+        {
+            for (int i = 1; i < 16; i++)
+            {
+                CopyToBitArray_IndexIsMultipleOf8_Base(i);
+            }
+        }
+
+        [Test]
+        public static void CopyToBitArray_IndexIsNotMultipleOf8_VaryingSourceIndex()
+        {
+            for (int i = 1; i < 16; i++)
+            {
+                CopyToBitArray_IndexIsNotMultipleOf8_Base(i);
             }
         }
     }

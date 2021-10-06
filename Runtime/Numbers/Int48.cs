@@ -287,13 +287,13 @@ namespace BitCollections
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator - (Int48 value)
+        public static Int48 operator - (Int48 value)
         {
             return -(ToFakeLong(value));
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator ~ (Int48 value)
+        public static Int48 operator ~ (Int48 value)
         {
             return ~(ToFakeLong(value));
         }
@@ -316,111 +316,63 @@ namespace BitCollections
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator + (Int48 left, Int48 right)
+        public static Int48 operator + (Int48 left, Int48 right)
         {
             return ToFakeLong(left) + ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator + (Int48 left, int right)
-        {
-            return ToFakeLong(left) + right;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator + (int left, Int48 right)
-        {
-            return left + ToFakeLong(right);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator + (Int48 left, long right)
         {
-            return ToFakeLong(left) + right;
+            return (long)left + right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator + (long left, Int48 right)
         {
-            return left + ToFakeLong(right);
+            return left + (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator - (Int48 left, Int48 right)
+        public static Int48 operator - (Int48 left, Int48 right)
         {
             return ToFakeLong(left) - ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator - (Int48 left, int right)
-        {
-            return ToFakeLong(left) - right;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator - (int left, Int48 right)
-        {
-            return left - ToFakeLong(right);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator - (Int48 left, long right)
         {
-            return ToFakeLong(left) - right;
+            return (long)left - right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator - (long left, Int48 right)
         {
-            return left - ToFakeLong(right);
+            return left - (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator * (Int48 left, Int48 right)
+        public static Int48 operator * (Int48 left, Int48 right)
         {
             return ToFakeLong(left) * ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator * (Int48 left, int right)
-        {
-            return ToFakeLong(left) * right;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator * (int left, Int48 right)
-        {
-            return left * ToFakeLong(right);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator * (Int48 left, long right)
         {
-            return ToFakeLong(left) * right;
+            return (long)left * right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator * (long left, Int48 right)
         {
-            return left * ToFakeLong(right);
+            return left * (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator / (Int48 left, Int48 right)
         {
             return (long)left / (long)right;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator / (Int48 left, int right)
-        {
-            return (long)left / right;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator / (int left, Int48 right)
-        {
-            return left / (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -442,18 +394,6 @@ namespace BitCollections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator % (Int48 left, int right)
-        {
-            return (long)left % right;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator % (int left, Int48 right)
-        {
-            return left % (long)right;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator % (Int48 left, long right)
         {
             return (long)left % right;
@@ -467,97 +407,61 @@ namespace BitCollections
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator & (Int48 left, Int48 right)
+        public static Int48 operator & (Int48 left, Int48 right)
         {
             return ToFakeLong(left) & ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator & (Int48 left, int right)
-        {
-            return ToFakeLong(left) & right;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator & (int left, Int48 right)
-        {
-            return left & ToFakeLong(right);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator & (Int48 left, long right)
         {
-            return ToFakeLong(left) & right;
+            return (long)left & right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator & (long left, Int48 right)
         {
-            return left & ToFakeLong(right);
+            return left & (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator | (Int48 left, Int48 right)
+        public static Int48 operator | (Int48 left, Int48 right)
         {
             return ToFakeLong(left) | ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator | (Int48 left, int right)
-        {
-            return ToFakeLong(left) | (long)right;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator | (int left, Int48 right)
-        {
-            return (long)left | ToFakeLong(right);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator | (Int48 left, long right)
         {
-            return ToFakeLong(left) | right;
+            return (long)left | right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator | (long left, Int48 right)
         {
-            return left | ToFakeLong(right);
+            return left | (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator ^ (Int48 left, Int48 right)
+        public static Int48 operator ^ (Int48 left, Int48 right)
         {
             return ToFakeLong(left) ^ ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator ^ (Int48 left, int right)
-        {
-            return ToFakeLong(left) ^ right;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator ^ (int left, Int48 right)
-        {
-            return left ^ ToFakeLong(right);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator ^ (Int48 left, long right)
         {
-            return ToFakeLong(left) ^ right;
+            return (long)left ^ right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long operator ^ (long left, Int48 right)
         {
-            return left ^ ToFakeLong(right);
+            return left ^ (long)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long operator << (Int48 left, int right)
+        public static Int48 operator << (Int48 left, int right)
         {
             return ToFakeLong(left) << right;
         }
@@ -572,7 +476,7 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator == (Int48 left, Int48 right)
         {
-            return (long)left == (long)right;
+            return ToFakeLong(left) == ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -602,7 +506,7 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator != (Int48 left, Int48 right)
         {
-            return (long)left != (long)right;
+            return ToFakeLong(left) != ToFakeLong(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -805,7 +709,7 @@ namespace BitCollections
 
             result = (Int48)Int;
 
-            return (success & (Int <= MaxValue)) & (Int >= MinValue);
+            return success & maxmath.isinrange(Int, MinValue, MaxValue);
         }
         public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out Int48 result)
         {
@@ -813,7 +717,7 @@ namespace BitCollections
 
             result = (Int48)Int;
 
-            return (success & (Int <= MaxValue)) & (Int >= MinValue);
+            return success & maxmath.isinrange(Int, MinValue, MaxValue);
         }
     
         public override string ToString()

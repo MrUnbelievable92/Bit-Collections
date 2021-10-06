@@ -343,6 +343,21 @@ Assert.IsNotGreater(x24_31.x7, UInt2.MaxValue);
             {
 Assert.IsWithinArrayBounds(index, Length);
 
+                if (Constant.IsConstantExpression(index))
+                {
+                    if (index == 0)
+                    {
+                        return (uint)(intern & (ulong)maxmath.bitmask64(BitsPerNumber));
+                    }
+                    else if (index == Length - 1)
+                    {
+                        return (uint)(intern >> (index * BitsPerNumber));
+                    }
+                    else { }
+                }
+                else { }
+
+
                 return (uint)maxmath.bits_extract(intern, index * BitsPerNumber, BitsPerNumber);
             }
 
@@ -399,7 +414,7 @@ Assert.IsValidSubarray(index, numNumbers, Length);
 
             if (Constant.IsConstantExpression(value))
             {
-                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(numNumbers) && Constant.IsConstantExpression(index) && index + numNumbers == Length && value == 0)
+                if (Constant.IsConstantExpression(index) && Constant.IsConstantExpression(numNumbers) && index + numNumbers == Length && value == 0)
                 {
                     if (index == 0)
                     {
@@ -453,18 +468,18 @@ Assert.IsValidSubarray(index, numNumbers, Length);
 
         public override string ToString()
         {
-            return new Enumerator<uint>(this).ToString();
+            return new ArrayEnumerator<uint>(this).ToString();
         }
 
 
         public IEnumerator<uint> GetEnumerator()
         {
-            return new Enumerator<uint>(this);
+            return new ArrayEnumerator<uint>(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new Enumerator<uint>(this);
+            return new ArrayEnumerator<uint>(this);
         }
     }
 }

@@ -14,9 +14,9 @@ namespace BitCollections
         public const int MaxValue = 8_388_607;
     
     
-        private readonly byte byte0;
-        private readonly byte byte1;
-        private readonly byte byte2;
+        internal readonly byte byte0;
+        internal readonly byte byte1;
+        internal readonly byte byte2;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -255,13 +255,13 @@ namespace BitCollections
     
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int operator - (Int24 value)
+        public static Int24 operator - (Int24 value)
         {
             return -(ToFakeInt(value));
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int operator ~ (Int24 value)
+        public static Int24 operator ~ (Int24 value)
         {
             return ~(ToFakeInt(value));
         }
@@ -284,7 +284,7 @@ namespace BitCollections
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int operator + (Int24 left, Int24 right)
+        public static Int24 operator + (Int24 left, Int24 right)
         {
             return ToFakeInt(left) + ToFakeInt(right);
         }
@@ -292,17 +292,17 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int operator + (Int24 left, int right)
         {
-            return ToFakeInt(left) + right;
+            return (int)left + right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int operator + (int left, Int24 right)
         {
-            return left + ToFakeInt(right);
+            return left + (int)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int operator - (Int24 left, Int24 right)
+        public static Int24 operator - (Int24 left, Int24 right)
         {
             return ToFakeInt(left) - ToFakeInt(right);
         }
@@ -310,17 +310,17 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int operator - (Int24 left, int right)
         {
-            return ToFakeInt(left) - right;
+            return (int)left - right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int operator - (int left, Int24 right)
         {
-            return left - ToFakeInt(right);
+            return left - (int)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int operator * (Int24 left, Int24 right)
+        public static Int24 operator * (Int24 left, Int24 right)
         {
             return ToFakeInt(left) * ToFakeInt(right);
         }
@@ -328,13 +328,13 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int operator * (Int24 left, int right)
         {
-            return ToFakeInt(left) * right;
+            return (int)left * right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int operator * (int left, Int24 right)
         {
-            return left * ToFakeInt(right);
+            return left * (int)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -375,7 +375,7 @@ namespace BitCollections
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int operator & (Int24 left, Int24 right)
+        public static Int24 operator & (Int24 left, Int24 right)
         {
             return ToFakeInt(left) & ToFakeInt(right);
         }
@@ -383,17 +383,17 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int operator & (Int24 left, int right)
         {
-            return ToFakeInt(left) & right;
+            return (int)left & right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int operator & (int left, Int24 right)
         {
-            return left & ToFakeInt(right);
+            return left & (int)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int operator | (Int24 left, Int24 right)
+        public static Int24 operator | (Int24 left, Int24 right)
         {
             return ToFakeInt(left) | ToFakeInt(right);
         }
@@ -401,17 +401,17 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int operator | (Int24 left, int right)
         {
-            return ToFakeInt(left) | (int)right;
+            return (int)left | right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int operator | (int left, Int24 right)
         {
-            return (int)left | ToFakeInt(right);
+            return left | (int)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int operator ^ (Int24 left, Int24 right)
+        public static Int24 operator ^ (Int24 left, Int24 right)
         {
             return ToFakeInt(left) ^ ToFakeInt(right);
         }
@@ -419,17 +419,17 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int operator ^ (Int24 left, int right)
         {
-            return ToFakeInt(left) ^ right;
+            return (int)left ^ right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int operator ^ (int left, Int24 right)
         {
-            return left ^ ToFakeInt(right);
+            return left ^ (int)right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int operator << (Int24 left, int right)
+        public static Int24 operator << (Int24 left, int right)
         {
             return ToFakeInt(left) << right;
         }
@@ -444,7 +444,7 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator == (Int24 left, Int24 right)
         {
-            return (int)left == (int)right;
+            return ToFakeInt(left) == ToFakeInt(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -462,7 +462,7 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator != (Int24 left, Int24 right)
         {
-            return (int)left != (int)right;
+            return ToFakeInt(left) != ToFakeInt(right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -605,7 +605,7 @@ namespace BitCollections
 
             result = (Int24)Int;
 
-            return (success & (Int <= MaxValue)) & (Int >= MinValue);
+            return success & maxmath.isinrange(Int, MinValue, MaxValue);
         }
         public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out Int24 result)
         {
@@ -613,7 +613,7 @@ namespace BitCollections
 
             result = (Int24)Int;
 
-            return (success & (Int <= MaxValue)) & (Int >= MinValue);
+            return success & maxmath.isinrange(Int, MinValue, MaxValue);
         }
     
         public override string ToString()

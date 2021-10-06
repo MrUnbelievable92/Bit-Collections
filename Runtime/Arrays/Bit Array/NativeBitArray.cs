@@ -10,9 +10,13 @@ using Unity.Burst;
 using MaxMath;
 using System.Runtime.InteropServices;
 
+using static Unity.Burst.Intrinsics.X86;
+
 namespace BitCollections
 {
-    [StructLayout(LayoutKind.Sequential)]  [NativeContainer]    [NativeContainerSupportsDeallocateOnJobCompletion]
+    [StructLayout(LayoutKind.Sequential)]  
+    [NativeContainer]    
+    [NativeContainerSupportsDeallocateOnJobCompletion]
     unsafe public struct NativeBitArray : IArray<bool>, IEquatable<NativeBitArray>, INativeDisposable
     {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -21,11 +25,12 @@ static readonly SharedStatic<int> s_StaticSafetyId = SharedStatic<int>.GetOrCrea
 [NativeSetClassTypeToNullOnSchedule] private DisposeSentinel m_DisposeSentinel;
 #endif
     
-        [NativeDisableUnsafePtrRestriction] private bit64* m_Ptr;
+        [NativeDisableUnsafePtrRestriction] 
+        internal bit64* m_Ptr;
     
-        private Allocator m_Allocator;
+        internal Allocator m_Allocator;
 
-        private readonly int m_Length;
+        internal readonly int m_Length;
 
 
         public readonly int Length => m_Length;
@@ -42,9 +47,16 @@ Assert.IsGreater((int)allocator, (int)Allocator.None);
             m_Length = numBits;
             
             uint size = maxmath.divrem((uint)numBits, 64, out uint remainder);
-            size = (uint)sizeof(bit64) * (size + maxmath.touint8(remainder != 0));
-    
-            m_Ptr = (bit64*)UnsafeUtility.Malloc(size, 32, allocator);
+            size = (uint)sizeof(bit64) * (size + maxmath.tobyte(remainder != 0));
+
+            if (Avx.IsAvxSupported)
+            {
+                m_Ptr = (bit64*)UnsafeUtility.Malloc(size, 32, allocator);
+            }
+            else
+            {
+                m_Ptr = (bit64*)UnsafeUtility.Malloc(size, 16, allocator);
+            }
     
 Assert.IsNotNull(m_Ptr);
 
@@ -70,6 +82,7 @@ AtomicSafetyHandle.SetStaticSafetyId(ref m_Safety, s_StaticSafetyId.Data);
         public readonly void* GetUnsafePtr()
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
+AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
 AtomicSafetyHandle.CheckWriteAndThrow(m_Safety);
 #endif
             return m_Ptr;
@@ -140,7 +153,7 @@ DisposeSentinel.Dispose(ref m_Safety, ref m_DisposeSentinel);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 DisposeSentinel.Clear(ref m_DisposeSentinel);
 #endif
-            inputDeps = new NativeArrayDisposeJob
+            inputDeps = new NativeCollectionDisposeJob
             {
                 ptr = m_Ptr,
                 allocator = m_Allocator
@@ -174,21 +187,21 @@ AtomicSafetyHandle.Release(m_Safety);
             return ((IntPtr)m_Ptr).GetHashCode();
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return GetEnumerator().ToString();
         }
 
 
-        IEnumerator IEnumerable.GetEnumerator()
+        readonly IEnumerator IEnumerable.GetEnumerator()
         {
-            return new Enumerator<bool>(this);
+            return new ArrayEnumerator<bool>(this);
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerator<bool> GetEnumerator()
+        public readonly IEnumerator<bool> GetEnumerator()
         {
-            return new Enumerator<bool>(this);
+            return new ArrayEnumerator<bool>(this);
         }
 
 
@@ -203,14 +216,17 @@ return new ReadOnly(m_Ptr, m_Length);
         }
 
 
-        [NativeContainer]  [NativeContainerIsReadOnly]
+        [NativeContainer]  
+        [NativeContainerIsReadOnly]
         public readonly struct ReadOnly : IReadOnlyArray<bool>
         {
-            [NativeDisableUnsafePtrRestriction] private readonly bit64* m_Ptr;
-            private readonly int m_Length;
+            [NativeDisableUnsafePtrRestriction] 
+            internal readonly bit64* m_Ptr;
+
+            internal readonly int m_Length;
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-private readonly AtomicSafetyHandle m_Safety;
+internal readonly AtomicSafetyHandle m_Safety;
 
 internal ReadOnly(bit64* ptr, int length, ref AtomicSafetyHandle safety)
 {
@@ -242,17 +258,17 @@ AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
             }
 
 
-            public int Length => m_Length;
+            public readonly int Length => m_Length;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public IEnumerator<bool> GetEnumerator()
+            public readonly IEnumerator<bool> GetEnumerator()
             {
-                return new Enumerator<bool>(this);
+                return new ArrayEnumerator<bool>(this);
             }
 
-            IEnumerator IEnumerable.GetEnumerator()
+            readonly IEnumerator IEnumerable.GetEnumerator()
             {
-                return new Enumerator<bool>(this);
+                return new ArrayEnumerator<bool>(this);
             }
         }
     }

@@ -323,7 +323,7 @@ namespace BitCollections.Tests
                 result &= test[26] == ((i == 23) ? vector.w : ((i == 24) ? vector.z : ((i == 25) ? vector.y : ((i == 26) ? vector.x : TestData_LHS.x26))));
                 result &= test[27] == ((i == 24) ? vector.w : ((i == 25) ? vector.z : ((i == 26) ? vector.y : ((i == 27) ? vector.x : TestData_LHS.x27))));
                 result &= test[28] == ((i == 25) ? vector.w : ((i == 26) ? vector.z : ((i == 27) ? vector.y : ((i == 28) ? vector.x : TestData_LHS.x28))));
-                result &= test[29] == ((i == 26) ? vector.w : ((i == 27) ? vector.z : ((i == 28) ? vector.y : TestData_LHS.x29)));;
+                result &= test[29] == ((i == 26) ? vector.w : ((i == 27) ? vector.z : ((i == 28) ? vector.y : TestData_LHS.x29)));
                 result &= test[30] == ((i == 27) ? vector.w : ((i == 28) ? vector.z : TestData_LHS.x30));
                 result &= test[31] == ((i == 28) ? vector.w : TestData_LHS.x31);
             }                                

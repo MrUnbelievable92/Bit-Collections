@@ -30,6 +30,8 @@ using System.Runtime.CompilerServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("0.9.10")]
-[assembly: AssemblyFileVersion("0.9.10")]
-[assembly: AssemblyInformationalVersion("0.9 Pre-Release")]
+[assembly: AssemblyVersion("1.0.1")]
+[assembly: AssemblyFileVersion("1.0.1")]
+[assembly: AssemblyInformationalVersion("1.0 Release")]
+
+[assembly: CompilationRelaxationsAttribute(CompilationRelaxations.NoStringInterning)]
