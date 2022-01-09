@@ -2,6 +2,8 @@
 
 Bit Collections for Unity is all about saving as much RAM and/or network bandwidth as possible, by providing array value types of single bits, aswell as array value types of signed- and unsigned integers with a given number of bits.
 
+The compression applied is geared towards performance first, but can and should also be used before using advanced compression algorithms. 
+
 Since using less RAM usually comes at the cost of taking more time (CPU), this library uses SIMD instructions as much possible, resulting in the following dependencies:
 
 - Unity 2020.2.0f (C# 8 => unmanaged constructed types)
