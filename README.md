@@ -20,7 +20,7 @@ This package has the following dependencies:
 
 ### BitInt
 The most fundamental building block in this library is the interface `BitInt`. It defines how many bits an integer has and whether or not it is signed.
-All integers between 1 and 63 bits are defined as types, named `(U)Int[n]`, except for `Bit`, which is only available as an unsigned integer. Most of the time, these types are only used as generic type parameters; they should not be instantiated.
+All integers between 1 and 63 bits are defined as types, named `(U)Int[n]`, except for `Bit`, which is only available as an unsigned integer. These types are only used as generic type parameters and should not be instantiated.
 ![alt text](https://i.imgur.com/JkW8vfM.png)
 
 ### Byte Ints	
