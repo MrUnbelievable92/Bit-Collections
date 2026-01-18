@@ -1,14 +1,34 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using MaxMath;
-using Unity.Collections;
+
+using static Unity.Mathematics.math;
+using static MaxMath.maxmath;
 
 namespace BitCollections.Tests
 {
     internal static class _bit64
     {
-        internal static bit64 TestData_LHS => new bit64{ intern = 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110 };
-        internal static bit64 TestData_RHS => new bit64{ intern = 0b1110_1100_1011_0001_1010_1111_1010_1010_1001_1011_1101_0001_1011_0110_0000_0110 };
+        internal static bit64 TestData_LHS => new bit64{ Bits = 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110 };
+        internal static bit64 TestData_RHS => new bit64{ Bits = 0b1110_1100_1011_0001_1010_1111_1010_1010_1001_1011_1101_0001_1011_0110_0000_0110 };
+        
+        private static Random64 rng = Random64.New;
 
+        private static bit64 Random => new bit64 { Bits = rng.NextULong() };
+        private static bool RandomBool => rng.NextBool();
+        private static int RandomIndex() => (int)rng.NextLong(0, 64);
+        private static int RandomNumBits(int index) => (int)rng.NextLong(0, 64 - index + 1);
+
+        private static void AssertBitsOutsideFieldAreUntouched(bit64 t0, bit64 t1, int idx, int num)
+        {
+            for (int j = 0; j < idx; j++)
+            {
+                Assert.AreEqual(t0[j], t1[j]);
+            }
+            for (int j = idx + num; j < 64; j++)
+            {
+                Assert.AreEqual(t0[j], t1[j]);
+            }
+        }
 
         [Test]
         public static void Constructor_boolx64()
@@ -94,7 +114,7 @@ namespace BitCollections.Tests
                                    true);
 
 
-            Assert.AreEqual(test.intern == 0b1110_1100_1011_0001_1010_1111_1010_1010_1001_1011_1101_0001_1011_0110_0000_0110, true);
+            Assert.AreEqual(test.Bits == 0b1110_1100_1011_0001_1010_1111_1010_1010_1001_1011_1101_0001_1011_0110_0000_0110, true);
         }
 
         [Test]
@@ -107,7 +127,7 @@ namespace BitCollections.Tests
                              new bit8(0b1001_1110),
                              new bit8(0b0010_1011),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern 
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -120,7 +140,7 @@ namespace BitCollections.Tests
                              new bit8(0b1001_1110),
                              new bit8(0b0010_1011),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -133,7 +153,7 @@ namespace BitCollections.Tests
                              new bit8(0b1001_1110),
                              new bit8(0b0010_1011),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -146,7 +166,7 @@ namespace BitCollections.Tests
                              new bit8(0b1001_1110),
                              new bit8(0b0010_1011),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -159,7 +179,7 @@ namespace BitCollections.Tests
                              new bit16(0b1001_1110_1101_0110),
                              new bit8(0b0010_1011),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -172,7 +192,7 @@ namespace BitCollections.Tests
                              new bit8(0b1101_0110),
                              new bit16(0b0010_1011_1001_1110),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -185,7 +205,7 @@ namespace BitCollections.Tests
                              new bit8(0b1101_0110),
                              new bit8(0b1001_1110),
                              new bit16(0b1101_0010_0010_1011),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -198,7 +218,7 @@ namespace BitCollections.Tests
                              new bit8(0b1101_0110),
                              new bit8(0b1001_1110),
                              new bit8(0b0010_1011),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -210,7 +230,7 @@ namespace BitCollections.Tests
                              new bit8(0b1001_1110),
                              new bit8(0b0010_1011),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -222,7 +242,7 @@ namespace BitCollections.Tests
                              new bit16(0b1001_1110_1101_0110),
                              new bit8(0b0010_1011),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -234,7 +254,7 @@ namespace BitCollections.Tests
                              new bit8(0b1101_0110),
                              new bit16(0b0010_1011_1001_1110),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -246,7 +266,7 @@ namespace BitCollections.Tests
                              new bit8(0b1101_0110),
                              new bit8(0b1001_1110),
                              new bit16(0b1101_0010_0010_1011),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -258,7 +278,7 @@ namespace BitCollections.Tests
                              new bit8(0b1101_0110),
                              new bit8(0b1001_1110),
                              new bit8(0b0010_1011),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -270,7 +290,7 @@ namespace BitCollections.Tests
                              new bit16(0b1001_1110_1101_0110),
                              new bit8(0b0010_1011),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -282,7 +302,7 @@ namespace BitCollections.Tests
                              new bit8(0b1101_0110),
                              new bit16(0b0010_1011_1001_1110),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -294,7 +314,7 @@ namespace BitCollections.Tests
                              new bit8(0b1101_0110),
                              new bit8(0b1001_1110),
                              new bit16(0b1101_0010_0010_1011),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -306,7 +326,7 @@ namespace BitCollections.Tests
                              new bit8(0b1101_0110),
                              new bit8(0b1001_1110),
                              new bit8(0b0010_1011),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -318,7 +338,7 @@ namespace BitCollections.Tests
                              new bit16(0b1101_0110_0001_1101),
                              new bit16(0b0010_1011_1001_1110),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -330,7 +350,7 @@ namespace BitCollections.Tests
                              new bit16(0b1101_0110_0001_1101),
                              new bit8(0b1001_1110),
                              new bit16(0b1101_0010_0010_1011),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -342,7 +362,7 @@ namespace BitCollections.Tests
                              new bit16(0b1101_0110_0001_1101),
                              new bit8(0b1001_1110),
                              new bit8(0b0010_1011),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -354,7 +374,7 @@ namespace BitCollections.Tests
                              new bit8(0b0001_1101),
                              new bit16(0b1001_1110_1101_0110),
                              new bit16(0b1101_0010_0010_1011),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -366,7 +386,7 @@ namespace BitCollections.Tests
                              new bit8(0b0001_1101),
                              new bit16(0b1001_1110_1101_0110),
                              new bit8(0b0010_1011),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -378,7 +398,7 @@ namespace BitCollections.Tests
                              new bit8(0b0001_1101),
                              new bit8(0b1101_0110),
                              new bit16(0b0010_1011_1001_1110),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -389,7 +409,7 @@ namespace BitCollections.Tests
                              new bit16(0b1101_0110_0001_1101),
                              new bit16(0b0010_1011_1001_1110),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -400,7 +420,7 @@ namespace BitCollections.Tests
                              new bit16(0b1101_0110_0001_1101),
                              new bit8(0b1001_1110),
                              new bit16(0b1101_0010_0010_1011),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -411,7 +431,7 @@ namespace BitCollections.Tests
                              new bit16(0b1101_0110_0001_1101),
                              new bit8(0b1001_1110),
                              new bit8(0b0010_1011),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -422,7 +442,7 @@ namespace BitCollections.Tests
                              new bit8(0b0001_1101),
                              new bit16(0b1001_1110_1101_0110),
                              new bit16(0b1101_0010_0010_1011),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -433,7 +453,7 @@ namespace BitCollections.Tests
                              new bit8(0b0001_1101),
                              new bit16(0b1001_1110_1101_0110),
                              new bit8(0b0010_1011),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -444,7 +464,7 @@ namespace BitCollections.Tests
                              new bit8(0b0001_1101),
                              new bit8(0b1101_0110),
                              new bit16(0b0010_1011_1001_1110),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -455,7 +475,7 @@ namespace BitCollections.Tests
                              new bit16(0b0001_1101_1011_0101),
                              new bit16(0b1001_1110_1101_0110),
                              new bit16(0b1101_0010_0010_1011),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -466,7 +486,7 @@ namespace BitCollections.Tests
                              new bit16(0b0001_1101_1011_0101),
                              new bit16(0b1001_1110_1101_0110),
                              new bit8(0b0010_1011),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -477,7 +497,7 @@ namespace BitCollections.Tests
                              new bit16(0b0001_1101_1011_0101),
                              new bit8(0b1101_0110),
                              new bit16(0b0010_1011_1001_1110),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -488,7 +508,7 @@ namespace BitCollections.Tests
                              new bit8(0b1011_0101),
                              new bit16(0b1101_0110_0001_1101),
                              new bit16(0b0010_1011_1001_1110),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -499,7 +519,7 @@ namespace BitCollections.Tests
                              new bit8(0b1001_1110),
                              new bit8(0b0010_1011),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -510,7 +530,7 @@ namespace BitCollections.Tests
                              new bit32(0b1001_1110_1101_0110_0001_1101_1011_0101),
                              new bit8(0b0010_1011),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -521,7 +541,7 @@ namespace BitCollections.Tests
                              new bit8(0b1011_0101),
                              new bit32(0b0010_1011_1001_1110_1101_0110_0001_1101),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -532,7 +552,7 @@ namespace BitCollections.Tests
                              new bit8(0b1011_0101),
                              new bit8(0b0001_1101),
                              new bit32(0b1101_0010_0010_1011_1001_1110_1101_0110),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -543,7 +563,7 @@ namespace BitCollections.Tests
                              new bit8(0b1011_0101),
                              new bit8(0b0001_1101),
                              new bit8(0b1101_0110),
-                             new bit32(0b1011_0001_1101_0010_0010_1011_1001_1110)).intern
+                             new bit32(0b1011_0001_1101_0010_0010_1011_1001_1110)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -553,7 +573,7 @@ namespace BitCollections.Tests
             Assert.AreEqual(new bit64(new bit32(0b1101_0110_0001_1101_1011_0101_1101_1110),
                              new bit16(0b0010_1011_1001_1110),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -563,7 +583,7 @@ namespace BitCollections.Tests
             Assert.AreEqual(new bit64(new bit32(0b1101_0110_0001_1101_1011_0101_1101_1110),
                              new bit8(0b1001_1110),
                              new bit16(0b1101_0010_0010_1011),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -573,7 +593,7 @@ namespace BitCollections.Tests
             Assert.AreEqual(new bit64(new bit32(0b1101_0110_0001_1101_1011_0101_1101_1110),
                              new bit8(0b1001_1110),
                              new bit8(0b0010_1011),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -583,7 +603,7 @@ namespace BitCollections.Tests
             Assert.AreEqual(new bit64(new bit8(0b1101_1110),
                              new bit32(0b1001_1110_1101_0110_0001_1101_1011_0101),
                              new bit16(0b1101_0010_0010_1011),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -593,7 +613,7 @@ namespace BitCollections.Tests
             Assert.AreEqual(new bit64(new bit8(0b1101_1110),
                              new bit32(0b1001_1110_1101_0110_0001_1101_1011_0101),
                              new bit8(0b0010_1011),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -603,7 +623,7 @@ namespace BitCollections.Tests
             Assert.AreEqual(new bit64(new bit8(0b1101_1110),
                              new bit8(0b1011_0101),
                              new bit32(0b0010_1011_1001_1110_1101_0110_0001_1101),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -613,7 +633,7 @@ namespace BitCollections.Tests
             Assert.AreEqual(new bit64(new bit16(0b1011_0101_1101_1110),
                              new bit32(0b0010_1011_1001_1110_1101_0110_0001_1101),
                              new bit8(0b1101_0010),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -623,7 +643,7 @@ namespace BitCollections.Tests
             Assert.AreEqual(new bit64(new bit16(0b1011_0101_1101_1110),
                              new bit8(0b0001_1101),
                              new bit32(0b1101_0010_0010_1011_1001_1110_1101_0110),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -633,7 +653,7 @@ namespace BitCollections.Tests
             Assert.AreEqual(new bit64(new bit16(0b1011_0101_1101_1110),
                              new bit8(0b0001_1101),
                              new bit8(0b1101_0110),
-                             new bit32(0b1011_0001_1101_0010_0010_1011_1001_1110)).intern
+                             new bit32(0b1011_0001_1101_0010_0010_1011_1001_1110)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -643,7 +663,7 @@ namespace BitCollections.Tests
             Assert.AreEqual(new bit64(new bit8(0b1101_1110),
                              new bit16(0b0001_1101_1011_0101),
                              new bit32(0b1101_0010_0010_1011_1001_1110_1101_0110),
-                             new bit8(0b1011_0001)).intern
+                             new bit8(0b1011_0001)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -653,7 +673,7 @@ namespace BitCollections.Tests
             Assert.AreEqual(new bit64(new bit8(0b1101_1110),
                              new bit16(0b0001_1101_1011_0101),
                              new bit8(0b1101_0110),
-                             new bit32(0b1011_0001_1101_0010_0010_1011_1001_1110)).intern
+                             new bit32(0b1011_0001_1101_0010_0010_1011_1001_1110)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -663,7 +683,7 @@ namespace BitCollections.Tests
             Assert.AreEqual(new bit64(new bit8(0b1101_1110),
                              new bit8(0b1011_0101),
                              new bit16(0b1101_0110_0001_1101),
-                             new bit32(0b1011_0001_1101_0010_0010_1011_1001_1110)).intern
+                             new bit32(0b1011_0001_1101_0010_0010_1011_1001_1110)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -673,7 +693,7 @@ namespace BitCollections.Tests
             Assert.AreEqual(new bit64(new bit16(0b1011_0101_1101_1110),
                              new bit16(0b1101_0110_0001_1101),
                              new bit16(0b0010_1011_1001_1110),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -682,7 +702,7 @@ namespace BitCollections.Tests
         {
             Assert.AreEqual(new bit64(new bit32(0b1101_0110_0001_1101_1011_0101_1101_1110),
                              new bit16(0b0010_1011_1001_1110),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -691,7 +711,7 @@ namespace BitCollections.Tests
         {
             Assert.AreEqual(new bit64(new bit16(0b1011_0101_1101_1110),
                              new bit32(0b0010_1011_1001_1110_1101_0110_0001_1101),
-                             new bit16(0b1011_0001_1101_0010)).intern
+                             new bit16(0b1011_0001_1101_0010)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -700,7 +720,7 @@ namespace BitCollections.Tests
         {
             Assert.AreEqual(new bit64(new bit16(0b1011_0101_1101_1110),
                              new bit16(0b1101_0110_0001_1101),
-                             new bit32(0b1011_0001_1101_0010_0010_1011_1001_1110)).intern
+                             new bit32(0b1011_0001_1101_0010_0010_1011_1001_1110)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -708,7 +728,7 @@ namespace BitCollections.Tests
         public static void Constructor_bit32x2()
         {
             Assert.AreEqual(new bit64(new bit32(0b1101_0110_0001_1101_1011_0101_1101_1110),
-                             new bit32(0b1011_0001_1101_0010_0010_1011_1001_1110)).intern
+                             new bit32(0b1011_0001_1101_0010_0010_1011_1001_1110)).Bits
                    == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110, true);
         }
 
@@ -810,586 +830,879 @@ namespace BitCollections.Tests
             {
                 bit64 test = TestData_LHS;
                 test[i] = false;
-                result &= test.intern == (TestData_LHS.intern & ~(1ul << i));
+                result &= test.Bits == (TestData_LHS.Bits & ~(1ul << i));
             }
 
             for (int i = 0; i < 64; i++)
             {
                 bit64 test = TestData_LHS;
                 test[i] = true;
-                result &= test.intern == (TestData_LHS.intern | (1ul << i));
+                result &= test.Bits == (TestData_LHS.Bits | (1ul << i));
             }
 
             Assert.AreEqual(result, true);
         }
 
+        
         [Test]
-        public static void IndexOfFirst()
+        public static void SetReplicate()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                bool b = RandomBool;
+                bit64 t = Random.SetReplicate(b);
 
-            result &= TestData_LHS.IndexOfFirst() == 1; 
-            result &= TestData_RHS.IndexOfFirst() == 1;
-
-            result &= TestData_LHS.IndexOfFirst(36, 10) == 36;
-            result &= TestData_RHS.IndexOfFirst(44, 10) == 45;
-
-            Assert.AreEqual(result, true);
+                for (int j = 0; j < 64; j++)
+                {
+                    Assert.AreEqual(b, t[j]);
+                }
+            }
         }
 
         [Test]
-        public static void IndexOfLast()
+        public static void SetReplicate_BitField()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                bool b = RandomBool;
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t0 = Random;
+                bit64 t1 = t0.SetReplicate(idx, num, b);
 
-            result &= TestData_LHS.IndexOfLast() == 63; 
-            result &= TestData_RHS.IndexOfLast() == 63;
-
-            result &= TestData_LHS.IndexOfLast(55, 5) == 56;
-            result &= TestData_RHS.IndexOfLast(44, 10) == 53;
-
-            Assert.AreEqual(result, true);
+                AssertBitsOutsideFieldAreUntouched(t0, t1, idx, num);
+                for (int j = 0; j < num; j++)
+                {
+                    Assert.AreEqual(t1[j + idx], b);
+                }
+            }
         }
 
         [Test]
         public static void ResetFirst()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                bit64 t0 = Random;
+                bit64 t1 = t0.ResetFirst();
 
+                int iof = t0.IndexOfFirst();
+                for (int j = 0; j < 64; j++)
+                {
+                    if (j == iof)
+                    {
+                        Assert.IsFalse(t1[j]);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(t0[j], t1[j]);
+                    }
+                }
+            }
+        }
 
-            bit64 _0 = TestData_LHS;
-            bit64 _1 = TestData_RHS;
+        [Test]
+        public static void ResetFirst_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t0 = Random;
+                bit64 t1 = t0.ResetFirst(idx, num);
 
-            _0.ResetFirst();
-            result &= _0.intern == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1100;
-            _1.ResetFirst();
-            result &= _1.intern == 0b1110_1100_1011_0001_1010_1111_1010_1010_1001_1011_1101_0001_1011_0110_0000_0100;
-
-            _0 = TestData_LHS;
-            _1 = TestData_RHS;
-
-            _0.ResetFirst(32, 4);
-            result &= _0.intern == 0b1011_0001_1101_0010_0010_1011_1001_1100_1101_0110_0001_1101_1011_0101_1101_1110;
-            _1.ResetFirst(32, 4);
-            result &= _1.intern == 0b1110_1100_1011_0001_1010_1111_1010_1000_1001_1011_1101_0001_1011_0110_0000_0110;
-
-
-            Assert.AreEqual(result, true);
+                int iof = t0.IndexOfFirst(idx, num);
+                for (int j = 0; j < 64; j++)
+                {
+                    if (j == iof)
+                    {
+                        Assert.IsFalse(t1[j]);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(t0[j], t1[j]);
+                    }
+                }
+            }
         }
 
         [Test]
         public static void SetFirst()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                bit64 t0 = Random;
+                bit64 t1 = t0.SetFirst();
 
+                int iof = (!t0).IndexOfFirst();
+                for (int j = 0; j < 64; j++)
+                {
+                    if (j == iof)
+                    {
+                        Assert.IsTrue(t1[j]);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(t0[j], t1[j]);
+                    }
+                }
+            }
+        }
 
-            bit64 _0 = TestData_LHS;
-            bit64 _1 = TestData_RHS;
+        [Test]
+        public static void SetFirst_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t0 = Random;
+                bit64 t1 = t0.SetFirst(idx, num);
 
-            _0.SetFirst();
-            result &= _0.intern == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1111;
-            _1.SetFirst();
-            result &= _1.intern == 0b1110_1100_1011_0001_1010_1111_1010_1010_1001_1011_1101_0001_1011_0110_0000_0111;
-
-            _0 = TestData_LHS;
-            _1 = TestData_RHS;
-
-            _0.SetFirst(32, 4);
-            result &= _0.intern == 0b1011_0001_1101_0010_0010_1011_1001_1111_1101_0110_0001_1101_1011_0101_1101_1110;
-            _1.SetFirst(32, 4);
-            result &= _1.intern == 0b1110_1100_1011_0001_1010_1111_1010_1011_1001_1011_1101_0001_1011_0110_0000_0110;
-
-
-            Assert.AreEqual(result, true);
+                int iof = (!t0).IndexOfFirst(idx, num);
+                for (int j = 0; j < 64; j++)
+                {
+                    if (j == iof)
+                    {
+                        Assert.IsTrue(t1[j]);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(t0[j], t1[j]);
+                    }
+                }
+            }
         }
 
         [Test]
         public static void ResetLast()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                bit64 t0 = Random;
+                bit64 t1 = t0.ResetLast();
 
+                int iof = t0.IndexOfLast();
+                for (int j = 0; j < 64; j++)
+                {
+                    if (j == iof)
+                    {
+                        Assert.IsFalse(t1[j]);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(t0[j], t1[j]);
+                    }
+                }
+            }
+        }
 
-            bit64 _0 = TestData_LHS;
-            bit64 _1 = TestData_RHS;
+        [Test]
+        public static void ResetLast_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t0 = Random;
+                bit64 t1 = t0.ResetLast(idx, num);
 
-            _0.ResetLast();
-            result &= _0.intern == 0b0011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110;
-            _1.ResetLast();
-            result &= _1.intern == 0b0110_1100_1011_0001_1010_1111_1010_1010_1001_1011_1101_0001_1011_0110_0000_0110;
-
-            _0 = TestData_LHS;
-            _1 = TestData_RHS;
-
-            _0.ResetLast(32, 4);
-            result &= _0.intern == 0b1011_0001_1101_0010_0010_1011_1001_0110_1101_0110_0001_1101_1011_0101_1101_1110;
-            _1.ResetLast(32, 8);
-            result &= _1.intern == 0b1110_1100_1011_0001_1010_1111_0010_1010_1001_1011_1101_0001_1011_0110_0000_0110;
-
-
-            Assert.AreEqual(result, true);
+                int iof = t0.IndexOfLast(idx, num);
+                for (int j = 0; j < 64; j++)
+                {
+                    if (j == iof)
+                    {
+                        Assert.IsFalse(t1[j]);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(t0[j], t1[j]);
+                    }
+                }
+            }
         }
 
         [Test]
         public static void SetLast()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                bit64 t0 = Random;
+                bit64 t1 = t0.SetLast();
 
+                int iof = (!t0).IndexOfLast();
+                for (int j = 0; j < 64; j++)
+                {
+                    if (j == iof)
+                    {
+                        Assert.IsTrue(t1[j]);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(t0[j], t1[j]);
+                    }
+                }
+            }
+        }
 
-            bit64 _0 = TestData_LHS;
-            bit64 _1 = TestData_RHS;
+        [Test]
+        public static void SetLast_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t0 = Random;
+                bit64 t1 = t0.SetLast(idx, num);
 
-            _0.SetLast();
-            result &= _0.intern == 0b1111_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110;
-            _1.SetLast();
-            result &= _1.intern == 0b1111_1100_1011_0001_1010_1111_1010_1010_1001_1011_1101_0001_1011_0110_0000_0110;
-
-            _0 = TestData_LHS;
-            _1 = TestData_RHS;
-
-            _0.SetLast(32, 8);
-            result &= _0.intern == 0b1011_0001_1101_0010_0010_1011_1101_1110_1101_0110_0001_1101_1011_0101_1101_1110;
-            _1.SetLast(32, 8);
-            result &= _1.intern == 0b1110_1100_1011_0001_1010_1111_1110_1010_1001_1011_1101_0001_1011_0110_0000_0110;
-
-
-            Assert.AreEqual(result, true);
+                int iof = (!t0).IndexOfLast(idx, num);
+                for (int j = 0; j < 64; j++)
+                {
+                    if (j == iof)
+                    {
+                        Assert.IsTrue(t1[j]);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(t0[j], t1[j]);
+                    }
+                }
+            }
         }
 
         [Test]
         public static void ShiftLeft()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                int n = RandomNumBits(0) % 64;
+                bit64 t0 = Random;
+                bit64 t1 = t0.ShiftLeft(n);
 
-            bit64 x = TestData_LHS;
-            x.ShiftLeft(28, 20, 10);
-            result &= x.intern == 0b1011_0001_1101_0010_0111_1011_0100_0000_0000_0110_0001_1101_1011_0101_1101_1110;
+                for (int j = 0; j < 64; j++)
+                {
+                    if (j < n)
+                    {
+                        Assert.IsFalse(t1[j]);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(t0[j - n], t1[j]);
+                    }
+                }
+            }
+        }
 
-            x = TestData_RHS;
-            x.ShiftLeft(36, 11, 5);
-            result &= x.intern == 0b1110_1100_1011_0001_1111_0100_0000_1010_1001_1011_1101_0001_1011_0110_0000_0110;
-
-            Assert.AreEqual(result, true);
+        [Test]
+        public static void ShiftLeft_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                int n = (int)rng.NextLong(0, num + 1);
+                bit64 t0 = Random;
+                bit64 t1 = t0.ShiftLeft(idx, num, n);
+                
+                AssertBitsOutsideFieldAreUntouched(t0, t1, idx, num);
+                for (int j = 0; j < n; j++)
+                {
+                    Assert.IsFalse(t1[j + idx]);
+                }
+                for (int j = n; j < num - n; j++)
+                {
+                    Assert.AreEqual(t0[j + idx - n], t1[j + idx]);
+                }
+            }
         }
 
         [Test]
         public static void ShiftRight()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                int n = RandomNumBits(0) % 64;
+                bit64 t0 = Random;
+                bit64 t1 = t0.ShiftRight(n);
 
-            bit64 x = TestData_LHS;
-            x.ShiftRight(28, 20, 10);
-            result &= x.intern == 0b1011_0001_1101_0010_0000_0000_0000_1010_1110_0110_0001_1101_1011_0101_1101_1110;
+                for (int j = 0; j < 64; j++)
+                {
+                    if (j >= 64 - n)
+                    {
+                        Assert.IsFalse(t1[j]);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(t0[j + n], t1[j]);
+                    }
+                }
+            }
+        }
 
-            x = TestData_RHS;
-            x.ShiftRight(36, 11, 5);
-            result &= x.intern == 0b1110_1100_1011_0001_1000_0001_0111_1010_1001_1011_1101_0001_1011_0110_0000_0110;
-
-            Assert.AreEqual(result, true);
+        [Test]
+        public static void ShiftRight_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                int n = (int)rng.NextLong(0, num + 1);
+                bit64 t0 = Random;
+                bit64 t1 = t0.ShiftRight(idx, num, n);
+                
+                AssertBitsOutsideFieldAreUntouched(t0, t1, idx, num);
+                for (int j = idx; j < idx + num - n; j++)
+                {
+                    Assert.AreEqual(t0[j + n], t1[j]);
+                }
+                for (int j = idx + num - n; j < idx + num; j++)
+                {
+                    Assert.IsFalse(t1[j]);
+                }
+            }
         }
 
         [Test]
         public static void RotateLeft()
-        {   
-            bool result = true;
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int n = RandomNumBits(0);
+                bit64 t0 = Random;
+                bit64 t1 = t0.RotateLeft(n);
 
-            bit64 x = TestData_LHS;
-            x.RotateLeft(28, 20, 10);
-            result &= x.intern == 0b1011_0001_1101_0010_0111_1011_0100_1010_1110_0110_0001_1101_1011_0101_1101_1110;
+                for (int j = 0; j < 64; j++)
+                {
+                    Assert.AreEqual(t0[(j - n + 64) % 64], t1[j]);
+                }
+            }
+        }
 
-            x = TestData_RHS;
-            x.RotateLeft(36, 11, 5);
-            result &= x.intern == 0b1110_1100_1011_0001_1111_0100_1011_1010_1001_1011_1101_0001_1011_0110_0000_0110;
+        [Test]
+        public static void RotateLeft_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                int n = (int)rng.NextLong(0, num + 1);
+                bit64 t0 = Random;
+                bit64 t1 = num == 0 ? t0 : t0.RotateLeft(idx, num, n);
+                
+                AssertBitsOutsideFieldAreUntouched(t0, t1, idx, num);
+                if (n == 0)
+                {
+                    Assert.AreEqual(t0.Bits, t1.Bits);
+                }
+                else
+                {
+                    for (int j = 0; j < num; j++)
+                    {
+                        int srcInField = (j - n + num) % num;
+                        int srcIndex = idx + srcInField;
+                        int dstIndex = idx + j;
 
-            Assert.AreEqual(result, true);
+                        Assert.AreEqual(t0[srcIndex], t1[dstIndex]);
+                    }
+                }
+            }
         }
 
         [Test]
         public static void RotateRight()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                int n = RandomNumBits(0);
+                bit64 t0 = Random;
+                bit64 t1 = t0.RotateRight(n);
 
-            bit64 x = TestData_LHS;
-            x.RotateRight(28, 20, 10);
-            result &= x.intern == 0b1011_0001_1101_0010_0111_1011_0100_1010_1110_0110_0001_1101_1011_0101_1101_1110;
-
-            x = TestData_RHS;
-            x.RotateRight(36, 11, 5);
-            result &= x.intern == 0b1110_1100_1011_0001_1110_1001_0111_1010_1001_1011_1101_0001_1011_0110_0000_0110;
-
-            Assert.AreEqual(result, true);
+                for (int j = 0; j < 64; j++)
+                {
+                    Assert.AreEqual(t0[(j + n + 64) % 64], t1[j]);
+                }
+            }
         }
 
         [Test]
-        public static void Swap()
+        public static void RotateRight_BitField()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                int n = (int)rng.NextLong(0, num + 1);
+                bit64 t0 = Random;
+                bit64 t1 = num == 0 ? t0 : t0.RotateRight(idx, num, n);
+                
+                AssertBitsOutsideFieldAreUntouched(t0, t1, idx, num);
+                if (n == 0)
+                {
+                    Assert.AreEqual(t0.Bits, t1.Bits);
+                }
+                else
+                {
+                    for (int j = 0; j < num; j++)
+                    {
+                        int srcInField = (j + n + num) % num;
+                        int srcIndex = idx + srcInField;
+                        int dstIndex = idx + j;
 
-            bit64 x = TestData_LHS;
-            x.Swap(13, 55);
-            result &= x.intern == 0b1011_0001_1101_0010_0010_1011_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110;
-
-            x = TestData_RHS;
-            x.Swap(11, 47);
-            result &= x.intern == 0b1110_1100_1011_0001_0010_1111_1010_1010_1001_1011_1101_0001_1011_1110_0000_0110;
-
-
-            x = TestData_LHS;
-            x.Swap(2, 32, 12);
-            result &= x.intern == 0b1011_0001_1101_0010_0010_1101_0111_0111_1101_0110_0001_1101_1010_1110_0111_1010;
-
-            x = TestData_RHS;
-            x.Swap(4, 44, 10);
-            result &= x.intern == 0b1110_1100_1011_0110_0000_1111_1010_1010_1001_1011_1101_0001_1011_0001_1010_0110;
-
-            Assert.AreEqual(result, true);
-        }
-
-        [Test]
-        public static void Flip()
-        {
-            bool result = true;
-
-            bit64 x = TestData_LHS;
-            x.Flip(32, 20); 
-            result &= x.intern == 0b1011_0001_1101_1101_1101_0100_0110_0001_1101_0110_0001_1101_1011_0101_1101_1110;
-
-            x = TestData_RHS;
-            x.Flip(20, 20);
-            result &= x.intern == 0b1110_1100_1011_0001_1010_1111_0101_0101_0110_0100_0010_0001_1011_0110_0000_0110;
-
-            Assert.AreEqual(result, true);
+                        Assert.AreEqual(t0[srcIndex], t1[dstIndex]);
+                    }
+                }
+            }
         }
 
         [Test]
         public static void Reverse()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                bit64 t0 = Random;
+                bit64 t1 = t0.Reverse();
 
-            bit64 x = TestData_LHS;
-            x.Reverse();
-            result &= x.intern == 0b0111_1011_1010_1101_1011_1000_0110_1011_0111_1001_1101_0100_0100_1011_1000_1101;
-
-            x = TestData_RHS;
-            x.Reverse();
-            result &= x.intern == 0b0110_0000_0110_1101_1000_1011_1101_1001_0101_0101_1111_0101_1000_1101_0011_0111;
-
-            x = TestData_LHS;
-            x.Reverse(24, 20);
-            result &= x.intern == 0b1011_0001_1101_0010_0010_0110_1011_0111_1001_1101_0001_1101_1011_0101_1101_1110;
-
-            x = TestData_RHS;
-            x.Reverse(36, 16);
-            result &= x.intern == 0b1110_1100_1011_0101_1111_0101_1000_1010_1001_1011_1101_0001_1011_0110_0000_0110;
-
-            Assert.AreEqual(result, true);
+                for (int j = 0; j < 64; j++)
+                {
+                    Assert.AreEqual(t0[(64 - 1) - j], t1[j]);
+                }
+            }
         }
 
         [Test]
-        public static void SetBits()
+        public static void Reverse_BitField()
         {
-            bool result = true;
-
-            bit64 x = TestData_LHS;
-            x.SetBits(40, 16, true);
-            result &= x.intern == 0b1011_0001_1111_1111_1111_1111_1001_1110_1101_0110_0001_1101_1011_0101_1101_1110;
-
-            x = TestData_RHS;
-            x.SetBits(24, 28, false);
-            result &= x.intern == 0b1110_1100_1011_0000_0000_0000_0000_0000_0000_0000_1101_0001_1011_0110_0000_0110;
-
-            Assert.AreEqual(result, true);
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t0 = Random;
+                bit64 t1 = t0.Reverse(idx, num);
+                
+                AssertBitsOutsideFieldAreUntouched(t0, t1, idx, num);
+                for (int j = 0; j < num; j++)
+                {
+                    Assert.AreEqual(t0[(num - 1) - j + idx], t1[j + idx]);
+                }
+            }
         }
 
+        [Test]
+        public static void Swap()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx0 = RandomIndex();
+                int idx1 = RandomIndex();
+                bit64 t0 = Random;
+                bit64 t1 = t0.Swap(idx0, idx1);
+                
+                Assert.AreEqual(t0[idx0], t1[idx1]);
+                Assert.AreEqual(t0[idx1], t1[idx0]);
+
+                for (int j = 0; j < 64; j++)
+                {
+                    if (j != idx0
+                     && j != idx1)
+                    {
+                        Assert.AreEqual(t0[j], t1[j]);
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public static void Swap_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int num = (int)rng.NextLong(0, (64 / 2) + 1);
+                int idx0 = (int)rng.NextLong(0, 64 - 2 * num + tobyte(num != 0));
+                int idx1 = (int)rng.NextLong(idx0 + num, 64 - num + tobyte(num != 0));
+                bit64 t0 = Random;
+                bit64 t1 = t0.Swap(idx0, idx1, num);
+
+                for (int j = 0; j < num; j++)
+                {
+                    Assert.AreEqual(t0[j + idx0], t1[j + idx1]);
+                    Assert.AreEqual(t0[j + idx1], t1[j + idx0]);
+                }
+
+                for (int j = 0; j < 64; j++)
+                {
+                    if (!isinrange(j, idx0, idx0 + num - 1)
+                     && !isinrange(j, idx1, idx1 + num - 1))
+                    {
+                        Assert.AreEqual(t0[j], t1[j]);
+                    }
+                }
+            }
+        }
+        
+        [Test]
+        public static void Flip()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                bit64 t0 = Random;
+                bit64 t1 = t0.Flip();
+
+                for (int j = 0; j < 64; j++)
+                {
+                    Assert.AreEqual(t1[j], !t0[j]);
+                }
+            }
+        }
+
+        [Test]
+        public static void Flip_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t0 = Random;
+                bit64 t1 = t0.Flip(idx, num);
+
+                AssertBitsOutsideFieldAreUntouched(t0, t1, idx, num);
+                for (int j = 0; j < num; j++)
+                {
+                    Assert.AreEqual(t1[j + idx], !t0[j + idx]);
+                }
+            }
+        }
+        
+        [Test]
+        public static void IndexOfFirst()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                bit64 t = Random;
+                int iof = t.IndexOfFirst();
+
+                if (iof != 64)
+                {
+                    Assert.IsTrue(t[iof]);
+                }
+                for (int j = 0; j < min(iof, 64); j++)
+                {
+                    Assert.IsFalse(t[j]);
+                }
+            }
+        }
+
+        [Test]
+        public static void IndexOfFirst_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t = Random;
+                int iof = t.IndexOfFirst(idx, num);
+
+                if (num == 0)
+                {
+                    Assert.IsFalse(isinrange(iof, 0, 63));
+                    break;
+                }
+
+                if (iof != 64)
+                {
+                    Assert.IsTrue(t[iof]);
+                }
+                for (int j = idx; j < min(iof, idx + num); j++)
+                {
+                    Assert.IsFalse(t[j]);
+                }
+            }
+        }
+        
+        [Test]
+        public static void IndexOfLast()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                bit64 t = Random;
+                int iol = t.IndexOfLast();
+
+                if (iol >= 0)
+                {
+                    Assert.IsTrue(t[iol]);
+                    for (int j = 63; j > iol; j--)
+                    {
+                        Assert.IsFalse(t[j]);
+                    }
+                }
+                else
+                {
+                    for (int j = 63; j >= 0; j--)
+                    {
+                        Assert.IsFalse(t[j]);
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public static void IndexOfLast_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t = Random;
+                int iol = t.IndexOfLast(idx, num);
+                
+                if (num == 0)
+                {
+                    Assert.IsFalse(isinrange(iol, 0, 63));
+                    break;
+                }
+
+                if (iol >= 0)
+                {
+                    Assert.IsTrue(t[iol]);
+                    for (int j = idx + num - 1; j > iol; j--)
+                    {
+                        Assert.IsFalse(t[j]);
+                    }
+                }
+                else
+                {
+                    for (int j = idx + num - 1; j >= idx; j--)
+                    {
+                        Assert.IsFalse(t[j]);
+                    }
+                }
+            }
+        }
+
+        private static int __countbits(bit64 t, int idx, int num)
+        {
+            int r = 0;
+            for (int i = 0; i < num; i++)
+            {
+                r += tobyte(t[i + idx]);
+            }
+            return r;
+        }
+        
         [Test]
         public static void CountBits()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                bit64 t = Random;
 
-            bit64 x = TestData_LHS;
-            result &= (x.CountBits(24, 22) == 14);
-
-            x = TestData_RHS;
-            result &= (x.CountBits(16, 40) == 23);
-
-            Assert.AreEqual(result, true);
+                Assert.AreEqual(t.CountBits(), __countbits(t, 0, 64));
+            }
         }
 
+        [Test]
+        public static void CountBits_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t = Random;
+                
+                Assert.AreEqual(t.CountBits(idx, num), __countbits(t, idx, num));
+            }
+        }
+        
+        private static int __longeststring(bool value, bit64 t, int idx, int num)
+        {
+            if (num <= 0) 
+            {
+                return 0;
+            }
+
+            int maximum = 0;
+            int current = 0;
+            for (int i = idx; i < idx + num; i++)
+            {
+                if (t[i] == value)
+                {
+                    maximum = max(++current, maximum);
+                }
+                else
+                {
+                    current = 0;
+                }
+            }
+
+            return maximum;
+        }
+
+        [Test]
+        public static void FindString()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                bit64 t = Random;
+                int count = (int)rng.NextLong(0, 64 + 1);
+
+                int iof = t.FindString(true, count);
+                if (iof != 64)
+                {
+                    if (count != 0)
+                    {
+                        Assert.IsTrue(__longeststring(true, t, 0, iof) < count);
+                    }
+                    for (int j = 0; j < count; j++)
+                    {
+                        Assert.IsTrue(t[j + iof]);
+                    }
+                }
+
+                iof = t.FindString(false, count);
+                if (iof != 64)
+                {
+                    if (count != 0)
+                    {
+                        Assert.IsTrue(__longeststring(false, t, 0, iof) < count);
+                    }
+                    for (int j = 0; j < count; j++)
+                    {
+                        Assert.IsFalse(t[j + iof]);
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public static void FindString_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                bit64 t = Random;
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                int count = (int)rng.NextLong(0, num + 1);
+
+                int iof = t.FindString(idx, num, true, count);
+                if (iof != 64)
+                {
+                    if (count != 0)
+                    {
+                        Assert.IsTrue(__longeststring(true, t, idx, iof - idx) < count);
+                    }
+                    for (int j = 0; j < count; j++)
+                    {
+                        Assert.IsTrue(t[j + iof]);
+                    }
+                }
+                
+                iof = t.FindString(idx, num, false, count);
+                if (iof != 64)
+                {
+                    if (count != 0)
+                    {
+                        Assert.IsTrue(__longeststring(false, t, idx, iof - idx) < count);
+                    }
+                    for (int j = 0; j < count; j++)
+                    {
+                        Assert.IsFalse(t[j + iof]);
+                    }
+                }
+            }
+        }
+        
         [Test]
         public static void TestAll()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                bit64 t = Random;
 
-            bit64 x = TestData_LHS;
-            result &= (x.TestAll() == false);
-            result &= (x.TestAll(33, 4) == true);
-
-            x = TestData_RHS;
-            result &= (x.TestAll() == false);
-            result &= (x.TestAll(35, 9) == false);
-
-            Assert.AreEqual(result, true);
+                Assert.AreEqual(t.TestAll(), __countbits(t, 0, 64) == 64);
+            }
         }
 
+        [Test]
+        public static void TestAll_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t = Random;
+
+                Assert.AreEqual(t.TestAll(idx, num), __countbits(t, idx, num) == num);
+            }
+        }
+        
         [Test]
         public static void TestAny()
         {
-            bool result = true;
+            for (int i = 0; i < 128; i++)
+            {
+                bit64 t = Random;
 
-            bit64 x = TestData_LHS;
-            result &= (x.TestAny() == true);
-            result &= (x.TestAny(36, 9) == true);
-
-            x = TestData_RHS;
-            result &= (x.TestAny() == true);
-            result &= (x.TestAny(3, 6) == false);
-
-            Assert.AreEqual(result, true);
+                Assert.AreEqual(t.TestAny(), __countbits(t, 0, 64) != 0);
+            }
         }
 
+        [Test]
+        public static void TestAny_BitField()
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t = Random;
+
+                Assert.AreEqual(t.TestAny(idx, num), __countbits(t, idx, num) != 0);
+            }
+        }
+        
         [Test]
         public static void TestNone()
         {
-            bool result = true;
-
-            bit64 x = TestData_LHS;
-            result &= (x.TestNone() == false);
-            result &= (x.TestNone(36, 8) == false);
-
-            x = TestData_RHS;
-            result &= (x.TestNone() == false);
-            result &= (x.TestNone(49, 3) == true);
-
-            Assert.AreEqual(result, true);
-        }
-
-        [Test]
-        public static void Shuffle()
-        {
-            Random64 rng = new Random64(123);
-
-            for (int i = 0; i < 16; i++)
+            for (int i = 0; i < 128; i++)
             {
-                bit64 x = TestData_LHS;
+                bit64 t = Random;
 
-                uint bits = x.CountBits();
-
-                x.Shuffle(ref rng);
-
-                Assert.AreEqual(bits, x.CountBits());
+                Assert.AreEqual(t.TestNone(), __countbits(t, 0, 64) == 0);
             }
         }
 
         [Test]
-        public static void ShuffleBitField()
+        public static void TestNone_BitField()
         {
-            Random64 rng = new Random64(123);
-
-            for (int i = 0; i < 16; i++)
+            for (int i = 0; i < 128; i++)
             {
-                bit64 x = TestData_LHS;
-                int index = (int)rng.NextLong(0, x.Length);
-                int numBits = (int)rng.NextLong(1, x.Length - index + 1);
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t = Random;
 
-                uint bits = x.CountBits(index, numBits);
-
-                x.Shuffle(index, numBits, ref rng);
-
-                Assert.AreEqual(bits, x.CountBits(index, numBits));
+                Assert.AreEqual(t.TestNone(idx, num), __countbits(t, idx, num) == 0);
             }
         }
-
-        public static void CopyToArray_Base(int srcIndex = 0)
+        
+        [Test]
+        public static void TestNotAll()
         {
-            Random64 rng = new Random64(265);
-
-            for (int i = 0; i < 16; i++)
+            for (int i = 0; i < 128; i++)
             {
-                bit64 bits = (bit64)rng.NextLong();
-                NativeArray<bool> array = new NativeArray<bool>((int)rng.NextLong(bits.Length, 200), Allocator.Temp);
-                NativeArray<bool> arrayCpy = new NativeArray<bool>(array.Length, Allocator.Temp);
+                bit64 t = Random;
 
-                for (int j = 0; j < array.Length; j++)
-                {
-                    bool next = rng.NextBool();
-                    array[j] = next;
-                    arrayCpy[j] = next;
-                }
-
-                for (int numValues = 1; numValues <= bits.Length - srcIndex; numValues++)
-                {
-                    int dstIndex = (int)rng.NextLong(0, array.Length - (numValues - 1));
-                    bits.CopyTo(array, dstIndex, numValues, srcIndex);
-
-                    for (int k = 0;k < array.Length;k++)
-                    {
-                        if (k >= dstIndex && k <= dstIndex + (numValues - 1))
-                        {
-                            Assert.AreEqual(array[k], bits[k - dstIndex + srcIndex]);
-                        }
-                        else
-                        {
-                            Assert.AreEqual(array[k], arrayCpy[k]);
-                        }
-                    }
-                    
-                    for (int j = dstIndex; j < dstIndex + numValues; j++)
-                    {
-                        array[j] = arrayCpy[j];
-                    }
-                }
-
-                array.Dispose();
-                arrayCpy.Dispose();
-            }
-        }
-
-        public static void CopyToBitArray_IndexIsMultipleOf8_Base(int srcIndex = 0)
-        {
-            Random64 rng = new Random64(265);
-
-            for (int i = 0; i < 16; i++)
-            {
-                bit64 bits = (bit64)rng.NextLong();
-                NativeBitArray array = new NativeBitArray((int)rng.NextLong(bits.Length, 200), Allocator.Temp);
-                NativeBitArray arrayCpy = new NativeBitArray(array.Length, Allocator.Temp);
-
-                for (int j = 0; j < array.Length; j++)
-                {
-                    bool next = rng.NextBool();
-                    array[j] = next;
-                    arrayCpy[j] = next;
-                }
-
-                for (int numValues = 1; numValues <= bits.Length - srcIndex; numValues++)
-                {
-                    int dstIndex = 8 * (int)rng.NextLong(0, (array.Length - (numValues - 1)) / 8);
-                    bits.CopyTo(array, dstIndex, numValues, srcIndex);
-
-                    for (int k = 0;k < array.Length;k++)
-                    {
-                        if (k >= dstIndex && k <= dstIndex + (numValues - 1))
-                        {
-                            Assert.AreEqual(array[k], bits[k - dstIndex + srcIndex]);
-                        }
-                        else
-                        {
-                            Assert.AreEqual(array[k], arrayCpy[k]);
-                        }
-                    }
-                    
-                    for (int j = dstIndex; j < dstIndex + numValues; j++)
-                    {
-                        array[j] = arrayCpy[j];
-                    }
-                }
-
-                array.Dispose();
-                arrayCpy.Dispose();
-            }
-        }
-
-        public static void CopyToBitArray_IndexIsNotMultipleOf8_Base(int srcIndex = 0)
-        {
-            Random64 rng = new Random64(265);
-
-            for (int i = 0; i < 16; i++)
-            {
-                bit64 bits = (bit64)rng.NextLong();
-                NativeBitArray array = new NativeBitArray((int)rng.NextLong(bits.Length, 200), Allocator.Temp);
-                NativeBitArray arrayCpy = new NativeBitArray(array.Length, Allocator.Temp);
-
-                for (int j = 0; j < array.Length; j++)
-                {
-                    bool next = rng.NextBool();
-                    array[j] = next;
-                    arrayCpy[j] = next;
-                }
-
-                for (int numValues = 1; numValues <= bits.Length - srcIndex; numValues++)
-                {
-                    int dstIndex = (int)rng.NextLong(0, array.Length - (numValues - 1));
-                    if (dstIndex % 8 == 0)
-                    {
-                        if (dstIndex == 0)
-                        {
-                            if (numValues != bits.Length)
-                            {
-                                dstIndex++;
-                            }
-                        }
-                        else
-                        {
-                            dstIndex--;
-                        }
-                    }
-
-                    bits.CopyTo(array, dstIndex, numValues, srcIndex);
-
-                    for (int k = 0;k < array.Length;k++)
-                    {
-                        if (k >= dstIndex && k <= dstIndex + (numValues - 1))
-                        {
-                            Assert.AreEqual(array[k], bits[k - dstIndex + srcIndex]);
-                        }
-                        else
-                        {
-                            Assert.AreEqual(array[k], arrayCpy[k]);
-                        }
-                    }
-                    
-                    for (int j = dstIndex; j < dstIndex + numValues; j++)
-                    {
-                        array[j] = arrayCpy[j];
-                    }
-                }
-
-                array.Dispose();
-                arrayCpy.Dispose();
+                Assert.AreEqual(t.TestNotAll(), __countbits(t, 0, 64) != 64);
             }
         }
 
         [Test]
-        public static void CopyToArray()
+        public static void TestNotAll_BitField()
         {
-            CopyToArray_Base(0);
-        }
-
-        [Test]
-        public static void CopyToBitArray_IndexIsMultipleOf8()
-        {
-            CopyToBitArray_IndexIsMultipleOf8_Base(0);
-        }
-
-        [Test]
-        public static void CopyToBitArray_IndexIsNotMultipleOf8()
-        {
-            CopyToBitArray_IndexIsNotMultipleOf8_Base(0);
-        }
-
-        [Test]
-        public static void CopyToArray_VaryingSourceIndex()
-        {
-            for (int i = 1; i < 64; i++)
+            for (int i = 0; i < 128; i++)
             {
-                CopyToArray_Base(i);
-            }
-        }
+                int idx = RandomIndex();
+                int num = RandomNumBits(idx);
+                bit64 t = Random;
 
-        [Test]
-        public static void CopyToBitArray_IndexIsMultipleOf8_VaryingSourceIndex()
-        {
-            for (int i = 1; i < 64; i++)
-            {
-                CopyToBitArray_IndexIsMultipleOf8_Base(i);
-            }
-        }
-
-        [Test]
-        public static void CopyToBitArray_IndexIsNotMultipleOf8_VaryingSourceIndex()
-        {
-            for (int i = 1; i < 64; i++)
-            {
-                CopyToBitArray_IndexIsNotMultipleOf8_Base(i);
+                Assert.AreEqual(t.TestNotAll(idx, num), __countbits(t, idx, num) != num);
             }
         }
     }

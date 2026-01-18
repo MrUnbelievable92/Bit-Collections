@@ -1,16 +1,21 @@
 {
     "name": "BitCollections",
-    "rootNamespace": "",
+    "rootNamespace": "BitCollections",
     "references": [
         "Unity.Mathematics",
         "Unity.Collections",
         "MaxMath",
         "Unity.Burst",
         "CSharpDevTools",
-        "Unity.Jobs"
+        "SIMD Algorithms"
     ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
     "allowUnsafeCode": true,
     "overrideReferences": false,
+    "precompiledReferences": [],
     "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
     "noEngineReferences": false
 }

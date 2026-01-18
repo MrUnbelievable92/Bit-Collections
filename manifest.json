@@ -1,19 +1,19 @@
 {
   "name": "bitcollections",
   "displayName": "Bit Collections",
-  "version": "1.0.1",
-  "unity": "2020.2",
+  "version": "2.0.0",
+  "unity": "2021.3",
   "description": "Bit Collections is all about saving as much RAM and/or network bandwidth as possible, by providing array value types of single bits, aswell as array value types of signed- and unsigned integers with a given number of bits.",
    "keywords": [
     "Unity"
   ],
    "dependencies": {
-    "maxmath" : "2.2.0": "https://github.com/MrUnbelievable92/MaxMath.git",
-    "csharpdevtools" : "1.0.6": "https://github.com/MrUnbelievable92/C-Sharp-Dev-Tools.git",
-    "com.unity.burst": "1.4.3",
-    "com.unity.mathematics": "1.2.1",
-	"com.unity.collections": "0.14.0-preview.16",
-	"com.unity.jobs": "0.7.0-preview.17"
+    "csharpdevtools": "1.0.10": "https://github.com/MrUnbelievable92/C-Sharp-Dev-Tools.git",
+    "maxmath": "2.9.9": "https://github.com/MrUnbelievable92/MaxMath.git",
+    "simd_algorithms": "1.2.0": "https://github.com/MrUnbelievable92/SIMD-Algorithms.git",
+    "com.unity.burst": "1.8.26",
+    "com.unity.mathematics": "1.3.1",
+	"com.unity.collections": "1.2.4"
 	},
   "author": {
     "name": "Maximilian Kalimon",
