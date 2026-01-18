@@ -21,7 +21,7 @@ This package has the following dependencies:
 ### BitInt
 The most fundamental building block in this library is the interface `BitInt`. It defines how many bits an integer has and whether or not it is signed.
 All integers between 1 and 63 bits are defined as types, named `(U)Int[n]`, except for `Bit`, which is only available as an unsigned integer. Most of the time, these types are only used as generic type parameters; they should not be instantiated.
-![alt text](https://i.imgur.com/a/o3LQOGG.png)
+![alt text](https://imgur.com/a/o3LQOGG.png)
 
 ### Byte Ints	
 Among all `BitInt`s are all integers consisting of a multiple of eight bits, which are implemented as fully usable types with the entire standard C# API for integers, and they integrate with all C# integer and floating point types as well as `Unity.Mathematics` and `MaxMath` types such as vectors and `MaxMath.UInt128` or `MaxMath.quadruple`.
