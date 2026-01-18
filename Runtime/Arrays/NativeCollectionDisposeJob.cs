@@ -1,22 +1,29 @@
-﻿using Unity.Collections;
+using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Burst;
 
 namespace BitCollections
 {
-    [BurstCompile]  
+    [BurstCompile]
     [NativeContainer]
     unsafe internal struct NativeCollectionDisposeJob : IJob
     {
-        [NativeDisableUnsafePtrRestriction] public void* ptr;
+        [NativeDisableUnsafePtrRestriction]
+        public void* Ptr;
+        public Allocator Allocator;
 
-        public Allocator allocator;
+
+        public NativeCollectionDisposeJob(void* ptr, Allocator allocator)
+        {
+            Ptr = ptr;
+            Allocator = allocator;
+        }
 
 
         public void Execute()
         {
-            UnsafeUtility.Free(ptr, allocator);
+            UnsafeUtility.Free(Ptr, Allocator);
         }
     }
 }

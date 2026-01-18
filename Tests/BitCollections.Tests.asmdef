@@ -1,18 +1,22 @@
 {
     "name": "BitCollections.Tests",
+    "rootNamespace": "BitCollections.Tests",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "BitCollections",
         "MaxMath",
         "Unity.Mathematics",
-        "Unity.Collections"
+        "Unity.Collections",
+        "CSharpDevTools",
+        "Unity.Burst",
+        "SIMD Algorithms"
     ],
     "includePlatforms": [
         "Editor"
     ],
     "excludePlatforms": [],
-    "allowUnsafeCode": false,
+    "allowUnsafeCode": true,
     "overrideReferences": true,
     "precompiledReferences": [
         "nunit.framework.dll"
