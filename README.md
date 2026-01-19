@@ -85,7 +85,7 @@ Other than that, it behaves just like `NativeBitIntArray<T>`.
 
 ### Advanced Usage
 
-These four containers have optimized algorithms as member methods that avoid reading out/writing values individually. Where appropriate, they use `SIMDAlgorithms`' `Comparison` enum for advanced algorithms:
+These four containers have optimized algorithms as member methods that avoid reading out/writing values individually. Wherever possible, they accept an optional `SIMDAlgorithms.Comparison` enum parameter for advanced algorithms:
 ![alt text](https://i.imgur.com/sUYy9V0.png)
 While specialized algorithms cover many common operations, not everything can be generalized. To avoid iterating over each packed integer individually, these containers define optimized `T LoadVector<T>(int index)` and `void StoreVector<T>(T vector, int index)` member methods, which are powerful tools for SIMD processing of data in bulk:
 ![alt text](https://i.imgur.com/FFbFiPd.png)
