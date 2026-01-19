@@ -117,7 +117,7 @@ This library, on the other hand, focuses on:
 
 - XML documentation for each method and type is a priority.
 - Hash Maps with either key or value (or both) being a `BitInt` are next on the to-do-list and by far the most important missing feature.
-- Not everything is highly optimized. There are almost 64 * 64 = 4096 combinations between possible pairs of `BitInts`; combined with the fact that some algorithms don't have a generalized solution (especially when it comes to vectorization), this requires hand-optimized code.
+- Not everything is highly optimized. There are almost 128 * 128 = 16384 combinations between possible pairs of `BitInts`; combined with the fact that some algorithms don't have a generalized solution (especially when it comes to vectorization), this requires hand-optimized code.
 If you require a particular operation to be optimized (even if it is only for a very specific `BitInt`), [please open an issue](https://github.com/MrUnbelievable92/Bit-Collections/issues/new).
 - Based on `MaxMath.UInt128`, fixed-size bitfields between 9 and 16 bytes (inclusive) are under consideration, due to native double register shift instructions existing
 - Custom floats (sign bit - yes or no? how many mantissa bits? how many exponent bits?) are under consideration.
