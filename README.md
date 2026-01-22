@@ -31,7 +31,7 @@ Now that we have all integers taking up all of 1 to 8 bytes exactly, we define t
 
 ### Bit Arrays
 
-`bit8`, `bit16`, `bit24`, `bit32`, `bit40`, `bit48`, `bit56`, `bit64`, and a `bits<T>` struct hold packed bits that can be read out as `bool`s and written individually with the `[]` index operator. 
+`bit8`, `bit16`, `bit24`, `bit32`, `bit40`, `bit48`, `bit56`, `bit64`, and `bits<T>` structs hold packed bits that can be read out as `bool`s and written individually with the `[]` index operator. 
 These also have boolean logic operators, such as the unary `!` - and the binary `&`, `|` and `^` operators, as well as comparison operators. 
 There is also a collection of useful member methods available, such as `IndexOfFirst`, `RotateLeft`, `Swap`, `TestAny` and many more.
 ![alt text](https://i.imgur.com/ZcDx9mS.png)
