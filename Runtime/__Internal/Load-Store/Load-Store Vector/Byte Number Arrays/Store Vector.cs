@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using Unity.Burst.Intrinsics;
-using Unity.Mathematics;
 using Unity.Collections;
 using MaxMath;
 using MaxMath.Intrinsics;

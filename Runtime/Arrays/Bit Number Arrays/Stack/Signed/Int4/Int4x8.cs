@@ -6,8 +6,7 @@ using Unity.Burst.CompilerServices;
 using MaxMath;
 using MaxMath.Intrinsics;
 
-using static MaxMath.maxmath;
-using static Unity.Mathematics.math;
+using static MaxMath.math;
 
 namespace BitCollections
 {

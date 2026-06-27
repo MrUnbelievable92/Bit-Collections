@@ -6,8 +6,7 @@ using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using MaxMath;
 
-using static MaxMath.maxmath;
-using static Unity.Mathematics.math;
+using static MaxMath.math;
 
 namespace BitCollections
 {
@@ -128,7 +127,13 @@ Assert.IsValidSubarray(index, new bit32().Length, values.Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator bool32(bit32 input)
         {
-            return tobool32((int)input.Bits);
+            return bool32.FromBitmask((int)input.Bits);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator mask8x32(bit32 input)
+        {
+            return mask8x32.FromBitmask((int)input.Bits);
         }
 
 
@@ -152,6 +157,12 @@ Assert.IsValidSubarray(index, new bit32().Length, values.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator bit32(bool32 input)
+        {
+            return (bit32)bitmask(input);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator bit32(mask8x32 input)
         {
             return (bit32)bitmask(input);
         }

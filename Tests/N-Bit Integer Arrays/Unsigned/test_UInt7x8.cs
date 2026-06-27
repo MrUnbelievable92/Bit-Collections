@@ -1,6 +1,5 @@
 using NUnit.Framework;
 using MaxMath;
-using Unity.Mathematics;
 
 namespace BitCollections.Tests
 {
@@ -300,7 +299,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(add[j], (l[j] + r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(add[j], (l[j] + r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -316,7 +315,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(add[j], (l[j] + r) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(add[j], (l[j] + r) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -332,7 +331,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(add[j], (l + r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(add[j], (l + r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -348,7 +347,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(sub[j], (l[j] - r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(sub[j], (l[j] - r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -364,7 +363,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(sub[j], (l[j] - r) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(sub[j], (l[j] - r) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -380,7 +379,7 @@ namespace BitCollections.Tests
                 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(sub[j], (l - r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(sub[j], (l - r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -396,7 +395,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(mul[j], (l[j] * r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(mul[j], (l[j] * r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -412,7 +411,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(mul[j], (l[j] * r) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(mul[j], (l[j] * r) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -428,7 +427,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(mul[j], (l * r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(mul[j], (l * r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -444,7 +443,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(div[j], (l[j] / r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(div[j], (l[j] / r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -460,7 +459,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(div[j], (l[j] / r) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(div[j], (l[j] / r) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -476,7 +475,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(div[j], (l / r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(div[j], (l / r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -492,7 +491,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(mod[j], (l[j] % r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(mod[j], (l[j] % r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -508,7 +507,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(mod[j], (l[j] % r) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(mod[j], (l[j] % r) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -524,7 +523,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(mod[j], (l % r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(mod[j], (l % r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -540,7 +539,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(and[j], (l[j] & r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(and[j], (l[j] & r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -556,7 +555,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(and[j], (l[j] & r) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(and[j], (l[j] & r) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -572,7 +571,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(and[j], (l & r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(and[j], (l & r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -588,7 +587,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(or[j], (l[j] | r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(or[j], (l[j] | r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -604,7 +603,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(or[j], (l[j] | r) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(or[j], (l[j] | r) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -620,7 +619,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(or[j], (l | r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(or[j], (l | r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -636,7 +635,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(xor[j], (l[j] ^ r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(xor[j], (l[j] ^ r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -652,7 +651,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(xor[j], (l[j] ^ r) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(xor[j], (l[j] ^ r) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -668,7 +667,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(xor[j], (l ^ r[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(xor[j], (l ^ r[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -684,7 +683,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(equal[j]), l[j] == r[j]);
+                    Assert.AreEqual(math.tobool(equal[j]), l[j] == r[j]);
                 }
             }
         }
@@ -700,7 +699,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(equal[j]), l[j] == r);
+                    Assert.AreEqual(math.tobool(equal[j]), l[j] == r);
                 }
             }
         }
@@ -716,7 +715,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(equal[j]), l == r[j]);
+                    Assert.AreEqual(math.tobool(equal[j]), l == r[j]);
                 }
             }
         }
@@ -732,7 +731,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(notEqual[j]), l[j] != r[j]);
+                    Assert.AreEqual(math.tobool(notEqual[j]), l[j] != r[j]);
                 }
             }
         }
@@ -748,7 +747,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(notEqual[j]), l[j] != r);
+                    Assert.AreEqual(math.tobool(notEqual[j]), l[j] != r);
                 }
             }
         }
@@ -764,7 +763,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(notEqual[j]), l != r[j]);
+                    Assert.AreEqual(math.tobool(notEqual[j]), l != r[j]);
                 }
             }
         }
@@ -780,7 +779,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(less[j]), l[j] < r[j]);
+                    Assert.AreEqual(math.tobool(less[j]), l[j] < r[j]);
                 }
             }
         }
@@ -796,7 +795,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(less[j]), l[j] < r);
+                    Assert.AreEqual(math.tobool(less[j]), l[j] < r);
                 }
             }
         }
@@ -812,7 +811,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(less[j]), l < r[j]);
+                    Assert.AreEqual(math.tobool(less[j]), l < r[j]);
                 }
             }
         }
@@ -828,7 +827,7 @@ namespace BitCollections.Tests
                 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(greater[j]), l[j] > r[j]);
+                    Assert.AreEqual(math.tobool(greater[j]), l[j] > r[j]);
                 }
             }
         }
@@ -844,7 +843,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(greater[j]), l[j] > r);
+                    Assert.AreEqual(math.tobool(greater[j]), l[j] > r);
                 }
             }
         }
@@ -860,7 +859,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(greater[j]), l > r[j]);
+                    Assert.AreEqual(math.tobool(greater[j]), l > r[j]);
                 }
             }
         }
@@ -876,7 +875,7 @@ namespace BitCollections.Tests
                 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(lessEqual[j]), l[j] <= r[j]);
+                    Assert.AreEqual(math.tobool(lessEqual[j]), l[j] <= r[j]);
                 }
             }
         }
@@ -892,7 +891,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(lessEqual[j]), l[j] <= r);
+                    Assert.AreEqual(math.tobool(lessEqual[j]), l[j] <= r);
                 }
             }
         }
@@ -908,7 +907,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(lessEqual[j]), l <= r[j]);
+                    Assert.AreEqual(math.tobool(lessEqual[j]), l <= r[j]);
                 }
             }
         }
@@ -924,7 +923,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(greaterEqual[j]), l[j] >= r[j]);
+                    Assert.AreEqual(math.tobool(greaterEqual[j]), l[j] >= r[j]);
                 }
             }
         }
@@ -940,7 +939,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(greaterEqual[j]), l[j] >= r);
+                    Assert.AreEqual(math.tobool(greaterEqual[j]), l[j] >= r);
                 }
             }
         }
@@ -956,7 +955,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(maxmath.tobool(greaterEqual[j]), l >= r[j]);
+                    Assert.AreEqual(math.tobool(greaterEqual[j]), l >= r[j]);
                 }
             }
         }
@@ -971,7 +970,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(not[j], (~x[j]) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(not[j], (~x[j]) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -987,7 +986,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(shiftLeft[j], (x[j] << n) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(shiftLeft[j], (x[j] << n) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }
@@ -1003,7 +1002,7 @@ namespace BitCollections.Tests
 
                 for (int j = 0; j < 8; j++)
                 {
-                    Assert.AreEqual(shiftRight[j], (x[j] >> n) & maxmath.bitmask32((uint)default(UInt7).Bits));
+                    Assert.AreEqual(shiftRight[j], (x[j] >> n) & math.bitmask32((uint)default(UInt7).Bits));
                 }
             }
         }

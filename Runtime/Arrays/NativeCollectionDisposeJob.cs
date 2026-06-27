@@ -21,7 +21,7 @@ namespace BitCollections
         }
 
 
-        public void Execute()
+        public readonly void Execute()
         {
             UnsafeUtility.Free(Ptr, Allocator);
         }

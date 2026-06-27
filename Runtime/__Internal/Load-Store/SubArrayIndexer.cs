@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Unity.Collections;
-using Unity.Mathematics;
 using MaxMath;
 using SIMDAlgorithms;
 using System;
@@ -16,8 +15,8 @@ namespace BitCollections.Tests
         private static NativeBitIntList<T> CreateRandomBitIntMockList<T>(int length, ref Random64 rng, long min = long.MinValue, long max = long.MaxValue)
             where T : unmanaged, BitInt
         {
-            min = (min == long.MinValue) ? default(T).MinValueAsLong : maxmath.minmag(default(T).MinValueAsLong, min);
-            max = (max == long.MaxValue) ? default(T).MaxValueAsLong : maxmath.minmag(default(T).MaxValueAsLong, max);
+            min = (min == long.MinValue) ? default(T).MinValueAsLong : math.minmag(default(T).MinValueAsLong, min);
+            max = (max == long.MaxValue) ? default(T).MaxValueAsLong : math.minmag(default(T).MaxValueAsLong, max);
 
             NativeBitIntList<T> result = new NativeBitIntList<T>(length, Allocator.Persistent);
 

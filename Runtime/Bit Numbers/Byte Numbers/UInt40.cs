@@ -2,11 +2,10 @@ using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Unity.Mathematics;
 using MaxMath;
 using SIMDAlgorithms;
 
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {

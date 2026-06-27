@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using DevTools;
 
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {

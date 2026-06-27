@@ -1,12 +1,11 @@
 using System.Runtime.CompilerServices;
-using Unity.Mathematics;
+using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using DevTools;
 using MaxMath;
 using SIMDAlgorithms;
 
-using static MaxMath.maxmath;
-using Unity.Burst.CompilerServices;
+using static MaxMath.math;
 
 namespace BitCollections
 {
@@ -139,6 +138,13 @@ namespace BitCollections
             if (typeof(V) == typeof(bool8))   return LoadByte8<T>(basePtr, index, length, memoryAccess).Reinterpret<byte8, V>();
             if (typeof(V) == typeof(bool16))  return LoadByte16<T>(basePtr, index, length, memoryAccess).Reinterpret<byte16, V>();
             if (typeof(V) == typeof(bool32))  return LoadByte32<T>(basePtr, index, length, memoryAccess).Reinterpret<byte32, V>();
+                                               
+            if (typeof(V) == typeof(Unity.Mathematics.int2))     return LoadInt2<T>(basePtr, index, length, memoryAccess).Reinterpret<int2, V>();
+            if (typeof(V) == typeof(Unity.Mathematics.int3))     return LoadInt3<T>(basePtr, index, length, memoryAccess).Reinterpret<int3, V>();
+            if (typeof(V) == typeof(Unity.Mathematics.int4))     return LoadInt4<T>(basePtr, index, length, memoryAccess).Reinterpret<int4, V>();
+            if (typeof(V) == typeof(Unity.Mathematics.uint2))    return LoadInt2<T>(basePtr, index, length, memoryAccess).Reinterpret<int2, V>();
+            if (typeof(V) == typeof(Unity.Mathematics.uint3))    return LoadInt3<T>(basePtr, index, length, memoryAccess).Reinterpret<int3, V>();
+            if (typeof(V) == typeof(Unity.Mathematics.uint4))    return LoadInt4<T>(basePtr, index, length, memoryAccess).Reinterpret<int4, V>();
 
             throw new System.TypeAccessException($"{typeof(V)}");
         }

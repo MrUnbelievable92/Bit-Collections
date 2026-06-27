@@ -22,7 +22,9 @@
         "nunit.framework.dll"
     ],
     "autoReferenced": false,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "BITCOLLECTIONS_TESTS"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }

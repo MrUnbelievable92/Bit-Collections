@@ -1,12 +1,8 @@
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using DevTools;
-using MaxMath.Intrinsics;
-using SIMDAlgorithms;
 
-using static Unity.Mathematics.math;
-using static MaxMath.maxmath;
-using System;
+using static MaxMath.math;
 
 namespace BitCollections
 {

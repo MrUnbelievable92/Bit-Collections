@@ -4,8 +4,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Burst.CompilerServices;
 using DevTools;
 
-using static Unity.Mathematics.math;
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {

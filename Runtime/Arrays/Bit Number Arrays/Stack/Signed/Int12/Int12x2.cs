@@ -3,12 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
-using Unity.Mathematics;
 using MaxMath;
 using MaxMath.Intrinsics;
 
-using static Unity.Mathematics.math;
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {
@@ -96,6 +94,9 @@ namespace BitCollections
         public static explicit operator uint2(Int12x2 input) => (uint2)(int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Unity.Mathematics.uint2(Int12x2 input) => (uint2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator ulong2(Int12x2 input) => (ulong2)(long2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -106,6 +107,9 @@ namespace BitCollections
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator int2(Int12x2 input) => signextend((int2)(UInt12x2)input, default(Int12).Bits);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.int2(Int12x2 input) => (int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator long2(Int12x2 input) => signextend((long2)(UInt12x2)input, default(Int12).Bits);
@@ -121,6 +125,9 @@ namespace BitCollections
         public static explicit operator Int12x2(uint2 input) => (Int12x2)(UInt12x2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Int12x2(Unity.Mathematics.uint2 input) => (Int12x2)(uint2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Int12x2(ulong2 input) => (Int12x2)(UInt12x2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -133,6 +140,9 @@ namespace BitCollections
         public static explicit operator Int12x2(int2 input) => (Int12x2)(UInt12x2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Int12x2(Unity.Mathematics.int2 input) => (Int12x2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Int12x2(long2 input) => (Int12x2)(UInt12x2)input;
 
 
@@ -143,10 +153,19 @@ namespace BitCollections
         public static implicit operator half2(Int12x2 input) => (half2)(short2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.half2(Int12x2 input) => (half2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator float2(Int12x2 input) => (float2)(int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.float2(Int12x2 input) => (float2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator double2(Int12x2 input) => (double2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.double2(Int12x2 input) => (double2)input;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -156,10 +175,19 @@ namespace BitCollections
         public static explicit operator Int12x2(half2 input) => (Int12x2)(short2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Int12x2(Unity.Mathematics.half2 input) => (Int12x2)(half2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Int12x2(float2 input) => (Int12x2)(int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Int12x2(Unity.Mathematics.float2 input) => (Int12x2)(float2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Int12x2(double2 input) => (Int12x2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Int12x2(Unity.Mathematics.double2 input) => (Int12x2)(double2)input;
 
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

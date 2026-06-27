@@ -6,8 +6,7 @@ using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using MaxMath;
 
-using static Unity.Mathematics.math;
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {
@@ -86,7 +85,25 @@ Assert.IsValidSubarray(index, new bit8().Length, values.Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator bool8(bit8 input)
         {
-            return tobool8(input.Bits);
+            return bool8.FromBitmask(input.Bits);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator mask8x8(bit8 input)
+        {
+            return mask8x8.FromBitmask(input.Bits);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator mask16x8(bit8 input)
+        {
+            return mask16x8.FromBitmask(input.Bits);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator mask32x8(bit8 input)
+        {
+            return mask32x8.FromBitmask(input.Bits);
         }
 
 
@@ -110,6 +127,24 @@ Assert.IsValidSubarray(index, new bit8().Length, values.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator bit8(bool8 input)
+        {
+            return (bit8)(byte)bitmask(input);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator bit8(mask8x8 input)
+        {
+            return (bit8)(byte)bitmask(input);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator bit8(mask16x8 input)
+        {
+            return (bit8)(byte)bitmask(input);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator bit8(mask32x8 input)
         {
             return (bit8)(byte)bitmask(input);
         }

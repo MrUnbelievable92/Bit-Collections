@@ -3,7 +3,7 @@ using DevTools;
 using MaxMath;
 using MaxMath.Intrinsics;
 using Unity.Burst.CompilerServices;
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {

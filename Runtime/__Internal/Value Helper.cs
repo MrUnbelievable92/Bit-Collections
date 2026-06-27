@@ -2,8 +2,7 @@ using System.Runtime.CompilerServices;
 using DevTools;
 using MaxMath.Intrinsics;
 
-using static Unity.Mathematics.math;
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {

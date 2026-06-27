@@ -1,11 +1,9 @@
 using System;
 using System.Runtime.CompilerServices;
-using Unity.Mathematics;
 using DevTools;
 using MaxMath;
 
-using static Unity.Mathematics.math;
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {

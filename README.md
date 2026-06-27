@@ -16,13 +16,12 @@ This package has the following dependencies:
 
 # Functionality
 
-## BitInt
+## Value Types
+
+### BitInt
 The most fundamental building block in this library is the interface `BitInt`. It defines how many bits an integer has and whether or not it is signed.
 All integers between 1 and 63 bits are defined as types, named `(U)Int[n]`, except for `Bit`, which is only available as an unsigned integer. These types are only used as generic type parameters and should not be instantiated.
-
 ![alt text](https://i.imgur.com/JkW8vfM.png)
-
-## Value Types
 
 ### Byte Ints	
 Among all `BitInt`s are all integers consisting of a multiple of eight bits, which are implemented as fully usable types with the entire standard C# API for integers, and they integrate with all C# integer and floating point types as well as `Unity.Mathematics` and `MaxMath` types such as vectors and `MaxMath.UInt128` or `MaxMath.quadruple`.
@@ -32,7 +31,7 @@ Now that we have all integers taking up all of 1 to 8 bytes exactly, we define t
 
 ### Bit Arrays
 
-`bit8`, `bit16`, `bit24`, `bit32`, `bit40`, `bit48`, `bit56`, `bit64`, and `bits<T>` structs hold packed bits that can be read out as `bool`s and written individually with the `[]` index operator. 
+`bit8`, `bit16`, `bit24`, `bit32`, `bit40`, `bit48`, `bit56`, `bit64`, and a `bits<T>` struct hold packed bits that can be read out as `bool`s and written individually with the `[]` index operator. 
 These also have boolean logic operators, such as the unary `!` - and the binary `&`, `|` and `^` operators, as well as comparison operators. 
 There is also a collection of useful member methods available, such as `IndexOfFirst`, `RotateLeft`, `Swap`, `TestAny` and many more.
 ![alt text](https://i.imgur.com/ZcDx9mS.png)
@@ -118,7 +117,6 @@ This library, on the other hand, focuses on:
 
 - XML documentation for each method and type is a priority.
 - Hash Maps with either key or value (or both) being a `BitInt` are next on the to-do-list and by far the most important missing feature.
-- Generalized [Mixed Radix Packing](https://en.wikipedia.org/wiki/Mixed_radix) feasibility is being researched.
 - Not everything is highly optimized. There are almost 128 * 128 = 16384 combinations between possible pairs of `BitInts`; combined with the fact that some algorithms don't have a generalized solution (especially when it comes to vectorization), this requires hand-optimized code.
 If you require a particular operation to be optimized (even if it is only for a very specific `BitInt`), [please open an issue](https://github.com/MrUnbelievable92/Bit-Collections/issues/new).
 - Based on `MaxMath.UInt128`, fixed-size bitfields between 9 and 16 bytes (inclusive) are under consideration, due to native double register shift instructions existing
@@ -128,18 +126,35 @@ If you require a particular operation to be optimized (even if it is only for a 
 
 # How To Install This Library
 
-Disclaimer: I firmly believe in open source - being able to copy/modify/understand other people's code is great :)
-I also want people to be able to step through code with a debugger.
-For these reasons I usually don't distribute DLLs.
+It is highly encouraged to use the Scoped Registries feature for installing BitCollections.
 
-- Download the package and unzip it into your "LocalPackages" folder, which is located at the root folder of your Unity project (where your "Assets" folder resides at).
-- Start up Unity. Usually Unity detects new packages and will generate .meta files for you.
-- In case that doesn't work, open up the package manager from within Unity and click on the '+' symbol at the upper left corner of the window, further clicking on "Add package from disk..." - "Add package from git URL" should also work.
+Installing using Scoped Registries:
+- Open your Unity project.
+- Go to Edit → Project Settings → Package Manager.
+- Under Scoped Registries, click + to add a new registry.
+- Enter the registry details:
 
-![alt text](https://i.imgur.com/QcqF96e.png)
+<blockquote>
+<ul>
+<li>Name: MrUnbelievable</li>
+<li>URL: https://registry.npmjs.org</li>
+<li>Scopes: com.mrunbelievable</li>
+</ul>
+</blockquote>
 
-- Locate the library's "package.json" file
-- DONE! 
+- Click Save.
+- Open Window → Package Manager.
+- In the package list, select My Registries.
+- Install BitCollections from the registry.
+
+## Why use a scoped registry?
+- Easy updates – Receive new versions directly through Unity’s Package Manager without manual downloads.
+- Version management – Switch, lock, or roll back versions cleanly using Unity’s built-in tooling.
+- Cleaner projects – No need to store package files inside your repository or project folder.
+- Dependency resolution – Unity automatically handles dependencies and compatibility.
+- Team-friendly – Everyone on the project uses the same source and versions with minimal setup.
+- Faster setup – Install in a few clicks instead of manually importing or maintaining local packages.
+- No IDE clutter – The package source code does not appear in your IDE, keeping your workspace focused on your own project code.
 
 # Donations
 

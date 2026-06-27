@@ -30,16 +30,16 @@ internal static readonly SharedStatic<int> _staticSafetyId = SharedStatic<int>.G
 #endif
 
         [NativeDisableUnsafePtrRestriction]
-        internal void* _ptr;
+        internal void* m_Buffer;
         internal readonly int _length;
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-        internal Allocator _allocator;
+        internal Allocator m_AllocatorLabel;
 #else
-        internal readonly Allocator _allocator;
+        internal readonly Allocator m_AllocatorLabel;
 #endif
 
         public readonly int Length => _length;
-        public readonly bool IsCreated => _ptr != null;
+        public readonly bool IsCreated => m_Buffer != null;
 
         public readonly ulong SizeInBytes
         {
@@ -58,8 +58,8 @@ Assert.IsNonNegative(numNumbers);
 Assert.IsGreater((int)allocator, (int)Allocator.None);
 
             _length = numNumbers;
-            _allocator = allocator;
-            _ptr = MemoryHelper.Allocate<T>(numNumbers, allocator, options);
+            m_AllocatorLabel = allocator;
+            m_Buffer = MemoryHelper.Allocate<T>(numNumbers, allocator, options);
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 SafetyHelper.InitSafety<NativeBitIntArray<T>>(allocator, _staticSafetyId, out m_Safety, out m_DisposeSentinel);
@@ -79,9 +79,9 @@ SafetyHelper.InitSafety<NativeBitIntArray<T>>(allocator, _staticSafetyId, out m_
 Assert.IsGreater((int)allocator, (int)Allocator.None);
 Assert.IsNonNegative(length);
 
-            _ptr = ptr;
+            m_Buffer = ptr;
             _length = length;
-            _allocator = allocator;
+            m_AllocatorLabel = allocator;
         }
 
         
@@ -98,7 +98,7 @@ this.CheckWriteAndThrow();
         {
 this.CheckReadAndThrow();
 
-            return _ptr;
+            return m_Buffer;
         }
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -2657,7 +2657,7 @@ Assert.IsValidSubarray(index, numValues, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(NativeBitIntArray<T> other)
         {
-            return (this._ptr == other._ptr) &
+            return (this.m_Buffer == other.m_Buffer) &
                    (this._length == other._length);
         }
 
@@ -2670,7 +2670,7 @@ Assert.IsValidSubarray(index, numValues, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override readonly int GetHashCode()
         {
-            return ((IntPtr)_ptr).GetHashCode();
+            return ((IntPtr)m_Buffer).GetHashCode();
         }
 
         public override readonly string ToString()
@@ -2698,9 +2698,9 @@ Assert.IsValidSubarray(index, numValues, Length);
         public void Dispose()
         {
         #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            SafetyHelper.Dispose(ref _ptr, ref _allocator, ref m_Safety, ref m_DisposeSentinel);
+            SafetyHelper.Dispose(ref m_Buffer, ref m_AllocatorLabel, ref m_Safety, ref m_DisposeSentinel);
         #else
-            SafetyHelper.Dispose(ref _ptr, _allocator);
+            SafetyHelper.Dispose(ref _ptr, m_AllocatorLabel);
         #endif
         }
 
@@ -2708,9 +2708,9 @@ Assert.IsValidSubarray(index, numValues, Length);
         public JobHandle Dispose(JobHandle dependency)
         {
         #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            return SafetyHelper.Dispose(dependency, ref _ptr, ref _allocator, ref m_Safety, ref m_DisposeSentinel);
+            return SafetyHelper.Dispose(dependency, ref m_Buffer, ref m_AllocatorLabel, ref m_Safety, ref m_DisposeSentinel);
         #else
-            return SafetyHelper.Dispose(dependency, ref _ptr, _allocator);
+            return SafetyHelper.Dispose(dependency, ref _ptr, m_AllocatorLabel);
         #endif
         }
 

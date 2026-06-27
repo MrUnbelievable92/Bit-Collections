@@ -2,8 +2,7 @@ using NUnit.Framework;
 using Unity.Collections;
 using MaxMath;
 
-using static Unity.Mathematics.math;
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections.Tests
 {
@@ -55,7 +54,7 @@ namespace BitCollections.Tests
                 for (int j = 0; j < arr.Length; j++)
                 {
                     arr[j] = rng.NextBool();
-                    std += maxmath.toint(arr[j]);
+                    std += math.toint(arr[j]);
                 }
 
                 Assert.AreEqual(std, arr.CountBits());
@@ -68,7 +67,7 @@ namespace BitCollections.Tests
 
                 for (int j = start; j <= end; j++)
                 {
-                    std += maxmath.toint(arr[j]);
+                    std += math.toint(arr[j]);
                 }
 
                 Assert.AreEqual(std, arr.CountBits(start, numBits));
@@ -80,7 +79,7 @@ namespace BitCollections.Tests
             for (int i = 0; i < staticSize1.Length; i++)
             {
                 staticSize1[i] = rng.NextBool();
-                stdStatic += maxmath.toint(staticSize1[i]);
+                stdStatic += math.toint(staticSize1[i]);
             }
 
             Assert.AreEqual(stdStatic, staticSize1.CountBits());
@@ -92,7 +91,7 @@ namespace BitCollections.Tests
             for (int i = 0; i < staticSize2.Length; i++)
             {
                 staticSize2[i] = rng.NextBool();
-                stdStatic += maxmath.toint(staticSize2[i]);
+                stdStatic += math.toint(staticSize2[i]);
             }
 
             Assert.AreEqual(stdStatic, staticSize2.CountBits());
@@ -102,7 +101,7 @@ namespace BitCollections.Tests
 
             for (int i = 8; i < 11; i++)
             {
-                stdStatic += maxmath.toint(staticSize2[i]);
+                stdStatic += math.toint(staticSize2[i]);
             }
 
             Assert.AreEqual(stdStatic, staticSize2.CountBits(8, 3));
@@ -111,12 +110,12 @@ namespace BitCollections.Tests
 
             for (int i = 7; i < staticSize2.Length; i++)
             {
-                stdStatic += maxmath.toint(staticSize2[i]);
+                stdStatic += math.toint(staticSize2[i]);
             }
 
             Assert.AreEqual(stdStatic, staticSize2.CountBits(7, 6));
 
-            stdStatic = maxmath.toint(staticSize2[9]);
+            stdStatic = math.toint(staticSize2[9]);
             Assert.AreEqual(stdStatic, staticSize2.CountBits(9, 1));
         }
 

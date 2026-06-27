@@ -4,11 +4,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
-using Unity.Mathematics;
 using MaxMath;
-
-using static MaxMath.maxmath;
 using MaxMath.Intrinsics;
+
+using static MaxMath.math;
 
 namespace BitCollections
 {
@@ -67,6 +66,9 @@ Assert.IsNotGreater(x, UInt28.MaxValue);
         public static implicit operator uint2(UInt28x2 input) => PackUnpack.BitIntArrayToUInt2<UInt28>(input.Bits);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.uint2(UInt28x2 input) => (uint2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ulong2(UInt28x2 input) => PackUnpack.BitIntArrayToULong2<UInt28>(input.Bits);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -77,6 +79,9 @@ Assert.IsNotGreater(x, UInt28.MaxValue);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator int2(UInt28x2 input) => (int2)(uint2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.int2(UInt28x2 input) => (int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator long2(UInt28x2 input) => (long2)(ulong2)input;
@@ -92,6 +97,9 @@ Assert.IsNotGreater(x, UInt28.MaxValue);
         public static explicit operator UInt28x2(uint2 input) => new UInt28x2 { Bits = (UInt56)PackUnpack.DownCast<UInt28>(input) };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator UInt28x2(Unity.Mathematics.uint2 input) => (UInt28x2)(uint2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator UInt28x2(ulong2 input) => new UInt28x2 { Bits = (UInt56)PackUnpack.DownCast<UInt28>(input) };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,6 +112,9 @@ Assert.IsNotGreater(x, UInt28.MaxValue);
         public static explicit operator UInt28x2(int2 input) => (UInt28x2)(uint2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator UInt28x2(Unity.Mathematics.int2 input) => (UInt28x2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator UInt28x2(long2 input) => (UInt28x2)(ulong2)input;
 
 
@@ -114,10 +125,19 @@ Assert.IsNotGreater(x, UInt28.MaxValue);
         public static explicit operator half2(UInt28x2 input) => (half2)(ushort2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Unity.Mathematics.half2(UInt28x2 input) => (half2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator float2(UInt28x2 input) => (float2)(int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Unity.Mathematics.float2(UInt28x2 input) => (float2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator double2(UInt28x2 input) => (double2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Unity.Mathematics.double2(UInt28x2 input) => (double2)input;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -127,10 +147,19 @@ Assert.IsNotGreater(x, UInt28.MaxValue);
         public static explicit operator UInt28x2(half2 input) => (UInt28x2)(ushort2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator UInt28x2(Unity.Mathematics.half2 input) => (UInt28x2)(half2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator UInt28x2(float2 input) => (UInt28x2)(int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator UInt28x2(Unity.Mathematics.float2 input) => (UInt28x2)(float2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator UInt28x2(double2 input) => (UInt28x2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator UInt28x2(Unity.Mathematics.double2 input) => (UInt28x2)(double2)input;
         
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -165,7 +194,7 @@ Assert.IsNotGreater(x, UInt28.MaxValue);
         {
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return (UInt28x2)((uint2)left * right);
+                return (UInt28x2)((uint2)left * (uint2)right);
             }
 
             ulong lo = left.Bits & bitmask64((ulong)default(UInt28).Bits, 0u * (ulong)default(UInt28).Bits);
@@ -208,7 +237,7 @@ Assert.IsNotGreater(x, UInt28.MaxValue);
         {
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return (UInt28x2)(div((uint2)left, right));
+                return (UInt28x2)((uint2)left / (uint2)right);
             }
 
             ulong lo = left.Bits & bitmask64((ulong)default(UInt28).Bits, 0u * (ulong)default(UInt28).Bits);
@@ -230,7 +259,7 @@ Assert.IsNotGreater(x, UInt28.MaxValue);
             
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return (UInt28x2)(div((uint2)left, right));
+                return (UInt28x2)((uint2)left / right);
             }
 
             ulong lo = left.Bits & bitmask64((ulong)default(UInt28).Bits, 0u * (ulong)default(UInt28).Bits);
@@ -247,7 +276,7 @@ Assert.IsNotGreater(x, UInt28.MaxValue);
         {
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return (UInt28x2)(div((uint2)left, right));
+                return (UInt28x2)((uint2)left / (uint2)right);
             }
             
             ulong lo = (ulong)left << (0 * default(UInt28).Bits);
@@ -264,7 +293,7 @@ Assert.IsNotGreater(x, UInt28.MaxValue);
         {
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return (UInt28x2)(mod((uint2)left, right));
+                return (UInt28x2)((uint2)left % (uint2)right);
             }
             
             return new UInt28x2((uint)(left[0] % right[0]),
@@ -281,7 +310,7 @@ Assert.IsNotGreater(x, UInt28.MaxValue);
             
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return (UInt28x2)(mod((uint2)left, right));
+                return (UInt28x2)((uint2)left % right);
             }
             
             return new UInt28x2((uint)(left[0] % right),
@@ -293,7 +322,7 @@ Assert.IsNotGreater(x, UInt28.MaxValue);
         {
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return (UInt28x2)(mod((uint2)left, right));
+                return (UInt28x2)((uint2)left % (uint2)right);
             }
 
             return new UInt28x2((uint)(left % right[0]),

@@ -1,12 +1,11 @@
 using System.Runtime.CompilerServices;
 using Unity.Burst.Intrinsics;
-using Unity.Mathematics;
 using Unity.Collections;
 using MaxMath;
 using MaxMath.Intrinsics;
 using SIMDAlgorithms;
 
-using static MaxMath.maxmath;
+using static MaxMath.math;
 using static MaxMath.Intrinsics.Xse;
 using static Unity.Burst.Intrinsics.X86;
 

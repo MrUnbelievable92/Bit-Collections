@@ -2,10 +2,9 @@ using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Burst;
-
-using static Unity.Mathematics.math;
-using static MaxMath.maxmath;
 using DevTools;
+
+using static MaxMath.math;
 
 namespace BitCollections
 {

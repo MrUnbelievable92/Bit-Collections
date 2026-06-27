@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Unity.Collections;
-using Unity.Mathematics;
 using MaxMath;
 using Unity.Jobs;
 using System;
@@ -29,7 +28,7 @@ namespace BitCollections.Tests
 
         private static int GenerateEvenlyDivisibleBy8(ref Random32 rng, int max = MAX_TEST_LENGTH)
         {
-            return maxmath.ceilmultiple(rng.NextInt(1, max), 8);
+            return math.ceilmultiple(rng.NextInt(1, max), 8);
         }
 
         private static int GenerateNotEvenlyDivisibleBy8(ref Random32 rng, int max = MAX_TEST_LENGTH)
@@ -1078,7 +1077,7 @@ namespace BitCollections.Tests
                 for (int j = 0; j < arr.Capacity; j++)
                 {
                     arr.Add(rng.NextBool());
-                    std += maxmath.toint(arr[j]);
+                    std += math.toint(arr[j]);
                 }
 
                 Assert.AreEqual(std, arr.CountBits());
@@ -1091,7 +1090,7 @@ namespace BitCollections.Tests
 
                 for (int j = start; j <= end; j++)
                 {
-                    std += maxmath.toint(arr[j]);
+                    std += math.toint(arr[j]);
                 }
 
                 Assert.AreEqual(std, arr.CountBits(start, numBits));
@@ -1103,7 +1102,7 @@ namespace BitCollections.Tests
             for (int i = 0; i < 6; i++)
             {
                 staticSize1.Add(rng.NextBool());
-                stdStatic += maxmath.toint(staticSize1[i]);
+                stdStatic += math.toint(staticSize1[i]);
             }
 
             Assert.AreEqual(stdStatic, staticSize1.CountBits());
@@ -1115,7 +1114,7 @@ namespace BitCollections.Tests
             for (int i = 0; i < 13; i++)
             {
                 staticSize2.Add(rng.NextBool());
-                stdStatic += maxmath.toint(staticSize2[i]);
+                stdStatic += math.toint(staticSize2[i]);
             }
 
             Assert.AreEqual(stdStatic, staticSize2.CountBits());
@@ -1125,7 +1124,7 @@ namespace BitCollections.Tests
 
             for (int i = 8; i < 11; i++)
             {
-                stdStatic += maxmath.toint(staticSize2[i]);
+                stdStatic += math.toint(staticSize2[i]);
             }
 
             Assert.AreEqual(stdStatic, staticSize2.CountBits(8, 3));
@@ -1134,12 +1133,12 @@ namespace BitCollections.Tests
 
             for (int i = 7; i < staticSize2.Length; i++)
             {
-                stdStatic += maxmath.toint(staticSize2[i]);
+                stdStatic += math.toint(staticSize2[i]);
             }
 
             Assert.AreEqual(stdStatic, staticSize2.CountBits(7, 6));
 
-            stdStatic = maxmath.toint(staticSize2[9]);
+            stdStatic = math.toint(staticSize2[9]);
             Assert.AreEqual(stdStatic, staticSize2.CountBits(9, 1));
         }
 

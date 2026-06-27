@@ -4,7 +4,7 @@ using MaxMath.Intrinsics;
 using SIMDAlgorithms;
 
 using static Unity.Burst.Intrinsics.X86;
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {
