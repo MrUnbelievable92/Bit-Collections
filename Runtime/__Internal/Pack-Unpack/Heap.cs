@@ -1,11 +1,9 @@
 using System.Runtime.CompilerServices;
-using Unity.Mathematics;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using MaxMath;
 
-using static MaxMath.maxmath;
-using static Unity.Mathematics.math;
+using static MaxMath.math;
 using static Unity.Burst.Intrinsics.X86;
 
 namespace BitCollections
@@ -65,7 +63,7 @@ namespace BitCollections
                 int index = (int)indexer.InnerIndex;
                 byte lo = *(byte*)src;
                 lo >>= index;
-                bool8 cvt = tobool8(lo);
+                bool8 cvt = bool8.FromBitmask(lo);
                 int countSrc = min(8 - index, count);
 
                 if (Hint.Likely(countSrc >= 4))
@@ -100,8 +98,8 @@ namespace BitCollections
             {
                 while (Hint.Likely(count >= 128))
                 {
-                    *((bool32*)dst + 0) = tobool32(*((int*)src + 0));
-                    *((bool32*)dst + 1) = tobool32(*((int*)src + 1));
+                    *((bool32*)dst + 0) = bool32.FromBitmask(*((int*)src + 0));
+                    *((bool32*)dst + 1) = bool32.FromBitmask(*((int*)src + 1));
                     if (Bmi2.IsBmi2Supported)
                     {
                         *((ulong*)dst + 8)  = bits_depositparallel((ulong)*((byte*)src + 8),  0x0101_0101_0101_0101);
@@ -111,9 +109,9 @@ namespace BitCollections
                     }
                     else
                     {
-                        *((bool32*)dst + 2) = tobool32(*((int*)src + 2));
+                        *((bool32*)dst + 2) = bool32.FromBitmask(*((int*)src + 2));
                     }
-                    *((bool32*)dst + 3) = tobool32(*((int*)src + 3));
+                    *((bool32*)dst + 3) = bool32.FromBitmask(*((int*)src + 3));
 
                     dst = (bool*)dst + 128;
                     src = (byte*)src + 128 / 8;
@@ -123,8 +121,8 @@ namespace BitCollections
 
                 if (Hint.Likely(count >= 64))
                 {
-                    *((bool32*)dst + 0) = tobool32(*((int*)src + 0));
-                    *((bool32*)dst + 1) = tobool32(*((int*)src + 1));
+                    *((bool32*)dst + 0) = bool32.FromBitmask(*((int*)src + 0));
+                    *((bool32*)dst + 1) = bool32.FromBitmask(*((int*)src + 1));
 
                     dst = (bool*)dst + 64;
                     src = (byte*)src + 64 / 8;
@@ -134,7 +132,7 @@ namespace BitCollections
 
                 if (Hint.Likely(count >= 32))
                 {
-                    *((bool32*)dst + 0) = tobool32(*((int*)src + 0));
+                    *((bool32*)dst + 0) = bool32.FromBitmask(*((int*)src + 0));
 
                     dst = (bool*)dst + 32;
                     src = (byte*)src + 32 / 8;
@@ -146,7 +144,7 @@ namespace BitCollections
             {
                 while (Hint.Likely(count >= 32))
                 {
-                    *((bool32*)dst + 0) = tobool32(*((int*)src + 0));
+                    *((bool32*)dst + 0) = bool32.FromBitmask(*((int*)src + 0));
 
                     dst = (bool*)dst + 32;
                     src = (byte*)src + 32 / 8;
@@ -157,7 +155,7 @@ namespace BitCollections
 
             if (Hint.Likely(count >= 16))
             {
-                *((bool16*)dst + 0) = tobool16(*((ushort*)src + 0));
+                *((bool16*)dst + 0) = bool16.FromBitmask(*((ushort*)src + 0));
 
                 dst = (bool*)dst + 16;
                 src = (byte*)src + 16 / 8;
@@ -167,7 +165,7 @@ namespace BitCollections
 
             if (Hint.Likely(count >= 8))
             {
-                *((bool8*)dst + 0) = tobool8(*((byte*)src + 0));
+                *((bool8*)dst + 0) = bool8.FromBitmask(*((byte*)src + 0));
 
                 dst = (bool*)dst + 8;
                 src = (byte*)src + 8 / 8;
@@ -177,7 +175,7 @@ namespace BitCollections
 
             if (Hint.Likely(count != 0))
             {
-                bool8 last = tobool8(*(byte*)src);
+                bool8 last = bool8.FromBitmask(*(byte*)src);
 
                 if (Hint.Likely(count >= 4))
                 {

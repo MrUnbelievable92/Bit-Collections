@@ -1,13 +1,11 @@
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Burst.CompilerServices;
-using Unity.Mathematics;
 using DevTools;
 using MaxMath;
 using SIMDAlgorithms;
 
-using static Unity.Mathematics.math;
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {
@@ -209,7 +207,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     while (count >= 32)
                     {
                         byte32 load = LoadStore.LoadVector<T, byte32>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((sbyte32)load, (sbyte32)splat) : where.Compare(load, splat));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((sbyte32)load, (sbyte32)splat) : where.Compare(load, splat));
 
                         startIndex += 32;
                         count -= 32;
@@ -218,7 +216,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     if (count >= 16)
                     {
                         byte16 load = LoadStore.LoadVector<T, byte16>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((sbyte16)load, (sbyte16)splat.v16_0) : where.Compare(load, splat.v16_0));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((sbyte16)load, (sbyte16)splat.v16_0) : where.Compare(load, splat.v16_0));
 
                         startIndex += 16;
                         count -= 16;
@@ -227,7 +225,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     if (count >= 8)
                     {
                         byte8 load = LoadStore.LoadVector<T, byte8>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((sbyte8)load, (sbyte8)splat.v8_0) : where.Compare(load, splat.v8_0));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((sbyte8)load, (sbyte8)splat.v8_0) : where.Compare(load, splat.v8_0));
 
                         startIndex += 8;
                         count -= 8;
@@ -236,7 +234,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     if (count >= 4)
                     {
                         byte4 load = LoadStore.LoadVector<T, byte4>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((sbyte4)load, (sbyte4)splat.v4_0) : where.Compare(load, splat.v4_0));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((sbyte4)load, (sbyte4)splat.v4_0) : where.Compare(load, splat.v4_0));
 
                         startIndex += 4;
                         count -= 4;
@@ -245,7 +243,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     if (count >= 2)
                     {
                         byte2 load = LoadStore.LoadVector<T, byte2>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((sbyte2)load, (sbyte2)splat.v2_0) : where.Compare(load, splat.v2_0));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((sbyte2)load, (sbyte2)splat.v2_0) : where.Compare(load, splat.v2_0));
 
                         startIndex += 2;
                         count -= 2;
@@ -263,7 +261,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     while (count >= 16)
                     {
                         ushort16 load = LoadStore.LoadVector<T, ushort16>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((short16)load, (short16)splat) : where.Compare(load, splat));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((short16)load, (short16)splat) : where.Compare(load, splat));
 
                         startIndex += 16;
                         count -= 16;
@@ -272,7 +270,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     if (count >= 8)
                     {
                         ushort8 load = LoadStore.LoadVector<T, ushort8>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((short8)load, (short8)splat.v8_0) : where.Compare(load, splat.v8_0));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((short8)load, (short8)splat.v8_0) : where.Compare(load, splat.v8_0));
 
                         startIndex += 8;
                         count -= 8;
@@ -281,7 +279,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     if (count >= 4)
                     {
                         ushort4 load = LoadStore.LoadVector<T, ushort4>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((short4)load, (short4)splat.v4_0) : where.Compare(load, splat.v4_0));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((short4)load, (short4)splat.v4_0) : where.Compare(load, splat.v4_0));
 
                         startIndex += 4;
                         count -= 4;
@@ -290,7 +288,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     if (count >= 2)
                     {
                         ushort2 load = LoadStore.LoadVector<T, ushort2>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((short2)load, (short2)splat.v2_0) : where.Compare(load, splat.v2_0));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((short2)load, (short2)splat.v2_0) : where.Compare(load, splat.v2_0));
 
                         startIndex += 2;
                         count -= 2;
@@ -308,7 +306,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     while (count >= 8)
                     {
                         uint8 load = LoadStore.LoadVector<T, uint8>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((int8)load, (int8)splat) : where.Compare(load, splat));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((int8)load, (int8)splat) : where.Compare(load, splat));
 
                         startIndex += 8;
                         count -= 8;
@@ -317,7 +315,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     if (count >= 4)
                     {
                         uint4 load = LoadStore.LoadVector<T, uint4>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((int4)load, (int4)splat.v4_0) : where.Compare(load, splat.v4_0));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((int4)load, (int4)splat.v4_0) : where.Compare(load, splat.v4_0));
 
                         startIndex += 4;
                         count -= 4;
@@ -326,7 +324,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     if (count >= 2)
                     {
                         uint2 load = LoadStore.LoadVector<T, uint2>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((int2)load, (int2)splat.v2_0) : where.Compare(load, splat.v2_0));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((int2)load, (int2)splat.v2_0) : where.Compare(load, splat.v2_0));
 
                         startIndex += 2;
                         count -= 2;
@@ -344,7 +342,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     while (count >= 4)
                     {
                         ulong4 load = LoadStore.LoadVector<T, ulong4>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((long4)load, (long4)splat) : where.Compare(load, (ulong4)splat));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((long4)load, (long4)splat) : where.Compare(load, (ulong4)splat));
 
                         startIndex += 4;
                         count -= 4;
@@ -353,7 +351,7 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     if (count >= 2)
                     {
                         ulong2 load = LoadStore.LoadVector<T, ulong2>(basePtr, startIndex, arrayLength);
-                        __count += (int)maxmath.count(default(T).IsSigned ? where.Compare((long2)load, (long2)splat.xy) : where.Compare(load, (ulong2)splat.xy));
+                        __count += (int)math.count(default(T).IsSigned ? where.Compare((long2)load, (long2)splat.xy) : where.Compare(load, (ulong2)splat.xy));
 
                         startIndex += 2;
                         count -= 2;

@@ -4,11 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
-using Unity.Mathematics;
 using MaxMath;
 
-using static MaxMath.maxmath;
-using static Unity.Mathematics.math;
+using static MaxMath.math;
 
 namespace BitCollections
 {
@@ -79,7 +77,19 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator bool16(bit16 input)
         {
-            return tobool16(input.Bits);
+            return bool16.FromBitmask(input.Bits);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator mask8x16(bit16 input)
+        {
+            return mask8x16.FromBitmask(input.Bits);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator mask16x16(bit16 input)
+        {
+            return mask16x16.FromBitmask(input.Bits);
         }
 
 
@@ -103,6 +113,18 @@ namespace BitCollections
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator bit16(bool16 input)
+        {
+            return (bit16)(ushort)bitmask(input);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator bit16(mask8x16 input)
+        {
+            return (bit16)(ushort)bitmask(input);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator bit16(mask16x16 input)
         {
             return (bit16)(ushort)bitmask(input);
         }

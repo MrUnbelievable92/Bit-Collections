@@ -6,8 +6,7 @@ using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using MaxMath;
 
-using static MaxMath.maxmath;
-using static Unity.Mathematics.math;
+using static MaxMath.math;
 
 namespace BitCollections
 {

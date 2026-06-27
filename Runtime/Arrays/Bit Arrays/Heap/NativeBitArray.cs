@@ -13,7 +13,7 @@ using Unity.Burst.CompilerServices;
 using DevTools;
 using SIMDAlgorithms;
 
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {
@@ -30,15 +30,15 @@ internal static readonly SharedStatic<int> _staticSafetyId = SharedStatic<int>.G
 #endif
 
         [NativeDisableUnsafePtrRestriction]
-        internal void* _ptr;
+        internal void* m_Buffer;
         internal readonly int _length;
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-        internal Allocator _allocator;
+        internal Allocator m_AllocatorLabel;
 #else
-        internal readonly Allocator _allocator;
+        internal readonly Allocator m_AllocatorLabel;
 #endif
 
-        public readonly bool IsCreated => _ptr != null;
+        public readonly bool IsCreated => m_Buffer != null;
 
         public readonly int Length
         {
@@ -104,9 +104,9 @@ internal static readonly SharedStatic<int> _staticSafetyId = SharedStatic<int>.G
 Assert.IsGreater((int)allocator, (int)Allocator.None);
 Assert.IsNonNegative(length);
 
-            _ptr = ptr;
+            m_Buffer = ptr;
             _length = length;
-            _allocator = allocator;
+            m_AllocatorLabel = allocator;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -115,9 +115,9 @@ Assert.IsNonNegative(length);
 Assert.IsGreater((int)allocator, (int)Allocator.None);
 Assert.IsNonNegative(numBits);
 
-            _ptr = MemoryHelper.Allocate<Bit>(numBits, allocator, options);
+            m_Buffer = MemoryHelper.Allocate<Bit>(numBits, allocator, options);
             _length = numBits;
-            _allocator = allocator;
+            m_AllocatorLabel = allocator;
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 SafetyHelper.InitSafety<NativeBitArray>(allocator, _staticSafetyId, out m_Safety, out m_DisposeSentinel);
@@ -129,11 +129,11 @@ SafetyHelper.InitSafety<NativeBitArray>(allocator, _staticSafetyId, out m_Safety
         {
 Assert.IsGreater((int)allocator, (int)Allocator.None);
 
-            _ptr = MemoryHelper.Allocate<Bit>(srcLength, allocator, NativeArrayOptions.UninitializedMemory);
+            m_Buffer = MemoryHelper.Allocate<Bit>(srcLength, allocator, NativeArrayOptions.UninitializedMemory);
             _length = srcLength;
-            _allocator = allocator;
+            m_AllocatorLabel = allocator;
 
-            LoadStore.CopyAscending<Bit>(bits, srcStartIndex, _ptr, 0, srcLength);
+            LoadStore.CopyAscending<Bit>(bits, srcStartIndex, m_Buffer, 0, srcLength);
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 SafetyHelper.InitSafety<NativeBitArray>(allocator, _staticSafetyId, out m_Safety, out m_DisposeSentinel);
@@ -144,7 +144,7 @@ SafetyHelper.InitSafety<NativeBitArray>(allocator, _staticSafetyId, out m_Safety
         public NativeBitArray(bool* values, Allocator allocator, int srcLength, int srcStartIndex = 0)
             : this(srcLength - srcStartIndex, allocator, NativeArrayOptions.UninitializedMemory)
         {
-            PackUnpack.CopyConvertBoolToBit(_ptr, 0, values, srcStartIndex, _length, false);
+            PackUnpack.CopyConvertBoolToBit(m_Buffer, 0, values, srcStartIndex, _length, false);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -174,7 +174,7 @@ SafetyHelper.InitSafety<NativeBitArray>(allocator, _staticSafetyId, out m_Safety
         {
             fixed (bool* ptr = values)
             {
-                PackUnpack.CopyConvertBoolToBit(_ptr, 0, ptr, srcStartIndex, _length, false);
+                PackUnpack.CopyConvertBoolToBit(m_Buffer, 0, ptr, srcStartIndex, _length, false);
             }
         }
 
@@ -384,7 +384,7 @@ this.CheckWriteAndThrow();
         {
 this.CheckReadAndThrow();
 
-            return _ptr;
+            return m_Buffer;
         }
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -550,7 +550,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(NativeBitArray other)
         {
-            return (this._ptr    == other._ptr) &
+            return (this.m_Buffer    == other.m_Buffer) &
                    (this._length == other._length);
         }
 
@@ -563,7 +563,7 @@ Assert.IsValidSubarray(index, numBits, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override readonly int GetHashCode()
         {
-            return ((IntPtr)_ptr).GetHashCode();
+            return ((IntPtr)m_Buffer).GetHashCode();
         }
 
         public override readonly string ToString()
@@ -603,9 +603,9 @@ Assert.IsValidSubarray(index, numBits, Length);
         public void Dispose()
         {
         #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            SafetyHelper.Dispose(ref _ptr, ref _allocator, ref m_Safety, ref m_DisposeSentinel);
+            SafetyHelper.Dispose(ref m_Buffer, ref m_AllocatorLabel, ref m_Safety, ref m_DisposeSentinel);
         #else
-            SafetyHelper.Dispose(ref _ptr, _allocator);
+            SafetyHelper.Dispose(ref _ptr, m_AllocatorLabel);
         #endif
         }
 
@@ -613,9 +613,9 @@ Assert.IsValidSubarray(index, numBits, Length);
         public JobHandle Dispose(JobHandle dependency)
         {
         #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            return SafetyHelper.Dispose(dependency, ref _ptr, ref _allocator, ref m_Safety, ref m_DisposeSentinel);
+            return SafetyHelper.Dispose(dependency, ref m_Buffer, ref m_AllocatorLabel, ref m_Safety, ref m_DisposeSentinel);
         #else
-            return SafetyHelper.Dispose(dependency, ref _ptr, _allocator);
+            return SafetyHelper.Dispose(dependency, ref _ptr, m_AllocatorLabel);
         #endif
         }
 

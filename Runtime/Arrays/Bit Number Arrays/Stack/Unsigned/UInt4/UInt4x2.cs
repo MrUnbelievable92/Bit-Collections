@@ -5,10 +5,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
-using Unity.Mathematics;
 using MaxMath.Intrinsics;
 
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {
@@ -87,6 +86,9 @@ Assert.IsNotGreater(x, UInt4.MaxValue);
         public static implicit operator uint2(UInt4x2 input) => PackUnpack.UpCast64<UInt4, UInt32>(input.Bits).Reinterpret<ulong, uint2>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.uint2(UInt4x2 input) => (uint2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ulong2(UInt4x2 input) => PackUnpack.BitIntArrayToULong2<UInt4>(input.Bits);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -97,6 +99,9 @@ Assert.IsNotGreater(x, UInt4.MaxValue);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator int2(UInt4x2 input) => (int2)(uint2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.int2(UInt4x2 input) => (int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator long2(UInt4x2 input) => (long2)(ulong2)input;
@@ -112,6 +117,9 @@ Assert.IsNotGreater(x, UInt4.MaxValue);
         public static explicit operator UInt4x2(uint2 input) => new UInt4x2 { Bits = (byte)PackUnpack.DownCast<UInt32, UInt4>(input.Reinterpret<uint2, ulong>()) };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator UInt4x2(Unity.Mathematics.uint2 input) => (UInt4x2)(uint2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator UInt4x2(ulong2 input) => new UInt4x2 { Bits = (byte)PackUnpack.DownCast<UInt4>(input) };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -124,6 +132,9 @@ Assert.IsNotGreater(x, UInt4.MaxValue);
         public static explicit operator UInt4x2(int2 input) => (UInt4x2)(uint2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator UInt4x2(Unity.Mathematics.int2 input) => (UInt4x2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator UInt4x2(long2 input) => (UInt4x2)(ulong2)input;
 
 
@@ -134,10 +145,19 @@ Assert.IsNotGreater(x, UInt4.MaxValue);
         public static implicit operator half2(UInt4x2 input) => (half2)(ushort2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.half2(UInt4x2 input) => (half2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator float2(UInt4x2 input) => (float2)(int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.float2(UInt4x2 input) => (float2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator double2(UInt4x2 input) => (double2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.double2(UInt4x2 input) => (double2)input;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -147,10 +167,19 @@ Assert.IsNotGreater(x, UInt4.MaxValue);
         public static explicit operator UInt4x2(half2 input) => (UInt4x2)(ushort2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator UInt4x2(Unity.Mathematics.half2 input) => (UInt4x2)(half2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator UInt4x2(float2 input) => (UInt4x2)(int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator UInt4x2(Unity.Mathematics.float2 input) => (UInt4x2)(float2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator UInt4x2(double2 input) => (UInt4x2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator UInt4x2(Unity.Mathematics.double2 input) => (UInt4x2)(double2)input;
         
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

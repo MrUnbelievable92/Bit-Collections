@@ -15,14 +15,12 @@ using MaxMath;
 using MaxMath.Intrinsics;
 using SIMDAlgorithms;
 
-using static Unity.Mathematics.math;
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {
     [NativeContainer]
     [DebuggerTypeProxy(typeof(NativeCollectionDebugView<long>))]
-    [NativeContainerSupportsDeallocateOnJobCompletion]
     [StructLayout(LayoutKind.Sequential)]
     unsafe public struct NativeBitIntList<T> : INativeList<long>, IArray<long>, IEquatable<NativeBitIntList<T>>, INativeDisposable, IUnityCollectionsCheck
         where T : BitInt
@@ -36,9 +34,9 @@ internal static readonly SharedStatic<int> _staticSafetyId = SharedStatic<int>.G
         [NativeDisableUnsafePtrRestriction]
         internal ListData* _data;
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-        internal Allocator _allocator;
+        internal Allocator m_AllocatorLabel;
 #else
-        internal readonly Allocator _allocator;
+        internal readonly Allocator m_AllocatorLabel;
 #endif
 
         private void* DataPtr
@@ -115,7 +113,7 @@ this.CheckReadAndThrow();
             set
             {
 Assert.IsNonNegative(value);
-Assert.IsGreater((int)_allocator, (int)Allocator.None);
+Assert.IsGreater((int)m_AllocatorLabel, (int)Allocator.None);
 this.CheckWriteAndThrow();
 this.CheckWriteAndBumpSecondaryVersion();
 
@@ -125,19 +123,19 @@ this.CheckWriteAndBumpSecondaryVersion();
 
                 if (Hint.Likely(newCapacity != 0))
                 {
-                    void* newPtr = UnsafeUtility.Malloc((long)MemoryHelper.SizeInBytes<T>(newCapacity), MemoryHelper.AlignOf<T>(), _allocator);
+                    void* newPtr = UnsafeUtility.Malloc((long)MemoryHelper.SizeInBytes<T>(newCapacity), MemoryHelper.AlignOf<T>(), m_AllocatorLabel);
 
                     if (Hint.Likely(_data->Capacity != 0))
                     {
                         UnsafeUtility.MemCpy(newPtr, DataPtr, (long)MemoryHelper.SizeInBytes<T>(oldLength));
-                        UnsafeUtility.Free(DataPtr, _allocator);
+                        UnsafeUtility.Free(DataPtr, m_AllocatorLabel);
                     }
 
                     _data->Ptr = newPtr;
                 }
                 else if (Hint.Unlikely(Capacity != 0))
                 {
-                    UnsafeUtility.Free(DataPtr, _allocator);
+                    UnsafeUtility.Free(DataPtr, m_AllocatorLabel);
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 _data->Ptr = null;
@@ -202,7 +200,7 @@ _data->Ptr = null;
 Assert.IsGreater((int)allocator, (int)Allocator.None);
 Assert.IsNonNegative(initialCapacity);
 
-            _allocator = allocator;
+            m_AllocatorLabel = allocator;
             _data = (ListData*)UnsafeUtility.Malloc(sizeof(ListData), UnsafeUtility.AlignOf<ListData>(), allocator);
             _data->Length = 0;
             _data->Capacity = (int)MemoryHelper.Capacity<T>(initialCapacity);
@@ -7434,14 +7432,14 @@ Assert.IsValidSubarray(index, numValues, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose()
         {
-            UnsafeUtility.Free(DataPtr, _allocator);
+            UnsafeUtility.Free(DataPtr, m_AllocatorLabel);
 
             void* ptr = _data;
 
         #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            SafetyHelper.Dispose(ref ptr, ref _allocator, ref m_Safety, ref m_DisposeSentinel);
+            SafetyHelper.Dispose(ref ptr, ref m_AllocatorLabel, ref m_Safety, ref m_DisposeSentinel);
         #else
-            SafetyHelper.Dispose(ref ptr, _allocator);
+            SafetyHelper.Dispose(ref ptr, m_AllocatorLabel);
         #endif
 
             _data = (ListData*)ptr;
@@ -7450,14 +7448,14 @@ Assert.IsValidSubarray(index, numValues, Length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public JobHandle Dispose(JobHandle dependency)
         {
-            dependency = new NativeCollectionDisposeJob(DataPtr, _allocator).Schedule(dependency);
+            dependency = new NativeCollectionDisposeJob(DataPtr, m_AllocatorLabel).Schedule(dependency);
 
             void* ptr = _data;
 
         #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            JobHandle dependency2 = SafetyHelper.Dispose(dependency, ref ptr, ref _allocator, ref m_Safety, ref m_DisposeSentinel);
+            JobHandle dependency2 = SafetyHelper.Dispose(dependency, ref ptr, ref m_AllocatorLabel, ref m_Safety, ref m_DisposeSentinel);
         #else
-            JobHandle dependency2 = SafetyHelper.Dispose(dependency, ref ptr, _allocator);
+            JobHandle dependency2 = SafetyHelper.Dispose(dependency, ref ptr, m_AllocatorLabel);
         #endif
 
             _data = (ListData*)ptr;

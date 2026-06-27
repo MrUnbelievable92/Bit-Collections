@@ -1,10 +1,8 @@
 using NUnit.Framework;
 using Unity.Collections;
 using MaxMath;
-using Unity.Mathematics;
 
-using static MaxMath.maxmath;
-using static Unity.Mathematics.math;
+using static MaxMath.math;
 
 namespace BitCollections.Tests
 {

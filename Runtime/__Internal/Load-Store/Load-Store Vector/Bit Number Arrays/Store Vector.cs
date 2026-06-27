@@ -1,11 +1,10 @@
 using System.Runtime.CompilerServices;
-using Unity.Mathematics;
 using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using MaxMath;
 using DevTools;
 
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {
@@ -131,6 +130,13 @@ namespace BitCollections
             if (typeof(V) == typeof(ulong2))    { StoreULong2<T>(basePtr, index, length, vector.Reinterpret<V, ulong2>());      return; }
             if (typeof(V) == typeof(ulong3))    { StoreULong3<T>(basePtr, index, length, vector.Reinterpret<V, ulong3>());      return; }
             if (typeof(V) == typeof(ulong4))    { StoreULong4<T>(basePtr, index, length, vector.Reinterpret<V, ulong4>());      return; }
+            
+            if (typeof(V) == typeof(Unity.Mathematics.int2))    { StoreInt2<T>(basePtr, index, length, vector.Reinterpret<V, int2>());          return; }
+            if (typeof(V) == typeof(Unity.Mathematics.int3))    { StoreInt3<T>(basePtr, index, length, vector.Reinterpret<V, int3>());          return; }
+            if (typeof(V) == typeof(Unity.Mathematics.int4))    { StoreInt4<T>(basePtr, index, length, vector.Reinterpret<V, int4>());          return; }
+            if (typeof(V) == typeof(Unity.Mathematics.uint2))   { StoreUInt2<T>(basePtr, index, length, vector.Reinterpret<V, uint2>());        return; }
+            if (typeof(V) == typeof(Unity.Mathematics.uint3))   { StoreUInt3<T>(basePtr, index, length, vector.Reinterpret<V, uint3>());        return; }
+            if (typeof(V) == typeof(Unity.Mathematics.uint4))   { StoreUInt4<T>(basePtr, index, length, vector.Reinterpret<V, uint4>());        return; }
 
             throw new System.TypeAccessException($"{typeof(V)}");
         }
@@ -145,7 +151,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 7, length);
 
             if (default(T).Bits == 8)
             {
-                *(bool8*)((bool*)basePtr + scalarIndex) = tobool8(value.Bits);
+                *(bool8*)((bool*)basePtr + scalarIndex) = bool8.FromBitmask(value.Bits);
             }
 
             if (default(T).Bits * 8 <= 64)
@@ -179,7 +185,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 15, length);
             
             if (default(T).Bits == 8)
             {
-                *(bool16*)((bool*)basePtr + scalarIndex) = tobool16(value.Bits);
+                *(bool16*)((bool*)basePtr + scalarIndex) = bool16.FromBitmask(value.Bits);
             }
 
             if (default(T).Bits * 16 <= 64)
@@ -218,7 +224,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 23, length);
             
             if (default(T).Bits == 8)
             {
-                bool32 result = tobool32(value.Bits);
+                bool32 result = bool32.FromBitmask(value.Bits);
 
                 *(bool16*)((bool*)basePtr + scalarIndex)     = result.v16_0;
                 *(bool8*)((bool*)basePtr + 16 + scalarIndex) = result.v8_16;
@@ -265,7 +271,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 31, length);
             
             if (default(T).Bits == 8)
             {
-                *(bool32*)((bool*)basePtr + scalarIndex) = tobool32((int)value.Bits);
+                *(bool32*)((bool*)basePtr + scalarIndex) = bool32.FromBitmask((int)value.Bits);
             }
 
             if (default(T).Bits * 32 <= 64)
@@ -309,8 +315,8 @@ Assert.IsWithinArrayBounds(scalarIndex + 39, length);
             
             if (default(T).Bits == 8)
             {
-                bool32 resultLo = tobool32((int)value.Bits);
-                bool8 resultHi = tobool8((int)(value.Bits >> 32));
+                bool32 resultLo = bool32.FromBitmask((int)value.Bits);
+                bool8 resultHi = bool8.FromBitmask((int)(value.Bits >> 32));
 
                 *(bool32*)((bool*)basePtr + scalarIndex)     = resultLo;
                 *(bool8*)((bool*)basePtr + 32 + scalarIndex) = resultHi;
@@ -362,8 +368,8 @@ Assert.IsWithinArrayBounds(scalarIndex + 47, length);
             
             if (default(T).Bits == 8)
             {
-                bool32 resultLo = tobool32((int)value.Bits);
-                bool16 resultHi = tobool16((int)(value.Bits >> 32));
+                bool32 resultLo = bool32.FromBitmask((int)value.Bits);
+                bool16 resultHi = bool16.FromBitmask((int)(value.Bits >> 32));
 
                 *(bool32*)((bool*)basePtr + scalarIndex)      = resultLo;
                 *(bool16*)((bool*)basePtr + 32 + scalarIndex) = resultHi;
@@ -415,8 +421,8 @@ Assert.IsWithinArrayBounds(scalarIndex + 55, length);
             
             if (default(T).Bits == 8)
             {
-                bool32 resultLo = tobool32((int)value.Bits);
-                bool32 resultHi = tobool32((int)(value.Bits >> 32));
+                bool32 resultLo = bool32.FromBitmask((int)value.Bits);
+                bool32 resultHi = bool32.FromBitmask((int)(value.Bits >> 32));
 
                 *(bool32*)((bool*)basePtr + scalarIndex)      = resultLo;
                 *(bool16*)((bool*)basePtr + 32 + scalarIndex) = resultHi.v16_0;
@@ -469,8 +475,8 @@ Assert.IsWithinArrayBounds(scalarIndex + 63, length);
             
             if (default(T).Bits == 8)
             {
-                *(bool32*)((bool*)basePtr + scalarIndex)       = tobool32((int)value.Bits);
-                *(bool32*)((bool*)basePtr + 32 + scalarIndex) = tobool32((int)(value.Bits >> 32));
+                *(bool32*)((bool*)basePtr + scalarIndex)      = bool32.FromBitmask((int)value.Bits);
+                *(bool32*)((bool*)basePtr + 32 + scalarIndex) = bool32.FromBitmask((int)(value.Bits >> 32));
             }
 
             if (default(T).Bits * 64 <= 64)

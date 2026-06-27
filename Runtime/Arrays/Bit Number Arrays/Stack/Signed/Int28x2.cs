@@ -6,9 +6,7 @@ using Unity.Burst.CompilerServices;
 using MaxMath;
 using MaxMath.Intrinsics;
 
-using static MaxMath.maxmath;
-using static Unity.Mathematics.math;
-using Unity.Mathematics;
+using static MaxMath.math;
 
 namespace BitCollections
 {
@@ -70,6 +68,9 @@ namespace BitCollections
         public static explicit operator uint2(Int28x2 input) => (uint2)(int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Unity.Mathematics.uint2(Int28x2 input) => (uint2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator ulong2(Int28x2 input) => (ulong2)(long2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,6 +81,9 @@ namespace BitCollections
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator int2(Int28x2 input) => signextend((int2)(UInt28x2)input, default(Int28).Bits);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.int2(Int28x2 input) => (int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator long2(Int28x2 input) => signextend((long2)(UInt28x2)input, default(Int28).Bits);
@@ -95,6 +99,9 @@ namespace BitCollections
         public static explicit operator Int28x2(uint2 input) => (Int28x2)(UInt28x2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Int28x2(Unity.Mathematics.uint2 input) => (Int28x2)(uint2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Int28x2(ulong2 input) => (Int28x2)(UInt28x2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -107,33 +114,54 @@ namespace BitCollections
         public static explicit operator Int28x2(int2 input) => (Int28x2)(UInt28x2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Int28x2(Unity.Mathematics.int2 input) => (Int28x2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Int28x2(long2 input) => (Int28x2)(UInt28x2)input;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator quarter2(Int28x2 input) => (quarter2)(sbyte2)input;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]// TODO (half2)(int2)input
-        public static implicit operator half2(Int28x2 input) => (half2)(float2)input;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator half2(Int28x2 input) => (half2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.half2(Int28x2 input) => (half2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator float2(Int28x2 input) => (float2)(int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.float2(Int28x2 input) => (float2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator double2(Int28x2 input) => (double2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Unity.Mathematics.double2(Int28x2 input) => (double2)input;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Int28x2(quarter2 input) => (Int28x2)(int2)input;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]// TODO (Int28x2)(int2)input
-        public static explicit operator Int28x2(half2 input) => (Int28x2)(float2)input;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Int28x2(half2 input) => (Int28x2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Int28x2(Unity.Mathematics.half2 input) => (Int28x2)(half2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Int28x2(float2 input) => (Int28x2)(int2)input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Int28x2(Unity.Mathematics.float2 input) => (Int28x2)(float2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Int28x2(double2 input) => (Int28x2)(int2)input;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Int28x2(Unity.Mathematics.double2 input) => (Int28x2)(double2)input;
         
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -182,7 +210,7 @@ namespace BitCollections
         {
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return (Int28x2)(div((int2)left, (int2)right));
+                return (Int28x2)((int2)left / (int2)right);
             }
             
             UInt28x2 negQuotient = (UInt28x2)(left ^ right) >> (default(Int28).Bits - 1);
@@ -205,7 +233,7 @@ namespace BitCollections
             
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return (Int28x2)(div((int2)left, right));
+                return (Int28x2)((int2)left / right);
             }
             
             UInt28x2 negQuotient = (UInt28x2)(left ^ right) >> (default(Int28).Bits - 1);
@@ -223,7 +251,7 @@ namespace BitCollections
         {
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return (Int28x2)(div(left, (int2)right));
+                return (Int28x2)(left / (int2)right);
             }
             
             UInt28x2 negQuotient = (UInt28x2)(left ^ right) >> (default(Int28).Bits - 1);
@@ -241,7 +269,7 @@ namespace BitCollections
         {
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return (Int28x2)(mod((int2)left, (int2)right));
+                return (Int28x2)((int2)left % (int2)right);
             }
             
             return new Int28x2((left[0] % right[0]),
@@ -258,7 +286,7 @@ namespace BitCollections
             
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return (Int28x2)(mod((int2)left, right));
+                return (Int28x2)((int2)left % right);
             }
             
             return new Int28x2((left[0] % right),
@@ -270,7 +298,7 @@ namespace BitCollections
         {
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return (Int28x2)(mod(left, (int2)right));
+                return (Int28x2)(left % (int2)right);
             }
 
             return new Int28x2((left % right[0]),

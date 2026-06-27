@@ -1,10 +1,9 @@
 using System.Runtime.CompilerServices;
-using Unity.Mathematics;
+using DevTools;
 using MaxMath;
 using MaxMath.Intrinsics;
 
-using static Unity.Mathematics.math;
-using static MaxMath.maxmath;
+using static MaxMath.math;
 
 namespace BitCollections
 {
@@ -552,6 +551,8 @@ namespace BitCollections
         internal static byte ShiftLeftLogical<T>(byte a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -566,6 +567,8 @@ namespace BitCollections
         internal static ushort ShiftLeftLogical<T>(ushort a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -580,6 +583,8 @@ namespace BitCollections
         internal static uint ShiftLeftLogical<T>(uint a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -594,6 +599,8 @@ namespace BitCollections
         internal static ulong ShiftLeftLogical<T>(ulong a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -608,6 +615,8 @@ namespace BitCollections
         internal static uint4 ShiftLeftLogical<T>(uint4 a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -622,6 +631,8 @@ namespace BitCollections
         internal static uint8 ShiftLeftLogical<T>(uint8 a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -637,6 +648,8 @@ namespace BitCollections
         internal static byte ShiftRightLogical<T>(byte a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -651,6 +664,8 @@ namespace BitCollections
         internal static ushort ShiftRightLogical<T>(ushort a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -665,6 +680,8 @@ namespace BitCollections
         internal static uint ShiftRightLogical<T>(uint a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -679,6 +696,8 @@ namespace BitCollections
         internal static ulong ShiftRightLogical<T>(ulong a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -693,6 +712,8 @@ namespace BitCollections
         internal static uint4 ShiftRightLogical<T>(uint4 a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -707,6 +728,8 @@ namespace BitCollections
         internal static uint8 ShiftRightLogical<T>(uint8 a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -722,6 +745,8 @@ namespace BitCollections
         internal static byte ShiftRightArithmetic<T>(byte a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -745,18 +770,20 @@ namespace BitCollections
                 return result;
             }
 
-            byte MASK = (byte)(bitmask8((uint)default(T).Bits) >> n);
-            
-            byte signBits = NegBool<T>(ShiftRightLogical<T>(a, default(T).Bits - 1));
-            byte logical = ShiftRightLogical<T>(a, n);
+            byte t = (byte)(SignBitMask8<T>() >> n);
+            a = ShiftRightLogical<T>(a, n);
+            a ^= t;
+            a = Sub<T>(a, t);
 
-            return bits_select(signBits, logical, Broadcast8<T>(MASK));
+            return a;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static ushort ShiftRightArithmetic<T>(ushort a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -780,18 +807,20 @@ namespace BitCollections
                 return result;
             }
 
-            ushort MASK = (ushort)(bitmask16((uint)default(T).Bits) >> n);
-            
-            ushort signBits = NegBool<T>(ShiftRightLogical<T>(a, default(T).Bits - 1));
-            ushort logical = ShiftRightLogical<T>(a, n);
+            ushort t = (ushort)(SignBitMask16<T>() >> n);
+            a = ShiftRightLogical<T>(a, n);
+            a ^= t;
+            a = Sub<T>(a, t);
 
-            return bits_select(signBits, logical, Broadcast16<T>(MASK));
+            return a;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static uint ShiftRightArithmetic<T>(uint a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -815,18 +844,20 @@ namespace BitCollections
                 return result;
             }
 
-            uint MASK = bitmask32((uint)default(T).Bits) >> n;
-            
-            uint signBits = NegBool<T>(ShiftRightLogical<T>(a, default(T).Bits - 1));
-            uint logical = ShiftRightLogical<T>(a, n);
+            uint t = SignBitMask32<T>() >> n;
+            a = ShiftRightLogical<T>(a, n);
+            a ^= t;
+            a = Sub<T>(a, t);
 
-            return bits_select(signBits, logical, Broadcast32<T>(MASK));
+            return a;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static ulong ShiftRightArithmetic<T>(ulong a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -850,18 +881,20 @@ namespace BitCollections
                 return result;
             }
 
-            ulong MASK = bitmask64((ulong)default(T).Bits) >> n;
-            
-            ulong signBits = NegBool<T>(ShiftRightLogical<T>(a, default(T).Bits - 1));
-            ulong logical = ShiftRightLogical<T>(a, n);
+            ulong t = SignBitMask64<T>() >> n;
+            a = ShiftRightLogical<T>(a, n);
+            a ^= t;
+            a = Sub<T>(a, t);
 
-            return bits_select(signBits, logical, Broadcast64<T>(MASK));
+            return a;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static uint4 ShiftRightArithmetic<T>(uint4 a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -885,18 +918,20 @@ namespace BitCollections
                 return result;
             }
 
-            uint MASK = bitmask32((uint)default(T).Bits) >> n;
-            
-            uint4 signBits = NegBool<T>(ShiftRightLogical<T>(a, default(T).Bits - 1));
-            uint4 logical = ShiftRightLogical<T>(a, n);
+            uint4 t = SignBitMask32<T>() >> n;
+            a = ShiftRightLogical<T>(a, n);
+            a ^= t;
+            a = Sub<T>(a, t);
 
-            return bits_select(signBits, logical, Broadcast32<T>(MASK));
+            return a;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static uint8 ShiftRightArithmetic<T>(uint8 a, int n)
             where T : BitInt
         {
+Assert.IsBetween(n, 0, default(T).Bits - 1);
+
             if (constexpr.IS_TRUE(n == 0))
             {
                 return a;
@@ -920,12 +955,12 @@ namespace BitCollections
                 return result;
             }
 
-            uint MASK = bitmask32((uint)default(T).Bits) >> n;
-            
-            uint8 signBits = NegBool<T>(ShiftRightLogical<T>(a, default(T).Bits - 1));
-            uint8 logical = ShiftRightLogical<T>(a, n);
+            uint8 t = SignBitMask32<T>() >> n;
+            a = ShiftRightLogical<T>(a, n);
+            a ^= t;
+            a = Sub<T>(a, t);
 
-            return bits_select(signBits, logical, Broadcast32<T>(MASK));
+            return a;
         }
 
 
@@ -1488,7 +1523,7 @@ namespace BitCollections
 
                 if (ispow2(__abs))
                 {
-                    sbyte shift = tzcnt(__abs);
+                    byte shift = tzcnt(__abs);
                     result = a;
                     byte signs = ShiftRightLogical<T>(a, default(T).Bits - 1);
                     if (constexpr.IS_TRUE(n == 2 || n == -2))
@@ -2905,6 +2940,92 @@ namespace BitCollections
             where T : BitInt
         {
             return LessThanOrEqual<T>(b, a, forceUnsigned);
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static byte Max<T>(byte a, byte b)
+            where T : BitInt
+        {
+            return (byte)(a ^ (byte)((byte)(a ^ b) & NegBool<T>(LessThan<T>(a, b))));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static ushort Max<T>(ushort a, ushort b)
+            where T : BitInt
+        {
+            return (ushort)(a ^ (ushort)((ushort)(a ^ b) & NegBool<T>(LessThan<T>(a, b))));
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static uint Max<T>(uint a, uint b)
+            where T : BitInt
+        {
+            return a ^ ((a ^ b) & NegBool<T>(LessThan<T>(a, b)));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static ulong Max<T>(ulong a, ulong b)
+            where T : BitInt
+        {
+            return a ^ ((a ^ b) & NegBool<T>(LessThan<T>(a, b)));
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static uint4 Max<T>(uint4 a, uint4 b)
+            where T : BitInt
+        {
+            return a ^ ((a ^ b) & NegBool<T>(LessThan<T>(a, b)));
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static uint8 Max<T>(uint8 a, uint8 b)
+            where T : BitInt
+        {
+            return a ^ ((a ^ b) & NegBool<T>(LessThan<T>(a, b)));
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static byte Min<T>(byte a, byte b)
+            where T : BitInt
+        {
+            return (byte)(b ^ (byte)((byte)(a ^ b) & NegBool<T>(LessThan<T>(a, b))));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static ushort Min<T>(ushort a, ushort b)
+            where T : BitInt
+        {
+            return (ushort)(b ^ (ushort)((ushort)(a ^ b) & NegBool<T>(LessThan<T>(a, b))));
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static uint Min<T>(uint a, uint b)
+            where T : BitInt
+        {
+            return b ^ ((a ^ b) & NegBool<T>(LessThan<T>(a, b)));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static ulong Min<T>(ulong a, ulong b)
+            where T : BitInt
+        {
+            return b ^ ((a ^ b) & NegBool<T>(LessThan<T>(a, b)));
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static uint4 Min<T>(uint4 a, uint4 b)
+            where T : BitInt
+        {
+            return b ^ ((a ^ b) & NegBool<T>(LessThan<T>(a, b)));
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static uint8 Min<T>(uint8 a, uint8 b)
+            where T : BitInt
+        {
+            return b ^ ((a ^ b) & NegBool<T>(LessThan<T>(a, b)));
         }
     }
 }

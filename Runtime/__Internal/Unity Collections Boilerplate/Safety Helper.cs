@@ -60,8 +60,7 @@ Assert.IsGreater((int)allocator, (int)Allocator.None);
             ptr = null;
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-DisposeSentinel.Clear(ref disposeSentinel);
-AtomicSafetyHandle.Release(safety);
+DisposeSentinel.Dispose(ref safety, ref disposeSentinel);
 allocator = Allocator.Invalid;
 #endif
             return dependency;

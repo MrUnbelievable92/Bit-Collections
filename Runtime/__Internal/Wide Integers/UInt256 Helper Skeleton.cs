@@ -166,8 +166,8 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int tzcnt(__UInt256__ x)
         {
-            int tzcntLo = maxmath.tzcnt(x.lo128);
-            int tzcntHi = maxmath.tzcnt(x.hi128);
+            int tzcntLo = math.tzcnt(x.lo128);
+            int tzcntHi = math.tzcnt(x.hi128);
             bool lo0 = x.lo128 == 0;
             int add = lo0 ? 128 : 0;
 
@@ -178,13 +178,13 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int countbits(__UInt256__ x)
         {
-            return maxmath.countbits(x.lo128) + maxmath.countbits(x.hi128);
+            return math.countbits(x.lo128) + math.countbits(x.hi128);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static __UInt256__ andnot(__UInt256__ x, __UInt256__ y)
         {
-            return new __UInt256__(maxmath.andnot(x.lo128, y.lo128), maxmath.andnot(x.hi128, y.hi128));
+            return new __UInt256__(math.andnot(x.lo128, y.lo128), math.andnot(x.hi128, y.hi128));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -197,11 +197,11 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static __UInt256__ bits_depositparallel(__UInt256__ x, __UInt256__ mask)
         {
-            int maskLoCount = maxmath.countbits(mask.lo128);
-            UInt128 lo = maxmath.bits_depositparallel(x.lo128, mask.lo128);
+            int maskLoCount = math.countbits(mask.lo128);
+            UInt128 lo = math.bits_depositparallel(x.lo128, mask.lo128);
             x >>= maskLoCount;
             
-            UInt128 hi = maxmath.bits_depositparallel(x.lo128, mask.hi128);
+            UInt128 hi = math.bits_depositparallel(x.lo128, mask.hi128);
             
             return new __UInt256__(lo, hi);
         }
@@ -209,9 +209,9 @@ namespace BitCollections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static __UInt256__ bits_extractparallel(__UInt256__ x, __UInt256__ mask)
         {
-            UInt128 lo = maxmath.bits_extractparallel(x.lo128, mask.lo128);
-            UInt128 hi = maxmath.bits_extractparallel(x.hi128, mask.hi128);
-            int maskloCount = maxmath.countbits(mask.lo128);
+            UInt128 lo = math.bits_extractparallel(x.lo128, mask.lo128);
+            UInt128 hi = math.bits_extractparallel(x.hi128, mask.hi128);
+            int maskloCount = math.countbits(mask.lo128);
             
             return lo | ((__UInt256__)hi << maskloCount);
         }
