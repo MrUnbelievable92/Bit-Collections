@@ -4,16 +4,6 @@ Bit Collections for Unity is all about saving as much RAM and/or network bandwid
 
 The compression applied is geared towards performance first, but can and should also be used before applying advanced compression algorithms on your data. 
 
-This package has the following dependencies:
-
-- Unity.Mathematics
-- Unity.Burst
-- Unity.Collections
-- Unity.Jobs
-- [MaxMath](https://github.com/MrUnbelievable92/MaxMath)
-- [C Sharp Dev Tools](https://github.com/MrUnbelievable92/C-Sharp-Dev-Tools)
-- [SIMD Algorithms](https://github.com/MrUnbelievable92/SIMD-Algorithms)
-
 # Functionality
 
 ## Value Types
