@@ -2574,8 +2574,7 @@ Assert.IsNotGreater(count + srcIndex, other.Length);
         [return: AssumeRange(-1L, int.MaxValue)]
         public readonly int IndexOf(long value, int index, int numValues, Comparison where = Comparison.EqualTo)
         {
-            int iof = BitAlgorithms.IndexOfFirst<T>(GetUnsafeReadOnlyPtr(), index, numValues, value, Length, where);
-            return iof == -1 ? -1 : iof + index; 
+            return BitAlgorithms.IndexOfFirst<T>(GetUnsafeReadOnlyPtr(), index, numValues, value, Length, where);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -2671,11 +2670,6 @@ Assert.IsValidSubarray(index, numValues, Length);
         public override readonly int GetHashCode()
         {
             return ((IntPtr)m_Buffer).GetHashCode();
-        }
-
-        public override readonly string ToString()
-        {
-            return GetEnumerator().ToString();
         }
 
 
@@ -2793,8 +2787,7 @@ this.CheckReadAndThrow();
             {
 this.CheckReadAndThrow();
 
-                int iof = BitAlgorithms.IndexOfFirst<T>(_ptr, index, numValues, value, Length, where);
-                return iof == -1 ? -1 : iof + index; 
+                return BitAlgorithms.IndexOfFirst<T>(_ptr, index, numValues, value, Length, where);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

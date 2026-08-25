@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
-using MaxMath.Intrinsics;
+using MaxMath.CompilerServices;
 using SIMDAlgorithms;
 
 using static Unity.Burst.Intrinsics.X86;

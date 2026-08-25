@@ -30,6 +30,46 @@ Assert.IsWithinArrayBounds(index, length);
                 case 20: { SubArrayIndexer<T> i = new SubArrayIndexer<T>(index); return default(T).IsSigned ? (*(Int20x2*)i.GetOuterPtr(basePtr))[(int)i.InnerIndex] : (int)(*(UInt20x2*)i.GetOuterPtr(basePtr))[(int)i.InnerIndex]; }
                 case 28: { SubArrayIndexer<T> i = new SubArrayIndexer<T>(index); return default(T).IsSigned ? (*(Int28x2*)i.GetOuterPtr(basePtr))[(int)i.InnerIndex] : (int)(*(UInt28x2*)i.GetOuterPtr(basePtr))[(int)i.InnerIndex]; }
 
+                // Bits == 8 is handled in 'default' below with an exact 1-byte window.
+                // These byte-multiples are "memory optimized" (MemoryHelper.SizeInBytes gives
+                // them zero safety padding), so - unlike the generic 'default' brackets below,
+                // which are sized for non-memory-optimized widths - they must use a window that
+                // exactly matches their own byte footprint, or the load reads past the buffer.
+                case 16: 
+                { 
+                    ushort raw = *(ushort*)((byte*)basePtr + (ulong)(uint)index * 2); 
+                    return default(T).IsSigned ? (short)raw : raw; 
+                }
+                case 24:
+                {
+                    byte* p = (byte*)basePtr + (ulong)(uint)index * 3;
+                    uint raw = *(ushort*)p | ((uint)p[2] << 16);
+                    return default(T).IsSigned ? ((int)raw << 8) >> 8 : (int)raw;
+                }
+                case 32: 
+                { 
+                    uint raw = *(uint*)((byte*)basePtr + (ulong)(uint)index * 4); 
+                    return default(T).IsSigned ? (int)raw : raw; 
+                }
+                case 40:
+                {
+                    byte* p = (byte*)basePtr + (ulong)(uint)index * 5;
+                    ulong raw = *(uint*)p | ((ulong)p[4] << 32);
+                    return default(T).IsSigned ? ((long)raw << 24) >> 24 : (long)raw;
+                }
+                case 48:
+                {
+                    byte* p = (byte*)basePtr + (ulong)(uint)index * 6;
+                    ulong raw = *(uint*)p | ((ulong)*(ushort*)(p + 4) << 32);
+                    return default(T).IsSigned ? ((long)raw << 16) >> 16 : (long)raw;
+                }
+                case 56:
+                {
+                    byte* p = (byte*)basePtr + (ulong)(uint)index * 7;
+                    ulong raw = *(uint*)p | ((ulong)*(ushort*)(p + 4) << 32) | ((ulong)p[6] << 48);
+                    return default(T).IsSigned ? ((long)raw << 8) >> 8 : (long)raw;
+                }
+
                 default:
                 {
 Assert.IsBetween(default(T).Bits, 1, 63);
@@ -66,6 +106,52 @@ Assert.IsBetween(default(T).Bits, 1, 63);
             where T : BitInt
         {
 Assert.IsWithinArrayBounds(index, length);
+
+            // Same reasoning as LoadScalar: these byte-multiples are "memory optimized" (no
+            // safety padding), so they get an exact-size window instead of falling into the
+            // oversized generic brackets below, which would write past the allocation. Sign
+            // doesn't matter for a store - truncating 'value' to the field's own width already
+            // produces the correct two's-complement bit pattern either way. Handled before the
+            // SubArrayIndexer/outerPtr below since none of these widths need that machinery.
+            if (default(T).Bits == 16)
+            {
+                *(ushort*)((byte*)basePtr + (ulong)(uint)index * 2) = (ushort)value;
+                return;
+            }
+            if (default(T).Bits == 24)
+            {
+                byte* p24 = (byte*)basePtr + (ulong)(uint)index * 3;
+                *(ushort*)p24 = (ushort)value;
+                p24[2] = (byte)((ulong)value >> 16);
+                return;
+            }
+            if (default(T).Bits == 32)
+            {
+                *(uint*)((byte*)basePtr + (ulong)(uint)index * 4) = (uint)value;
+                return;
+            }
+            if (default(T).Bits == 40)
+            {
+                byte* p40 = (byte*)basePtr + (ulong)(uint)index * 5;
+                *(uint*)p40 = (uint)value;
+                p40[4] = (byte)((ulong)value >> 32);
+                return;
+            }
+            if (default(T).Bits == 48)
+            {
+                byte* p48 = (byte*)basePtr + (ulong)(uint)index * 6;
+                *(uint*)p48 = (uint)value;
+                *(ushort*)(p48 + 4) = (ushort)((ulong)value >> 32);
+                return;
+            }
+            if (default(T).Bits == 56)
+            {
+                byte* p56 = (byte*)basePtr + (ulong)(uint)index * 7;
+                *(uint*)p56 = (uint)value;
+                *(ushort*)(p56 + 4) = (ushort)((ulong)value >> 32);
+                p56[6] = (byte)((ulong)value >> 48);
+                return;
+            }
 
             SubArrayIndexer<T> i = new SubArrayIndexer<T>(index);
             void* outerPtr = i.GetOuterPtr(basePtr);
@@ -587,15 +673,7 @@ Assert.IsNonNegative(count);
 Assert.IsWithinArrayBounds(index, oldLength);
 Assert.IsBetween(value, default(T).MinValueAsLong, default(T).MaxValueAsLong);
 
-            if (default(T).Bits < 8)
-            {
-                CopyAscending<T>(basePtr, index, basePtr, index + 1, oldLength - index);
-            }
-            else
-            {
-                CopyDescending<T>(basePtr, oldLength - 1, basePtr, oldLength, oldLength - index);
-            }
-
+            CopyDescending<T>(basePtr, oldLength - 1, basePtr, oldLength, oldLength - index);
             StoreScalar<T>(basePtr, index, oldLength + 1, value);
         }
     }

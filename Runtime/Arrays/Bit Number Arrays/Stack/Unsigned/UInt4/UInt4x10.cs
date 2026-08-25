@@ -6,8 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
-using MaxMath.Intrinsics;
 using MaxMath;
+using MaxMath.CompilerServices;
 
 namespace BitCollections
 {
@@ -193,7 +193,18 @@ Assert.IsNotGreater(x8,  UInt4.MaxValue);
         {
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return new UInt4x10 { Bits = PackUnpack.DownCast<UInt4>(PackUnpack.BitIntArrayToByte16<UInt4>(left.Bits) / PackUnpack.BitIntArrayToByte16<UInt4>(right.Bits)) };
+                byte16 leftV = PackUnpack.BitIntArrayToByte16<UInt4>(left.Bits);
+                byte16 rightV = PackUnpack.BitIntArrayToByte16<UInt4>(right.Bits);
+
+            #if TESTING
+                for (int i = 10; i < 16; i++)
+                {
+                    leftV[i] = 1;
+                    rightV[i] = 1;
+                }
+            #endif
+
+                return new UInt4x10 { Bits = PackUnpack.DownCast<UInt4>(leftV / rightV) };
             }
             
             return new UInt4x10{ Bits = SWAR.DivRem<UInt4>(left.Bits, right.Bits, out _)};
@@ -209,6 +220,15 @@ Assert.IsNotGreater(x8,  UInt4.MaxValue);
 
             if (BurstArchitecture.IsSIMDSupported)
             {
+                byte16 leftV = PackUnpack.BitIntArrayToByte16<UInt4>(left.Bits);
+
+            #if TESTING
+                for (int i = 10; i < 16; i++)
+                {
+                    leftV[i] = 1;
+                }
+            #endif
+
                 return new UInt4x10 { Bits = PackUnpack.DownCast<UInt4>(PackUnpack.BitIntArrayToByte16<UInt4>(left.Bits) / (byte)right) };
             }
             

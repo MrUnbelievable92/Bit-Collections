@@ -2,9 +2,13 @@ using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using MaxMath;
+using MaxMath.CompilerServices;
 using DevTools;
 
+using static Unity.Burst.Intrinsics.X86;
 using static MaxMath.math;
+using Unity.Burst.Intrinsics;
+using MaxMath.Intrinsics;
 
 namespace BitCollections
 {
@@ -3852,6 +3856,30 @@ Assert.IsWithinArrayBounds(scalarIndex + 7, length);
                 *(byte8*)((byte*)basePtr + scalarIndex) = value;
                 return;
             }
+            
+            if (default(T).Bits == 4)
+            {
+                uint* address = (uint*)((byte*)basePtr + (scalarIndex >> 1));
+                uint packed = ((UInt4x8)value).Bits;
+                
+                if ((scalarIndex & 1) == 0)
+                {
+                    *address = packed;
+                }
+                else
+                {
+                    uint lo  = packed << default(T).Bits;;
+                    byte hi = (byte)(packed >> (32 - default(T).Bits));
+                
+                    lo = bits_select(lo,        *(address + 0), bitmask32((uint)default(T).Bits));
+                    hi = bits_select(*(byte*)(address + 1), hi, bitmask8((uint)default(T).Bits));
+                
+                    *(address + 0) = lo;
+                    *((byte*)(address + 1)) = hi;
+                }
+
+                return;
+            }
 
             if (default(T).Bits == 24)
             {
@@ -3928,6 +3956,30 @@ Assert.IsWithinArrayBounds(scalarIndex + 15, length);
             if (default(T).Bits == 8)
             {
                 *(byte16*)((byte*)basePtr + scalarIndex) = value;
+                return;
+            }
+            
+            if (default(T).Bits == 4)
+            {
+                ulong* address = (ulong*)((byte*)basePtr + (scalarIndex >> 1));
+                ulong packed = ((UInt4x16)value).Bits;
+                
+                if ((scalarIndex & 1) == 0)
+                {
+                    *address = packed;
+                }
+                else
+                {
+                    ulong lo  = packed << default(T).Bits;;
+                    byte hi = (byte)(packed >> (64 - default(T).Bits));
+                
+                    lo = bits_select(lo,        *(address + 0), bitmask64((ulong)default(T).Bits));
+                    hi = bits_select(*(byte*)(address + 1), hi, bitmask8((uint)default(T).Bits));
+                
+                    *(address + 0) = lo;
+                    *((byte*)(address + 1)) = hi;
+                }
+
                 return;
             }
 
@@ -4022,6 +4074,46 @@ Assert.IsWithinArrayBounds(scalarIndex + 31, length);
             if (default(T).Bits == 8)
             {
                 *(byte32*)((byte*)basePtr + scalarIndex) = value;
+                return;
+            }
+
+            if (default(T).Bits == 4)
+            {
+                ulong* address = (ulong*)((byte*)basePtr + (scalarIndex >> 1));
+                ulong resultLo;
+                ulong resultHi;
+                if (Avx2.IsAvx2Supported)
+                {
+                    v256 result = Xse.mm256_cvtepi8_epi4(value);
+                    
+                    resultLo = result.ULong0;
+                    resultHi = result.ULong2;
+                }
+                else
+                {
+                    resultLo = ((UInt4x16)value.v16_0).Bits;
+                    resultHi = ((UInt4x16)value.v16_16).Bits;
+                }
+                
+                if ((scalarIndex & 1) == 0)
+                {
+                    *(address + 0) = resultLo;
+                    *(address + 1) = resultHi;
+                }
+                else
+                {
+                    ulong lo  = resultLo << default(T).Bits;;
+                    ulong mid = (resultLo >> (64 - default(T).Bits)) | (resultHi << default(T).Bits);
+                    byte hi = (byte)(resultHi >> (64 - default(T).Bits));
+                
+                    lo = bits_select(lo,        *(address + 0), bitmask64((ulong)default(T).Bits));
+                    hi = bits_select(*(byte*)(address + 2), hi, bitmask8((uint)default(T).Bits));
+                
+                    *(address + 0) = lo;
+                    *(address + 1) = mid;
+                    *((byte*)(address + 2)) = hi;
+                }
+
                 return;
             }
 
@@ -4130,10 +4222,10 @@ Assert.IsWithinArrayBounds(scalarIndex + 31, length);
         {
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 1, length);
-
-            if (default(T).Bits == 8)
+            
+            if (default(T).Bits <= 8)
             {
-                *(sbyte2*)((sbyte*)basePtr + scalarIndex) = value;
+                StoreByte2<T>(basePtr, scalarIndex, length, (byte2)value);
                 return;
             }
 
@@ -4158,13 +4250,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 1, length);
                 return;
             }
             
-            if (default(T).Bits <= 8)
-            {
-                ulong packed = PackUnpack.DownCast<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 2);
-            }
-            else if (default(T).Bits <= 16)
+            if (default(T).Bits <= 16)
             {
                 ulong packed = PackUnpack.DownCast<T>((short2)value);
 
@@ -4191,10 +4277,10 @@ Assert.IsWithinArrayBounds(scalarIndex + 1, length);
         {
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 2, length);
-
-            if (default(T).Bits == 8)
+            
+            if (default(T).Bits <= 8)
             {
-                *(sbyte3*)((sbyte*)basePtr + scalarIndex) = value;
+                StoreByte3<T>(basePtr, scalarIndex, length, (byte3)value);
                 return;
             }
 
@@ -4219,13 +4305,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 2, length);
                 return;
             }
             
-            if (default(T).Bits <= 8)
-            {
-                ulong packed = PackUnpack.DownCast<T>(new sbyte4(value, Uninitialized<sbyte>.Create()));
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 3);
-            }
-            else if (default(T).Bits <= 16)
+            if (default(T).Bits <= 16)
             {
                 ulong packed = PackUnpack.DownCast<T>((short4)new sbyte4(value, Uninitialized<sbyte>.Create()));
 
@@ -4267,10 +4347,10 @@ Assert.IsWithinArrayBounds(scalarIndex + 2, length);
         {
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 3, length);
-
-            if (default(T).Bits == 8)
+            
+            if (default(T).Bits <= 8)
             {
-                *(sbyte4*)((sbyte*)basePtr + scalarIndex) = value;
+                StoreByte4<T>(basePtr, scalarIndex, length, (byte4)value);
                 return;
             }
 
@@ -4295,13 +4375,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 3, length);
                 return;
             }
             
-            if (default(T).Bits <= 8)
-            {
-                ulong packed = PackUnpack.DownCast<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 4);
-            }
-            else if (default(T).Bits <= 16)
+            if (default(T).Bits <= 16)
             {
                 ulong packed = PackUnpack.DownCast<T>((short4)value);
 
@@ -4335,10 +4409,10 @@ Assert.IsWithinArrayBounds(scalarIndex + 3, length);
         {
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 7, length);
-
-            if (default(T).Bits == 8)
+            
+            if (default(T).Bits <= 8)
             {
-                *(sbyte8*)((sbyte*)basePtr + scalarIndex) = value;
+                StoreByte8<T>(basePtr, scalarIndex, length, (byte8)value);
                 return;
             }
 
@@ -4363,13 +4437,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 7, length);
                 return;
             }
             
-            if (default(T).Bits <= 8)
-            {
-                ulong packed = PackUnpack.DownCast<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 8);
-            }
-            else if (default(T).Bits <= 16)
+            if (default(T).Bits <= 16)
             {
                 UInt128 packed = PackUnpack.DownCast128<T>((short8)value);
 
@@ -4414,9 +4482,9 @@ Assert.IsWithinArrayBounds(scalarIndex + 7, length);
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 15, length);
 
-            if (default(T).Bits == 8)
+            if (default(T).Bits <= 8)
             {
-                *(sbyte16*)((sbyte*)basePtr + scalarIndex) = value;
+                StoreByte16<T>(basePtr, scalarIndex, length, (byte16)value);
                 return;
             }
 
@@ -4441,19 +4509,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 15, length);
                 return;
             }
             
-            if (default(T).Bits <= 4)
-            {
-                ulong packed = PackUnpack.DownCast<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 16);
-            }
-            else if (default(T).Bits <= 8)
-            {
-                UInt128 packed = PackUnpack.DownCast128<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 16);
-            }
-            else if (default(T).Bits <= 16)
+            if (default(T).Bits <= 16)
             {
                 UInt128* packed = stackalloc UInt128[]
                 {
@@ -4508,9 +4564,9 @@ Assert.IsWithinArrayBounds(scalarIndex + 15, length);
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 31, length);
 
-            if (default(T).Bits == 8)
+            if (default(T).Bits <= 8)
             {
-                *(sbyte32*)((sbyte*)basePtr + scalarIndex) = value;
+                StoreByte32<T>(basePtr, scalarIndex, length, (byte32)value);
                 return;
             }
 
@@ -4535,37 +4591,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 31, length);
                 return;
             }
             
-            if (default(T).Bits <= 2)
-            {
-                ulong packed = PackUnpack.DownCast<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 32);
-            }
-            else if (default(T).Bits <= 4)
-            {
-                UInt128 lo = PackUnpack.DownCast128<T>(value.v16_0);
-                UInt128 hi = PackUnpack.DownCast128<T>(value.v16_16);
-                UInt128 packed = lo | (hi << (16 * default(T).Bits));
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 32);
-            }
-            else if (default(T).Bits <= 8)
-            {
-                UInt128* packed = stackalloc UInt128[]
-                {
-                    PackUnpack.DownCast128<T>(value.v16_0),
-                    PackUnpack.DownCast128<T>(value.v16_16)
-                };
-
-                if (default(T).Bits != 8)
-                {
-                    packed[0] |= packed[1] << (16 * default(T).Bits);
-                    packed[1] >>= 128 - (16 * default(T).Bits);
-                }
-
-                CopyAscending<T>(packed, 0, basePtr, scalarIndex, 32);
-            }
-            else if (default(T).Bits <= 16)
+            if (default(T).Bits <= 16)
             {
                 __UInt256__* packed = stackalloc __UInt256__[]
                 {
@@ -4812,6 +4838,30 @@ Assert.IsWithinArrayBounds(scalarIndex + 7, length);
                 *(ushort8*)((ushort*)basePtr + scalarIndex) = value;
                 return;
             }
+            
+            if (default(T).Bits == 4)
+            {
+                uint* address = (uint*)((byte*)basePtr + (scalarIndex >> 1));
+                uint packed = ((UInt4x8)value).Bits;
+                
+                if ((scalarIndex & 1) == 0)
+                {
+                    *address = packed;
+                }
+                else
+                {
+                    uint lo  = packed << default(T).Bits;;
+                    byte hi = (byte)(packed >> (32 - default(T).Bits));
+                
+                    lo = bits_select(lo,        *(address + 0), bitmask32((uint)default(T).Bits));
+                    hi = bits_select(*(byte*)(address + 1), hi, bitmask8((uint)default(T).Bits));
+                
+                    *(address + 0) = lo;
+                    *((byte*)(address + 1)) = hi;
+                }
+
+                return;
+            }
 
             if (default(T).Bits == 24)
             {
@@ -4888,6 +4938,30 @@ Assert.IsWithinArrayBounds(scalarIndex + 15, length);
             if (default(T).Bits == 16)
             {
                 *(ushort16*)((ushort*)basePtr + scalarIndex) = value;
+                return;
+            }
+            
+            if (default(T).Bits == 4)
+            {
+                ulong* address = (ulong*)((byte*)basePtr + (scalarIndex >> 1));
+                ulong packed = ((UInt4x16)value).Bits;
+                
+                if ((scalarIndex & 1) == 0)
+                {
+                    *address = packed;
+                }
+                else
+                {
+                    ulong lo  = packed << default(T).Bits;;
+                    byte hi = (byte)(packed >> (64 - default(T).Bits));
+                
+                    lo = bits_select(lo,        *(address + 0), bitmask64((ulong)default(T).Bits));
+                    hi = bits_select(*(byte*)(address + 1), hi, bitmask8((uint)default(T).Bits));
+                
+                    *(address + 0) = lo;
+                    *((byte*)(address + 1)) = hi;
+                }
+
                 return;
             }
 
@@ -4981,10 +5055,10 @@ Assert.IsWithinArrayBounds(scalarIndex + 15, length);
         {
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 1, length);
-
-            if (default(T).Bits == 16)
+            
+            if (default(T).Bits <= 16)
             {
-                *(short2*)((short*)basePtr + scalarIndex) = value;
+                StoreUShort2<T>(basePtr, scalarIndex, length, (ushort2)value);
                 return;
             }
 
@@ -5010,13 +5084,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 1, length);
             }
             
             
-            if (default(T).Bits <= 16)
-            {
-                ulong packed = PackUnpack.DownCast<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 2);
-            }
-            else if (default(T).Bits <= 32)
+            if (default(T).Bits <= 32)
             {
                 ulong packed = PackUnpack.DownCast<T>((int2)value);
 
@@ -5037,10 +5105,10 @@ Assert.IsWithinArrayBounds(scalarIndex + 1, length);
         {
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 2, length);
-
-            if (default(T).Bits == 16)
+            
+            if (default(T).Bits <= 16)
             {
-                *(short3*)((short*)basePtr + scalarIndex) = value;
+                StoreUShort3<T>(basePtr, scalarIndex, length, (ushort3)value);
                 return;
             }
 
@@ -5065,13 +5133,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 2, length);
                 return;
             }
             
-            if (default(T).Bits <= 16)
-            {
-                ulong packed = PackUnpack.DownCast<T>(new short4(value, Uninitialized<short>.Create()));
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 3);
-            }
-            else if (default(T).Bits <= 32)
+            if (default(T).Bits <= 32)
             {
                 UInt128 packed = PackUnpack.DownCast128<T>((int4)new short4(value, Uninitialized<short>.Create()));
 
@@ -5107,10 +5169,10 @@ Assert.IsWithinArrayBounds(scalarIndex + 2, length);
         {
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 3, length);
-
-            if (default(T).Bits == 16)
+            
+            if (default(T).Bits <= 16)
             {
-                *(short4*)((short*)basePtr + scalarIndex) = value;
+                StoreUShort4<T>(basePtr, scalarIndex, length, (ushort4)value);
                 return;
             }
 
@@ -5135,13 +5197,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 3, length);
                 return;
             }
             
-            if (default(T).Bits <= 16)
-            {
-                ulong packed = PackUnpack.DownCast<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 4);
-            }
-            else if (default(T).Bits <= 32)
+            if (default(T).Bits <= 32)
             {
                 UInt128 packed = PackUnpack.DownCast128<T>((int4)value);
 
@@ -5169,10 +5225,10 @@ Assert.IsWithinArrayBounds(scalarIndex + 3, length);
         {
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 7, length);
-
-            if (default(T).Bits == 16)
+            
+            if (default(T).Bits <= 16)
             {
-                *(short8*)((short*)basePtr + scalarIndex) = value;
+                StoreUShort8<T>(basePtr, scalarIndex, length, (ushort8)value);
                 return;
             }
 
@@ -5197,19 +5253,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 7, length);
                 return;
             }
             
-            if (default(T).Bits <= 8)
-            {
-                ulong packed = PackUnpack.DownCast<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 8);
-            }
-            else if (default(T).Bits <= 16)
-            {
-                UInt128 packed = PackUnpack.DownCast128<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 8);
-            }
-            else if (default(T).Bits <= 32)
+            if (default(T).Bits <= 32)
             {
                 UInt128* packed = stackalloc UInt128[]
                 {
@@ -5247,10 +5291,10 @@ Assert.IsWithinArrayBounds(scalarIndex + 7, length);
         {
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 15, length);
-
-            if (default(T).Bits == 16)
+            
+            if (default(T).Bits <= 16)
             {
-                *(short16*)((short*)basePtr + scalarIndex) = value;
+                StoreUShort16<T>(basePtr, scalarIndex, length, (ushort16)value);
                 return;
             }
 
@@ -5275,38 +5319,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 15, length);
                 return;
             }
             
-            if (default(T).Bits <= 4)
-            {
-                ulong packed = PackUnpack.DownCast<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 16);
-            }
-            else if (default(T).Bits <= 8)
-            {
-                UInt128 lo = PackUnpack.DownCast128<T>(value.v8_0);
-                UInt128 hi = PackUnpack.DownCast128<T>(value.v8_8);
-
-                lo |= hi << (8 * default(T).Bits);
-
-                CopyAscending<T>(&lo, 0, basePtr, scalarIndex, 16);
-            }
-            else if (default(T).Bits <= 16)
-            {
-                UInt128* packed = stackalloc UInt128[]
-                {
-                    PackUnpack.DownCast128<T>(value.v8_0),
-                    PackUnpack.DownCast128<T>(value.v8_8)
-                };
-
-                if (default(T).Bits != 16)
-                {
-                    packed[0] |= packed[1] << (8 * default(T).Bits);
-                    packed[1] >>= 128 - (8 * default(T).Bits);
-                }
-
-                CopyAscending<T>(packed, 0, basePtr, scalarIndex, 16);
-            }
-            else if (default(T).Bits <= 32)
+            if (default(T).Bits <= 32)
             {
                 __UInt256__* packed = stackalloc __UInt256__[]
                 {
@@ -5525,6 +5538,30 @@ Assert.IsWithinArrayBounds(scalarIndex + 7, length);
                 *(uint8*)((uint*)basePtr + scalarIndex) = value;
                 return;
             }
+            
+            if (default(T).Bits == 4)
+            {
+                uint* address = (uint*)((byte*)basePtr + (scalarIndex >> 1));
+                uint packed = ((UInt4x8)value).Bits;
+                
+                if ((scalarIndex & 1) == 0)
+                {
+                    *address = packed;
+                }
+                else
+                {
+                    uint lo  = packed << default(T).Bits;;
+                    byte hi = (byte)(packed >> (32 - default(T).Bits));
+                
+                    lo = bits_select(lo,        *(address + 0), bitmask32((uint)default(T).Bits));
+                    hi = bits_select(*(byte*)(address + 1), hi, bitmask8((uint)default(T).Bits));
+                
+                    *(address + 0) = lo;
+                    *((byte*)(address + 1)) = hi;
+                }
+
+                return;
+            }
 
             if (default(T).Bits == 24)
             {
@@ -5607,18 +5644,13 @@ Assert.IsWithinArrayBounds(scalarIndex + 7, length);
         {
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 1, length);
-
-            if (default(T).Bits == 32)
+            
+            if (default(T).Bits <= 32)
             {
-                *(int2*)((int*)basePtr + scalarIndex) = value;
+                StoreUInt2<T>(basePtr, scalarIndex, length, (uint2)value);
                 return;
             }
 
-            if (default(T).Bits == 24)
-            {
-                Store_i32_to24((UInt24*)basePtr + scalarIndex, value);
-                return;
-            }
             if (default(T).Bits == 40)
             {
                 Store_i32_to40((UInt40*)basePtr + scalarIndex, value);
@@ -5635,18 +5667,9 @@ Assert.IsWithinArrayBounds(scalarIndex + 1, length);
                 return;
             }
             
-            if (default(T).Bits <= 32)
-            {
-                ulong packed = PackUnpack.DownCast<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 2);
-            }
-            else
-            { 
-                UInt128 packed = PackUnpack.DownCast128<T>((long2)value);
-                
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 2);
-            }
+            UInt128 packed = PackUnpack.DownCast128<T>((long2)value);
+               
+            CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 2);
         }
 
         [SkipLocalsInit]
@@ -5656,18 +5679,13 @@ Assert.IsWithinArrayBounds(scalarIndex + 1, length);
         {
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 2, length);
-
-            if (default(T).Bits == 32)
+            
+            if (default(T).Bits <= 32)
             {
-                *(int3*)((int*)basePtr + scalarIndex) = value;
+                StoreUInt3<T>(basePtr, scalarIndex, length, (uint3)value);
                 return;
             }
 
-            if (default(T).Bits == 24)
-            {
-                Store_i32_to24((UInt24*)basePtr + scalarIndex, value);
-                return;
-            }
             if (default(T).Bits == 40)
             {
                 Store_i32_to40((UInt40*)basePtr + scalarIndex, value);
@@ -5684,19 +5702,7 @@ Assert.IsWithinArrayBounds(scalarIndex + 2, length);
                 return;
             }
             
-            if (default(T).Bits <= 16)
-            {
-                ulong packed = PackUnpack.DownCast<T>(new int4(value, Uninitialized<int>.Create()));
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 3);
-            }
-            else if (default(T).Bits <= 32)
-            {
-                UInt128 packed = PackUnpack.DownCast128<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 3);
-            }
-            else if (default(T).Bits <= 128 / 3)
+            if (default(T).Bits <= 128 / 3)
             {
                 UInt128 lo = PackUnpack.DownCast128<T>((long2)value.xy);
                 UInt128 hi = (UInt128)(Int128)value.z << (2 * default(T).Bits);
@@ -5724,18 +5730,13 @@ Assert.IsWithinArrayBounds(scalarIndex + 2, length);
         {
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 3, length);
-
-            if (default(T).Bits == 32)
+            
+            if (default(T).Bits <= 32)
             {
-                *(int4*)((int*)basePtr + scalarIndex) = value;
+                StoreUInt4<T>(basePtr, scalarIndex, length, (uint4)value);
                 return;
             }
 
-            if (default(T).Bits == 24)
-            {
-                Store_i32_to24((UInt24*)basePtr + scalarIndex, value);
-                return;
-            }
             if (default(T).Bits == 40)
             {
                 Store_i32_to40((UInt40*)basePtr + scalarIndex, value);
@@ -5752,31 +5753,14 @@ Assert.IsWithinArrayBounds(scalarIndex + 3, length);
                 return;
             }
             
-            if (default(T).Bits <= 16)
-            {
-                ulong packed = PackUnpack.DownCast<T>(value);
+            UInt128* packed = stackalloc UInt128[2];
 
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 4);
-            }
-            else if (default(T).Bits <= 32)
-            {
-                UInt128 lo = PackUnpack.DownCast128<T>((long2)value.xy);
-                UInt128 hi = PackUnpack.DownCast128<T>((long2)value.zw);
-                UInt128 packed = lo | (hi << (2 * default(T).Bits));
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 4);
-            }
-            else
-            {
-                UInt128* packed = stackalloc UInt128[2];
-
-                UInt128 lo = PackUnpack.DownCast128<T>((long2)value.xy);
-                UInt128 hi = PackUnpack.DownCast128<T>((long2)value.zw);
-                packed[0] = lo | (hi << (2 * default(T).Bits));
-                packed[1] = hi >> (128 - (2 * default(T).Bits));
-
-                CopyAscending<T>(packed, 0, basePtr, scalarIndex, 4);
-            }
+            UInt128 lo = PackUnpack.DownCast128<T>((long2)value.xy);
+            UInt128 hi = PackUnpack.DownCast128<T>((long2)value.zw);
+            packed[0] = lo | (hi << (2 * default(T).Bits));
+            packed[1] = hi >> (128 - (2 * default(T).Bits));
+            
+            CopyAscending<T>(packed, 0, basePtr, scalarIndex, 4);
         }
         
         [SkipLocalsInit]
@@ -5786,18 +5770,13 @@ Assert.IsWithinArrayBounds(scalarIndex + 3, length);
         {
 Assert.IsWithinArrayBounds(scalarIndex, length);
 Assert.IsWithinArrayBounds(scalarIndex + 7, length);
-
-            if (default(T).Bits == 32)
+            
+            if (default(T).Bits <= 32)
             {
-                *(int8*)((int*)basePtr + scalarIndex) = value;
+                StoreUInt8<T>(basePtr, scalarIndex, length, (uint8)value);
                 return;
             }
 
-            if (default(T).Bits == 24)
-            {
-                Store_i32_to24((UInt24*)basePtr + scalarIndex, value);
-                return;
-            }
             if (default(T).Bits == 40)
             {
                 Store_i32_to40((UInt40*)basePtr + scalarIndex, value);
@@ -5815,57 +5794,16 @@ Assert.IsWithinArrayBounds(scalarIndex + 7, length);
             }
 
             
-            if (default(T).Bits <= 8)
+            __UInt256__* packed = stackalloc __UInt256__[]
             {
-                ulong packed = PackUnpack.DownCast<T>(value);
-
-                CopyAscending<T>(&packed, 0, basePtr, scalarIndex, 8);
-            }
-            else if (default(T).Bits <= 16)
-            {
-                ulong* packed = stackalloc ulong[]
-                {
-                    PackUnpack.DownCast<T>(value.v4_0),
-                    PackUnpack.DownCast<T>(value.v4_4)
-                };
-
-                if (default(T).Bits != 16)
-                {
-                    packed[0] |= packed[1] << (4 * default(T).Bits);
-                    packed[1] >>= 64 - (4 * default(T).Bits);
-                }                
-
-                CopyAscending<T>(packed, 0, basePtr, scalarIndex, 8);
-            }
-            else if (default(T).Bits <= 32)
-            {
-                UInt128* packed = stackalloc UInt128[]
-                {
-                    PackUnpack.DownCast128<T>(value.v4_0),
-                    PackUnpack.DownCast128<T>(value.v4_4)
-                };
-
-                if (default(T).Bits != 32)
-                {
-                    packed[0] |= packed[1] << (4 * default(T).Bits);
-                    packed[1] >>= 128 - (4 * default(T).Bits);
-                }                
-
-                CopyAscending<T>(packed, 0, basePtr, scalarIndex, 8);
-            }
-            else
-            {
-                __UInt256__* packed = stackalloc __UInt256__[]
-                {
-                    PackUnpack.DownCast256<T>((ulong4)value.v4_0),
-                    PackUnpack.DownCast256<T>((ulong4)value.v4_4),
-                };
-                
-                packed[0] |= packed[1] << (4 * default(T).Bits);
-                packed[1] >>= 256 - (4 * default(T).Bits);
-                
-                CopyAscending<T>(packed, 0, basePtr, scalarIndex, 8);
-            }
+                PackUnpack.DownCast256<T>((ulong4)value.v4_0),
+                PackUnpack.DownCast256<T>((ulong4)value.v4_4),
+            };
+            
+            packed[0] |= packed[1] << (4 * default(T).Bits);
+            packed[1] >>= 256 - (4 * default(T).Bits);
+            
+            CopyAscending<T>(packed, 0, basePtr, scalarIndex, 8);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

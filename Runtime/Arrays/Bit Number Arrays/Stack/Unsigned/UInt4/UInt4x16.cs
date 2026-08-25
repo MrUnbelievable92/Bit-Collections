@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using MaxMath;
-using MaxMath.Intrinsics;
+using MaxMath.CompilerServices;
 
 namespace BitCollections
 {
@@ -210,7 +210,7 @@ Assert.IsNotGreater(x14, UInt4.MaxValue);
         public static explicit operator UInt4x16(byte16 input) => new UInt4x16 { Bits = PackUnpack.DownCast<UInt4>(input) };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator UInt4x16(ushort16 input) => (UInt4x16)(byte16)input;
+        public static explicit operator UInt4x16(ushort16 input) => new UInt4x16 { Bits = PackUnpack.DownCast<UInt4>(input) };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator UInt4x16(sbyte16 input) => (UInt4x16)(byte16)input;

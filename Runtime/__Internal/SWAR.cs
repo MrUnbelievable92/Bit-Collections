@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using DevTools;
 using MaxMath;
-using MaxMath.Intrinsics;
+using MaxMath.CompilerServices;
 
 using static MaxMath.math;
 
@@ -2435,7 +2435,7 @@ Assert.IsBetween(n, 0, default(T).Bits - 1);
         {
             if (constexpr.IS_TRUE(b == 0))
             {
-                if (default(T).IsSigned)
+                if (default(T).IsSigned && !forceUnsigned)
                 {
                     return ShiftRightLogical<T>(a, default(T).Bits - 1);
                 }
@@ -2446,7 +2446,7 @@ Assert.IsBetween(n, 0, default(T).Bits - 1);
             }
             if (constexpr.IS_TRUE(a == 0))
             {
-                if (default(T).IsSigned)
+                if (default(T).IsSigned && !forceUnsigned)
                 {
                     return (byte)((byte)(OneMask8<T>() ^ ShiftRightLogical<T>(b, default(T).Bits - 1)) & IsNotZero<T>(b));
                 }
@@ -2476,7 +2476,7 @@ Assert.IsBetween(n, 0, default(T).Bits - 1);
         {
             if (constexpr.IS_TRUE(b == 0))
             {
-                if (default(T).IsSigned)
+                if (default(T).IsSigned && !forceUnsigned)
                 {
                     return ShiftRightLogical<T>(a, default(T).Bits - 1);
                 }
@@ -2487,7 +2487,7 @@ Assert.IsBetween(n, 0, default(T).Bits - 1);
             }
             if (constexpr.IS_TRUE(a == 0))
             {
-                if (default(T).IsSigned)
+                if (default(T).IsSigned && !forceUnsigned)
                 {
                     return (ushort)((ushort)(OneMask16<T>() ^ ShiftRightLogical<T>(b, default(T).Bits - 1)) & IsNotZero<T>(b));
                 }
@@ -2517,7 +2517,7 @@ Assert.IsBetween(n, 0, default(T).Bits - 1);
         {
             if (constexpr.IS_TRUE(b == 0))
             {
-                if (default(T).IsSigned)
+                if (default(T).IsSigned && !forceUnsigned)
                 {
                     return ShiftRightLogical<T>(a, default(T).Bits - 1);
                 }
@@ -2528,7 +2528,7 @@ Assert.IsBetween(n, 0, default(T).Bits - 1);
             }
             if (constexpr.IS_TRUE(a == 0))
             {
-                if (default(T).IsSigned)
+                if (default(T).IsSigned && !forceUnsigned)
                 {
                     return (OneMask32<T>() ^ ShiftRightLogical<T>(b, default(T).Bits - 1)) & IsNotZero<T>(b);
                 }
@@ -2558,7 +2558,7 @@ Assert.IsBetween(n, 0, default(T).Bits - 1);
         {
             if (constexpr.IS_TRUE(b == 0))
             {
-                if (default(T).IsSigned)
+                if (default(T).IsSigned && !forceUnsigned)
                 {
                     return ShiftRightLogical<T>(a, default(T).Bits - 1);
                 }
@@ -2569,7 +2569,7 @@ Assert.IsBetween(n, 0, default(T).Bits - 1);
             }
             if (constexpr.IS_TRUE(a == 0))
             {
-                if (default(T).IsSigned)
+                if (default(T).IsSigned && !forceUnsigned)
                 {
                     return (OneMask64<T>() ^ ShiftRightLogical<T>(b, default(T).Bits - 1)) & IsNotZero<T>(b);
                 }
@@ -2599,7 +2599,7 @@ Assert.IsBetween(n, 0, default(T).Bits - 1);
         {
             if (constexpr.IS_TRUE(b.Equals(0)))
             {
-                if (default(T).IsSigned)
+                if (default(T).IsSigned && !forceUnsigned)
                 {
                     return ShiftRightLogical<T>(a, default(T).Bits - 1);
                 }
@@ -2610,7 +2610,7 @@ Assert.IsBetween(n, 0, default(T).Bits - 1);
             }
             if (constexpr.IS_TRUE(a.Equals(0)))
             {
-                if (default(T).IsSigned)
+                if (default(T).IsSigned && !forceUnsigned)
                 {
                     return (OneMask32<T>() ^ ShiftRightLogical<T>(b, default(T).Bits - 1)) & IsNotZero<T>(b);
                 }
@@ -2640,7 +2640,7 @@ Assert.IsBetween(n, 0, default(T).Bits - 1);
         {
             if (constexpr.IS_TRUE(b.Equals(0)))
             {
-                if (default(T).IsSigned)
+                if (default(T).IsSigned && !forceUnsigned)
                 {
                     return ShiftRightLogical<T>(a, default(T).Bits - 1);
                 }
@@ -2651,7 +2651,7 @@ Assert.IsBetween(n, 0, default(T).Bits - 1);
             }
             if (constexpr.IS_TRUE(a.Equals(0)))
             {
-                if (default(T).IsSigned)
+                if (default(T).IsSigned && !forceUnsigned)
                 {
                     return (OneMask32<T>() ^ ShiftRightLogical<T>(b, default(T).Bits - 1)) & IsNotZero<T>(b);
                 }

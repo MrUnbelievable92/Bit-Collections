@@ -12,7 +12,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using DevTools;
 using MaxMath;
-using MaxMath.Intrinsics;
+using MaxMath.CompilerServices;
 using SIMDAlgorithms;
 
 using static MaxMath.math;
@@ -136,7 +136,7 @@ this.CheckWriteAndBumpSecondaryVersion();
 
                     if (Hint.Likely(_data->Capacity != 0))
                     {
-                        UnsafeUtility.MemCpy(newPtr, DataPtr, (long)MemoryHelper.SizeInBytes<Bit>(_data->Length));
+                        Memory.MemCpy(newPtr, DataPtr, (long)MemoryHelper.SizeInBytes<Bit>(_data->Length));
                         UnsafeUtility.Free(DataPtr, m_AllocatorLabel);
                     }
 
@@ -233,7 +233,7 @@ SafetyHelper.InitSafety<NativeBitList>(allocator, _staticSafetyId, out m_Safety,
             NativeBitArray result = new NativeBitArray(Length, allocator, NativeArrayOptions.UninitializedMemory);
 
             ulong bytes = MemoryHelper.SizeInBytes<Bit>(Length);
-            UnsafeUtility.MemCpy(result.GetUnsafePtr(), GetUnsafeReadOnlyPtr(), (long)bytes);
+            Memory.MemCpy(result.GetUnsafePtr(), GetUnsafeReadOnlyPtr(), (long)bytes);
             return result;
         }
 
@@ -319,9 +319,9 @@ this.CheckWriteAndThrow();
 
             if (length > Capacity)
             {
-                _data->Length = length;
                 // Limits the maximum capacity to 1 billion items - compliant with Unity.Collections
                 Capacity = math.ceilpow2(length);
+                _data->Length = length;
             }
             else
             {
@@ -335,7 +335,7 @@ this.CheckWriteAndThrow();
 
                 if (Hint.Likely(oldSizeInBytes != newSizeInBytes))
                 {
-                    UnsafeUtility.MemClear((bit8*)DataPtr + oldSizeInBytes, (long)(newSizeInBytes - oldSizeInBytes));
+                    Memory.MemClear((bit8*)DataPtr + oldSizeInBytes, (long)(newSizeInBytes - oldSizeInBytes));
                 }
             }
         }
@@ -1201,7 +1201,7 @@ this.CheckWriteAndBumpSecondaryVersion();
             byte highBits = andnot(srcRead, mask);
             byte currentLowBits = (byte)(lowBits | highBits);
 
-            uint bytesAffected = (ceilmultiple((uint)Length, 8u) - floormultiple((uint)index, 8u)) / 8u;
+            uint bytesAffected = (ceilmultiple((uint)Length, 8u, Promise.NoOverflow) - floormultiple((uint)index, 8u)) / 8u;
             bytesAffected--;
 
             while (Hint.Likely(bytesAffected >= (uint)sizeof(UInt128)))
@@ -1338,8 +1338,7 @@ Assert.IsValidSubarray(index, count, Length);
         [return: AssumeRange(-1L, int.MaxValue)]
         public readonly int IndexOf(bool value, int index, int numValues, Comparison where = Comparison.EqualTo)
         {
-            int iof = BitAlgorithms.IndexOfFirst<Bit>(GetUnsafeReadOnlyPtr(), index, numValues, tobyte(value), Length, where);
-            return iof == -1 ? -1 : iof + index; 
+            return BitAlgorithms.IndexOfFirst<Bit>(GetUnsafeReadOnlyPtr(), index, numValues, tobyte(value), Length, where);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1485,11 +1484,6 @@ Assert.IsValidSubarray(index, numBits, Length);
         public override readonly int GetHashCode()
         {
             return ((IntPtr)_data).GetHashCode();
-        }
-
-        public override readonly string ToString()
-        {
-            return GetEnumerator().ToString();
         }
 
 

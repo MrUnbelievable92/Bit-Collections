@@ -1,8 +1,7 @@
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using MaxMath;
-using MaxMath.Intrinsics;
-using static Unity.Burst.Intrinsics.X86;
+using MaxMath.CompilerServices;
 
 namespace BitCollections
 {
@@ -67,39 +66,25 @@ namespace BitCollections
         public static __UInt1024__ operator << (__UInt1024__ value, int n)
         {
             n &= 1023;
-
-            if (Hint.Unlikely(n == 0))
+            
+            if (constexpr.IS_TRUE(n == 0))
             {
                 return value;
             }
             else
             {
-                if (n < 512)
-                {
-                    if (constexpr.IS_TRUE(n == 256))
-                    {
-                        return new __UInt1024__(0, value.lo512.lo256, value.lo512.hi256, value.hi512.lo256);
-                    }
+                int n2 = n & 511;
+                bool upper = n >= 512;
 
-                    constexpr.ASSUME(n > 0 && n < 512);
+                __UInt512__ loShifted = value.lo512 << n2;
 
-                    return new __UInt1024__(value.lo512 << n, (value.hi512 << n) | (value.lo512 >> (512 - n)));
-                }
-                else
-                {
-                    if (constexpr.IS_TRUE(n == 512))
-                    {
-                        return new __UInt1024__(0, value.lo512);
-                    }
-                    if (constexpr.IS_TRUE(n == 768))
-                    {
-                        return new __UInt1024__(0, 0, 0, value.lo512.lo256);
-                    }
+                __UInt512__ carry      = (value.lo512 >> 1) >> (511 - n2);
+                __UInt512__ hiCombined = (value.hi512 << n2) | carry;
 
-                    constexpr.ASSUME(n > 511 && n < 1024);
+                __UInt512__ outLo = upper ? 0          : loShifted;
+                __UInt512__ outHi = upper ? loShifted  : hiCombined;
 
-                    return new __UInt1024__(0, value.lo512 << (n - 512));
-                }
+                return new __UInt1024__(outLo, outHi);
             }
         }
 
@@ -107,39 +92,25 @@ namespace BitCollections
         public static __UInt1024__ operator >> (__UInt1024__ value, int n)
         {
             n &= 1023;
-
-            if (Hint.Unlikely(n == 0))
+            
+            if (constexpr.IS_TRUE(n == 0))
             {
                 return value;
             }
             else
             {
-                if (n < 512)
-                {
-                    if (constexpr.IS_TRUE(n == 256))
-                    {
-                        return new __UInt1024__(value.lo512.hi256, value.hi512.lo256, value.hi512.hi256, 0);
-                    }
+                int n2 = n & 511;
+                bool upper = n >= 512;
 
-                    constexpr.ASSUME(n > 0 && n < 512);
+                __UInt512__ hiShifted = value.hi512 >> n2;
 
-                    return new __UInt1024__((value.lo512 >> n) | (value.hi512 << (512 - n)), value.hi512 >> n);
-                }
-                else
-                {
-                    if (constexpr.IS_TRUE(n == 512))
-                    {
-                        return new __UInt1024__(value.hi512, 0);
-                    }
-                    if (constexpr.IS_TRUE(n == 768))
-                    {
-                        return new __UInt1024__(value.hi512.hi256, 0, 0, 0);
-                    }
+                __UInt512__ carry      = (value.hi512 << 1) << (511 - n2);
+                __UInt512__ loCombined = (value.lo512 >> n2) | carry;
 
-                    constexpr.ASSUME(n > 511 && n < 1024);
+                __UInt512__ outHi = upper ? 0           : hiShifted;
+                __UInt512__ outLo = upper ? hiShifted   : loCombined;
 
-                    return new __UInt1024__(value.hi512 >> (n - 512), 0);
-                }
+                return new __UInt1024__(outLo, outHi);
             }
         }
 

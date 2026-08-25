@@ -1,10 +1,12 @@
-using System;
 using System.Runtime.CompilerServices;
 using DevTools;
 using MaxMath;
+using MaxMath.CompilerServices;
 using MaxMath.Intrinsics;
 
+using static Unity.Burst.Intrinsics.X86;
 using static MaxMath.math;
+using Unity.Burst.Intrinsics;
 
 namespace BitCollections
 {
@@ -571,13 +573,29 @@ Assert.IsNotSmaller(default(TTo).Bits, default(TFrom).Bits);
 		internal static byte8 BitIntArrayToByte8<T>(ulong array)
 			where T : BitInt
 		{
-            return bits_depositparallel(array, ArrayCastMask<T, UInt8>()).Reinterpret<ulong, byte8>();
+			if (default(T).Bits == 4)
+			{
+				if (BurstArchitecture.IsSIMDSupported)
+				{
+					return Xse.cvtepu4_epi8(array);
+				}
+			}
+
+			return bits_depositparallel(array, ArrayCastMask<T, UInt8>()).Reinterpret<ulong, byte8>();
 		}
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static byte16 BitIntArrayToByte16<T>(ulong array)
 			where T : BitInt
 		{
+			if (default(T).Bits == 4)
+			{
+				if (BurstArchitecture.IsSIMDSupported)
+				{
+					return Xse.cvtepu4_epi8(array);
+				}
+			}
+
 			return bits_depositparallel((UInt128)array, ArrayCastMask128<T, UInt8>()).Reinterpret<UInt128, byte16>();
 		}
 
@@ -603,7 +621,7 @@ Assert.IsNotSmaller(default(TTo).Bits, default(TFrom).Bits);
 		}
 		
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static uint8 BitIntArrayToUShort8<T>(ushort array)
+		internal static ushort8 BitIntArrayToUShort8<T>(ushort array)
 			where T : BitInt
 		{
 			return bitmask16((uint)default(T).Bits) & shrl(array, default(T).Bits * new ushort8(0, 1, 2, 3, 4, 5, 6, 7));
@@ -705,6 +723,14 @@ Assert.IsNotSmaller(default(TTo).Bits, default(TFrom).Bits);
 		internal static ulong DownCast<T>(byte16 array)
 			where T : BitInt
 		{
+			if (default(T).Bits == 4)
+			{
+				if (BurstArchitecture.IsSIMDSupported)
+				{
+					return Xse.cvtepi8_epi4(array);
+				}
+			}
+
 			return (ulong)bits_extractparallel(array.Reinterpret<byte16, UInt128>(), ArrayCastMask128<T, UInt8>());
 		}
 
@@ -712,6 +738,14 @@ Assert.IsNotSmaller(default(TTo).Bits, default(TFrom).Bits);
 		internal static ulong DownCast<T>(byte8 array)
 			where T : BitInt
 		{
+			if (default(T).Bits == 4)
+			{
+				if (BurstArchitecture.IsSIMDSupported)
+				{
+					return Xse.cvtepi8_epi4(array);
+				}
+			}
+
             return bits_extractparallel(array.Reinterpret<byte8, ulong>(), ArrayCastMask<T, UInt8>());
 		}
 
@@ -770,6 +804,20 @@ Assert.IsNotSmaller(default(TTo).Bits, default(TFrom).Bits);
 		internal static ulong DownCast<T>(ushort16 array)
 			where T : BitInt
 		{
+			if (default(T).Bits == 4)
+			{
+				if (Avx2.IsAvx2Supported)
+				{
+					v256 result = Xse.mm256_cvtepi16_epi4(array);
+
+					return result.UInt0 | ((ulong)result.UInt4 << 32);
+				}
+				else if (BurstArchitecture.IsSIMDSupported)
+				{
+					return DownCast<T>(array.v8_0) | ((ulong)DownCast<T>(array.v8_8) << 32);
+				}
+			}
+
 			return (ulong)__UInt256__.bits_extractparallel(array.Reinterpret<ushort16, __UInt256__>(), ArrayCastMask256<T, UInt16>());
 		}
 
@@ -777,6 +825,14 @@ Assert.IsNotSmaller(default(TTo).Bits, default(TFrom).Bits);
 		internal static ulong DownCast<T>(ushort8 array)
 			where T : BitInt
 		{
+			if (default(T).Bits == 4)
+			{
+				if (BurstArchitecture.IsSIMDSupported)
+				{
+					return Xse.cvtepi16_epi4(array);
+				}
+			}
+
 			return (ulong)bits_extractparallel(array.Reinterpret<ushort8, UInt128>(), ArrayCastMask128<T, UInt16>());
 		}
 
@@ -828,6 +884,11 @@ Assert.IsNotSmaller(default(TTo).Bits, default(TFrom).Bits);
 		internal static ulong DownCast<T>(uint8 array)
 			where T : BitInt
 		{
+			if (default(T).Bits == 4)
+			{
+				return DownCast<T>((byte8)array);
+			}
+
 			return (ulong)__UInt256__.bits_extractparallel(array.Reinterpret<uint8, __UInt256__>(), ArrayCastMask256<T, UInt32>());
 		}
 

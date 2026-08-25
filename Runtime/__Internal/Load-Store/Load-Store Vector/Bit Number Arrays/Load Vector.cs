@@ -3,8 +3,11 @@ using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using DevTools;
 using MaxMath;
+using MaxMath.CompilerServices;
+using MaxMath.Intrinsics;
 using SIMDAlgorithms;
 
+using static Unity.Burst.Intrinsics.X86;
 using static MaxMath.math;
 
 namespace BitCollections
@@ -2499,7 +2502,28 @@ Assert.IsWithinArrayBounds(scalarIndex + 7, length);
             {
                 return *(byte8*)((byte*)basePtr + scalarIndex);
             }
+            
+            if (default(T).Bits == 4)
+            {
+                uint* address = (uint*)((byte*)basePtr + (scalarIndex >> 1));
+                uint packed = *address;
 
+                if ((scalarIndex & 1) != 0)
+                {
+                    packed >>= default(T).Bits;
+                    packed |= (uint)*((byte*)(address + 1)) << (32 - default(T).Bits);
+                }
+
+                byte8 result = new UInt4x8 { Bits = packed };
+
+                if (default(T).IsSigned)
+                {
+                    result = (byte8)signextend((sbyte8)result, default(T).Bits);
+                }
+
+                return result;
+            }
+            
             if (default(T).IsSigned)
             {
                 if (default(T).Bits == 24)
@@ -2818,7 +2842,28 @@ Assert.IsWithinArrayBounds(scalarIndex + 15, length);
             {
                 return *(byte16*)((byte*)basePtr + scalarIndex);
             }
+            
+            if (default(T).Bits == 4)
+            {
+                ulong* address = (ulong*)((byte*)basePtr + (scalarIndex >> 1));
+                ulong packed = *address;
 
+                if ((scalarIndex & 1) != 0)
+                {
+                    packed >>= default(T).Bits;
+                    packed |= (ulong)*((byte*)(address + 1)) << (64 - default(T).Bits);
+                }
+
+                byte16 result = new UInt4x16 { Bits = packed };
+
+                if (default(T).IsSigned)
+                {
+                    result = (byte16)signextend((sbyte16)result, default(T).Bits);
+                }
+
+                return result;
+            }
+            
             if (default(T).IsSigned)
             {
                 if (default(T).Bits == 24)
@@ -2927,7 +2972,43 @@ Assert.IsWithinArrayBounds(scalarIndex + 31, length);
             {
                 return *(byte32*)((byte*)basePtr + scalarIndex);
             }
+            
+            if (default(T).Bits == 4)
+            {
+                ulong* addressLo = (ulong*)((byte*)basePtr + (scalarIndex >> 1));
+                ulong* addressHi = addressLo + 1;
+                ulong packedLo = *addressLo;
+                ulong packedHi = *addressHi;
 
+                if ((scalarIndex & 1) != 0)
+                {
+                    packedLo >>= default(T).Bits;
+                    packedLo |= packedHi << (64 - default(T).Bits);
+                    packedHi >>= default(T).Bits;
+                    packedHi |= (ulong)*((byte*)(addressHi + 1)) << (64 - default(T).Bits);
+                }
+
+                byte32 result;
+                if (Avx2.IsAvx2Supported)
+                {
+                    result = Xse.mm256_cvtepu4_epi8(packedLo, packedHi);
+                }
+                else
+                {
+                    UInt4x16 lo = new UInt4x16 { Bits = packedLo };
+                    UInt4x16 hi = new UInt4x16 { Bits = packedHi };
+
+                    result = new byte32((byte16)lo, (byte16)hi);
+                }
+
+                if (default(T).IsSigned)
+                {
+                    result = (byte32)signextend((sbyte32)result, default(T).Bits);
+                }
+
+                return result;
+            }
+            
             if (default(T).IsSigned)
             {
                 if (default(T).Bits == 24)
@@ -3347,7 +3428,19 @@ Assert.IsWithinArrayBounds(scalarIndex + 7, length);
             {
                 return *(short8*)((short*)basePtr + scalarIndex);
             }
+            
+            if (default(T).Bits == 4)
+            {
+                short8 result = LoadByte8<UInt4>(basePtr, scalarIndex, length, memoryAccess);
 
+                if (default(T).IsSigned)
+                {
+                    result = signextend(result, default(T).Bits);
+                }
+
+                return result;
+            }
+            
             if (default(T).IsSigned)
             {
                 if (default(T).Bits == 24)
@@ -3463,7 +3556,19 @@ Assert.IsWithinArrayBounds(scalarIndex + 15, length);
             {
                 return *(short16*)((short*)basePtr + scalarIndex);
             }
+            
+            if (default(T).Bits == 4)
+            {
+                short16 result = LoadByte16<UInt4>(basePtr, scalarIndex, length, memoryAccess);
 
+                if (default(T).IsSigned)
+                {
+                    result = signextend(result, default(T).Bits);
+                }
+
+                return result;
+            }
+            
             if (default(T).IsSigned)
             {
                 if (default(T).Bits == 24)
@@ -3910,6 +4015,18 @@ Assert.IsWithinArrayBounds(scalarIndex + 7, length);
             if (default(T).Bits == 32)
             {
                 return *(int8*)((int*)basePtr + scalarIndex);
+            }
+
+            if (default(T).Bits == 4)
+            {
+                int8 result = LoadByte8<UInt4>(basePtr, scalarIndex, length, memoryAccess);
+
+                if (default(T).IsSigned)
+                {
+                    result = signextend(result, default(T).Bits);
+                }
+
+                return result;
             }
 
             if (default(T).IsSigned)
