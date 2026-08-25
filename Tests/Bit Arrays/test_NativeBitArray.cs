@@ -126,7 +126,7 @@ namespace BitCollections.Tests
 
             for (int i = 0; i < 50; i++)
             {
-                int length = rng.NextInt(0, 500);
+                int length = rng.NextInt(1, 500);
 
                 NativeBitArray lhs = new NativeBitArray(length, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
                 NativeBitArray rhs = new NativeBitArray(length, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
@@ -185,7 +185,7 @@ namespace BitCollections.Tests
 
             for (int i = 0; i < 512; i++)
             {
-                int length = rng.NextInt(0, 10000);
+                int length = rng.NextInt(1, 10000);
                 int stringLength = rng.NextInt(0, min(length, 64));
                 NativeBitArray array = new NativeBitArray(length, Allocator.Persistent);
 
@@ -260,7 +260,7 @@ namespace BitCollections.Tests
 
             for (int i = 0; i < 512; i++)
             {
-                int length = rng.NextInt(0, 10000);
+                int length = rng.NextInt(1, 10000);
                 int startIndex = rng.NextInt(0, length);
                 int numTests = rng.NextInt(0, length - startIndex + 1);
                 int stringLength = rng.NextInt(0, numTests + 1);

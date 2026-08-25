@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
-using MaxMath;
+using MaxMath.CompilerServices;
 
 namespace BitCollections
 {

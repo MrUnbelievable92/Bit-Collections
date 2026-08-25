@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using MaxMath;
-using MaxMath.Intrinsics;
+using MaxMath.CompilerServices;
 
 using static MaxMath.math;
 
@@ -206,7 +206,18 @@ Assert.IsNotGreater(x4,  UInt4.MaxValue);
         {
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return new UInt4x6 { Bits = (uint)PackUnpack.DownCast<UInt4>(PackUnpack.BitIntArrayToByte8<UInt4>(left.Bits) / PackUnpack.BitIntArrayToByte8<UInt4>(right.Bits)) };
+                byte8 leftV = PackUnpack.BitIntArrayToByte8<UInt4>(left.Bits);
+                byte8 rightV = PackUnpack.BitIntArrayToByte8<UInt4>(right.Bits);
+
+            #if TESTING
+                for (int i = 6; i < 8; i++)
+                {
+                    leftV[i] = 1;
+                    rightV[i] = 1;
+                }
+            #endif
+
+                return new UInt4x6 { Bits = (uint)PackUnpack.DownCast<UInt4>(leftV / rightV) };
             }
 
             uint x0  = left.Bits & bitmask32((uint)default(UInt4).Bits, 0u * (uint)default(UInt4).Bits);
@@ -245,7 +256,16 @@ Assert.IsNotGreater(x4,  UInt4.MaxValue);
         
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return new UInt4x6 { Bits = (uint)PackUnpack.DownCast<UInt4>(PackUnpack.BitIntArrayToByte8<UInt4>(left.Bits) / (byte)right) };
+                byte8 leftV = PackUnpack.BitIntArrayToByte8<UInt4>(left.Bits);
+
+            #if TESTING
+                for (int i = 6; i < 8; i++)
+                {
+                    leftV[i] = 1;
+                }
+            #endif
+
+                return new UInt4x6 { Bits = (uint)PackUnpack.DownCast<UInt4>(leftV / (byte)right) };
             }
 
             uint x0  = left.Bits & bitmask32((uint)default(UInt4).Bits, 0u * (uint)default(UInt4).Bits);
@@ -279,7 +299,16 @@ Assert.IsNotGreater(x4,  UInt4.MaxValue);
         {
             if (BurstArchitecture.IsSIMDSupported)
             {
-                return new UInt4x6 { Bits = (uint)PackUnpack.DownCast<UInt4>((byte)left / PackUnpack.BitIntArrayToByte8<UInt4>(right.Bits)) };
+                byte8 rightV = PackUnpack.BitIntArrayToByte8<UInt4>(right.Bits);
+
+            #if TESTING
+                for (int i = 6; i < 8; i++)
+                {
+                    rightV[i] = 1;
+                }
+            #endif
+
+                return new UInt4x6 { Bits = (uint)PackUnpack.DownCast<UInt4>((byte)left / rightV) };
             }
 
             uint x0  = left << (0 * default(UInt4).Bits);

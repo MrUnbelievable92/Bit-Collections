@@ -1,8 +1,7 @@
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using MaxMath;
-using MaxMath.Intrinsics;
-using static Unity.Burst.Intrinsics.X86;
+using MaxMath.CompilerServices;
 
 namespace BitCollections
 {
@@ -67,39 +66,25 @@ namespace BitCollections
         public static __UInt256__ operator << (__UInt256__ value, int n)
         {
             n &= 255;
-
-            if (Hint.Unlikely(n == 0))
+            
+            if (constexpr.IS_TRUE(n == 0))
             {
                 return value;
             }
             else
             {
-                if (n < 128)
-                {
-                    if (constexpr.IS_TRUE(n == 64))
-                    {
-                        return new __UInt256__(0, value.lo128.lo64, value.lo128.hi64, value.hi128.lo64);
-                    }
+                int n2 = n & 127;
+                bool upper = n >= 128;
 
-                    constexpr.ASSUME(n > 0 && n < 128);
+                UInt128 loShifted = value.lo128 << n2;
 
-                    return new __UInt256__(value.lo128 << n, (value.hi128 << n) | (value.lo128 >> (128 - n)));
-                }
-                else
-                {
-                    if (constexpr.IS_TRUE(n == 128))
-                    {
-                        return new __UInt256__(0, value.lo128);
-                    }
-                    if (constexpr.IS_TRUE(n == 192))
-                    {
-                        return new __UInt256__(0, 0, 0, value.lo128.lo64);
-                    }
+                UInt128 carry      = (value.lo128 >> 1) >> (127 - n2);
+                UInt128 hiCombined = (value.hi128 << n2) | carry;
 
-                    constexpr.ASSUME(n > 127 && n < 256);
+                UInt128 outLo = upper ? 0          : loShifted;
+                UInt128 outHi = upper ? loShifted  : hiCombined;
 
-                    return new __UInt256__(0, value.lo128 << (n - 128));
-                }
+                return new __UInt256__(outLo, outHi);
             }
         }
 
@@ -107,39 +92,25 @@ namespace BitCollections
         public static __UInt256__ operator >> (__UInt256__ value, int n)
         {
             n &= 255;
-
-            if (Hint.Unlikely(n == 0))
+            
+            if (constexpr.IS_TRUE(n == 0))
             {
                 return value;
             }
             else
             {
-                if (n < 128)
-                {
-                    if (constexpr.IS_TRUE(n == 64))
-                    {
-                        return new __UInt256__(value.lo128.hi64, value.hi128.lo64, value.hi128.hi64, 0);
-                    }
+                int n2 = n & 127;
+                bool upper = n >= 128;
 
-                    constexpr.ASSUME(n > 0 && n < 128);
+                UInt128 hiShifted = value.hi128 >> n2;
 
-                    return new __UInt256__((value.lo128 >> n) | (value.hi128 << (128 - n)), value.hi128 >> n);
-                }
-                else
-                {
-                    if (constexpr.IS_TRUE(n == 128))
-                    {
-                        return new __UInt256__(value.hi128, 0);
-                    }
-                    if (constexpr.IS_TRUE(n == 192))
-                    {
-                        return new __UInt256__(value.hi128.hi64, 0, 0, 0);
-                    }
+                UInt128 carry      = (value.hi128 << 1) << (127 - n2);
+                UInt128 loCombined = (value.lo128 >> n2) | carry;
 
-                    constexpr.ASSUME(n > 127 && n < 256);
+                UInt128 outHi = upper ? 0           : hiShifted;
+                UInt128 outLo = upper ? hiShifted   : loCombined;
 
-                    return new __UInt256__(value.hi128 >> (n - 128), 0);
-                }
+                return new __UInt256__(outLo, outHi);
             }
         }
 

@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using DevTools;
-using MaxMath.Intrinsics;
+using MaxMath.CompilerServices;
 
 using static MaxMath.math;
 

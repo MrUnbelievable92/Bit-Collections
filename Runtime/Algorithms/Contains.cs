@@ -3,6 +3,7 @@ using Unity.Collections;
 using Unity.Burst.CompilerServices;
 using DevTools;
 using MaxMath;
+using MaxMath.CompilerServices;
 using SIMDAlgorithms;
 
 using static MaxMath.math;

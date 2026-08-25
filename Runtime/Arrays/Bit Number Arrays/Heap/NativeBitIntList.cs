@@ -12,7 +12,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using DevTools;
 using MaxMath;
-using MaxMath.Intrinsics;
+using MaxMath.CompilerServices;
 using SIMDAlgorithms;
 
 using static MaxMath.math;
@@ -127,7 +127,7 @@ this.CheckWriteAndBumpSecondaryVersion();
 
                     if (Hint.Likely(_data->Capacity != 0))
                     {
-                        UnsafeUtility.MemCpy(newPtr, DataPtr, (long)MemoryHelper.SizeInBytes<T>(oldLength));
+                        Memory.MemCpy(newPtr, DataPtr, (long)MemoryHelper.SizeInBytes<T>(_data->Length));
                         UnsafeUtility.Free(DataPtr, m_AllocatorLabel);
                     }
 
@@ -224,7 +224,7 @@ SafetyHelper.InitSafety<NativeBitIntList<T>>(allocator, _staticSafetyId, out m_S
             NativeBitIntArray<T> result = new NativeBitIntArray<T>(Length, allocator, NativeArrayOptions.UninitializedMemory);
 
             ulong bytes = MemoryHelper.SizeInBytes<T>(Length);
-            UnsafeUtility.MemCpy(result.GetUnsafePtr(), GetUnsafeReadOnlyPtr(), (long)bytes);
+            Memory.MemCpy(result.GetUnsafePtr(), GetUnsafeReadOnlyPtr(), (long)bytes);
             return result;
         }
 
@@ -311,8 +311,8 @@ this.CheckWriteAndThrow();
 
             if (length > Capacity)
             {
+                Capacity = math.ceilpow2(length);
                 _data->Length = length;
-                Capacity = length + length;
             }
             else
             {
@@ -326,7 +326,7 @@ this.CheckWriteAndThrow();
 
                 if (Hint.Likely(oldSizeInBytes != newSizeInBytes))
                 {
-                    UnsafeUtility.MemClear((byte*)DataPtr + oldSizeInBytes, (long)(newSizeInBytes - oldSizeInBytes));
+                    Memory.MemClear((byte*)DataPtr + oldSizeInBytes, (long)(newSizeInBytes - oldSizeInBytes));
                 }
             }
         }
@@ -7310,8 +7310,7 @@ Assert.IsValidSubarray(index, count, Length);
         [return: AssumeRange(-1L, int.MaxValue)]
         public readonly int IndexOf(long value, int index, int numValues, Comparison where = Comparison.EqualTo)
         {
-            int iof = BitAlgorithms.IndexOfFirst<T>(GetUnsafeReadOnlyPtr(), index, numValues, value, Length, where);
-            return iof == -1 ? -1 : iof + index; 
+            return BitAlgorithms.IndexOfFirst<T>(GetUnsafeReadOnlyPtr(), index, numValues, value, Length, where);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -7405,11 +7404,6 @@ Assert.IsValidSubarray(index, numValues, Length);
         public override readonly int GetHashCode()
         {
             return ((IntPtr)_data).GetHashCode();
-        }
-
-        public override readonly string ToString()
-        {
-            return GetEnumerator().ToString();
         }
 
 

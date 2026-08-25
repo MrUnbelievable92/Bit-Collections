@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using Unity.Burst.Intrinsics;
 using Unity.Collections;
 using MaxMath;
+using MaxMath.CompilerServices;
 using MaxMath.Intrinsics;
 
 using static MaxMath.Intrinsics.Xse;

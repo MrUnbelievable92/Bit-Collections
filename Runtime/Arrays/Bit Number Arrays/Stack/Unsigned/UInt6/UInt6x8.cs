@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using MaxMath;
+using MaxMath.CompilerServices;
 
 using static MaxMath.math;
-using MaxMath.Intrinsics;
 
 namespace BitCollections
 {

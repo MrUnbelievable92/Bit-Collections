@@ -1,14 +1,100 @@
 using System;
 using System.Runtime.CompilerServices;
 using DevTools;
+using Unity.Burst.Intrinsics;
 using MaxMath;
+using MaxMath.CompilerServices;
+using MaxMath.Intrinsics;
 
+using static Unity.Burst.Intrinsics.X86;
 using static MaxMath.math;
 
 namespace BitCollections
 {
     unsafe internal static partial class BitAlgorithms
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static ulong4 CSumBytes<T>(byte32 vec)
+            where T : BitInt
+        {
+            if (Avx2.IsAvx2Supported)
+            {
+                if (default(T).IsSigned)
+                {
+                    v256 NORMALIZE = Avx.mm256_set1_epi8(1 << 7);
+                    v256 sum = Avx2.mm256_sad_epu8(Avx2.mm256_xor_si256(vec, NORMALIZE), Avx.mm256_setzero_si256());
+                    
+                    return Avx2.mm256_add_epi64(sum, Avx.mm256_set1_epi64x(8 * -128));
+                }
+                else
+                {
+                    return Avx2.mm256_sad_epu8(vec, default);
+                }
+            }
+            else if (BurstArchitecture.IsSIMDSupported)
+            {
+                if (default(T).IsSigned)
+                {
+                    v128 NORMALIZE = Xse.set1_epi8(1 << 7);
+                    v128 sumlo = Xse.sad_epu8(Xse.xor_si128(vec.v16_0,  NORMALIZE), Xse.setzero_si128());
+                    v128 sumhi = Xse.sad_epu8(Xse.xor_si128(vec.v16_16, NORMALIZE), Xse.setzero_si128());
+                    
+                    ulong2 lo = Xse.add_epi64(sumlo, Xse.set1_epi64x(8 * -128));
+                    ulong2 hi = Xse.add_epi64(sumhi, Xse.set1_epi64x(8 * -128));
+
+                    return new ulong4(lo, hi);
+                }
+                else
+                {
+                    ulong2 lo = Xse.sad_epu8(vec.v16_0,  default);
+                    ulong2 hi = Xse.sad_epu8(vec.v16_16, default);
+
+                    return new ulong4(lo, hi);
+                }
+            }
+            else
+            {
+                if (default(T).IsSigned)
+                {
+                    return (ulong4)((sbyte32)vec).v4_0 + (ulong4)((sbyte32)vec).v4_4 + (ulong4)((sbyte32)vec).v4_8 + (ulong4)((sbyte32)vec).v4_12 + (ulong4)((sbyte32)vec).v4_16 + (ulong4)((sbyte32)vec).v4_20 + (ulong4)((sbyte32)vec).v4_24 + (ulong4)((sbyte32)vec).v4_28;
+                }
+                else
+                {
+                    return (ulong4)vec.v4_0 + (ulong4)vec.v4_4 + (ulong4)vec.v4_8 + (ulong4)vec.v4_12 + (ulong4)vec.v4_16 + (ulong4)vec.v4_20 + (ulong4)vec.v4_24 + (ulong4)vec.v4_28;
+                }
+            }
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static ulong2 CSumBytes<T>(byte16 vec)
+            where T : BitInt
+        {
+            if (BurstArchitecture.IsSIMDSupported)
+            {
+                if (default(T).IsSigned)
+                {
+                    v128 NORMALIZE = Xse.set1_epi8(1 << 7);
+                    v128 sum = Xse.sad_epu8(Xse.xor_si128(vec,  NORMALIZE), Xse.setzero_si128());
+                    
+                    return Xse.add_epi64(sum, Xse.set1_epi64x(8 * -128));
+                }
+                else
+                {
+                    return Xse.sad_epu8(vec, default);
+                }
+            }
+            else
+            {
+                if (default(T).IsSigned)
+                {
+                    return (ulong2)((sbyte16)vec).v2_0 + (ulong2)((sbyte16)vec).v2_2 + (ulong2)((sbyte16)vec).v2_4 + (ulong2)((sbyte16)vec).v2_6 + (ulong2)((sbyte16)vec).v2_8 + (ulong2)((sbyte16)vec).v2_10 + (ulong2)((sbyte16)vec).v2_12 + (ulong2)((sbyte16)vec).v2_14;
+                }
+                else
+                {
+                    return (ulong2)vec.v2_0 + (ulong2)vec.v2_2 + (ulong2)vec.v2_4 + (ulong2)vec.v2_6 + (ulong2)vec.v2_8 + (ulong2)vec.v2_10 + (ulong2)vec.v2_12 + (ulong2)vec.v2_14;
+                }
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long Sum<T>(void* basePtr, int startIndex, int count, int arrayLength, TypeCode range)
             where T : BitInt
@@ -207,159 +293,6 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                 
                 return result;
             }
-            else if (default(T).Bits == 4
-                  && !default(T).IsSigned)
-            {
-                SubArrayIndexer<T> indexer = new SubArrayIndexer<T>(startIndex);
-                basePtr = indexer.GetOuterPtr(basePtr);
-                int innerIndex = (int)indexer.InnerIndex;
-
-                long result;
-                if (innerIndex != 0
-                  & count != 0)
-                {
-                    byte read = *(byte*)basePtr;
-                    basePtr = (byte*)basePtr + 1;
-                    
-                    result = (byte)(read >> 4);
-                    
-                    count -= 1;
-                }
-                else
-                {
-                    result = 0;
-                }
-                
-                ulong acc0 = 0;
-                ulong acc1 = 0;
-                ulong acc2 = 0;
-                ulong acc3 = 0;
-
-                if (count >= 4 * 17 * 8)
-                {
-                    ushort8 sum0 = 0;
-                    ushort8 sum1 = 0;
-                    ushort8 sum2 = 0;
-                    ushort8 sum3 = 0;
-                    int counter = 0;
-                    do
-                    {
-                        for (int i = 0; i < 17; i++)
-                        {
-                            acc0 += PackUnpack.UpCast64<UInt4, UInt8>(((UInt4x8*)basePtr)[0].Bits);
-                            acc1 += PackUnpack.UpCast64<UInt4, UInt8>(((UInt4x8*)basePtr)[1].Bits);
-                            acc2 += PackUnpack.UpCast64<UInt4, UInt8>(((UInt4x8*)basePtr)[2].Bits);
-                            acc3 += PackUnpack.UpCast64<UInt4, UInt8>(((UInt4x8*)basePtr)[3].Bits);
-                            basePtr = (UInt4x8*)basePtr + 4;
-                        }
-                
-                        if (range != TypeCode.Byte
-                         && range != TypeCode.SByte
-                         && range != TypeCode.Int16
-                         && range != TypeCode.UInt16)
-                        {
-                            if (counter++ >= (ushort.MaxValue / byte.MaxValue) / 8)
-                            {
-                                result += csum(sum0);
-                                result += csum(sum1);
-                                result += csum(sum2);
-                                result += csum(sum3);
-                                sum0 = 0;
-                                sum1 = 0;
-                                sum2 = 0;
-                                sum3 = 0;
-                            }
-                        }
-                
-                        sum0 += acc0.Reinterpret<ulong, byte8>();
-                        sum1 += acc1.Reinterpret<ulong, byte8>();
-                        sum2 += acc2.Reinterpret<ulong, byte8>();
-                        sum3 += acc3.Reinterpret<ulong, byte8>();
-                        acc0 = 0;
-                        acc1 = 0;
-                        acc2 = 0;
-                        acc3 = 0;
-                        
-                        count -= 4 * 17 * 8;
-                    }
-                    while (count >= 4 * 17 * 8);
-                
-                    result += csum(sum0);
-                    result += csum(sum1);
-                    result += csum(sum2);
-                    result += csum(sum3);
-                }
-
-                if (count >= 4 * 8)
-                {
-                    do
-                    {
-                        acc0 += PackUnpack.UpCast64<UInt4, UInt8>(((UInt4x8*)basePtr)[0].Bits);
-                        acc1 += PackUnpack.UpCast64<UInt4, UInt8>(((UInt4x8*)basePtr)[1].Bits);
-                        acc2 += PackUnpack.UpCast64<UInt4, UInt8>(((UInt4x8*)basePtr)[2].Bits);
-                        acc3 += PackUnpack.UpCast64<UInt4, UInt8>(((UInt4x8*)basePtr)[3].Bits);
-
-                        count -= 4 * 8;
-                        basePtr = (UInt4x8*)basePtr + 4;
-                    } 
-                    while (count >= 4 * 8);
-                    
-                    result += csum((ushort8)acc0.Reinterpret<ulong, byte8>());
-                    result += csum((ushort8)acc1.Reinterpret<ulong, byte8>());
-                    result += csum((ushort8)acc2.Reinterpret<ulong, byte8>());
-                    result += csum((ushort8)acc3.Reinterpret<ulong, byte8>());
-
-                    acc0 = 0;
-                }
-
-                if (count >= 16)
-                {
-                    acc0 = PackUnpack.UpCast64<UInt4, UInt8>(((UInt4x8*)basePtr)[0].Bits);
-                    acc0 += PackUnpack.UpCast64<UInt4, UInt8>(((UInt4x8*)basePtr)[1].Bits);
-
-                    count -= 16;
-                    basePtr = (UInt4x8*)basePtr + 2;
-                }
-
-                if (count >= 8)
-                {
-                    acc0 += PackUnpack.UpCast64<UInt4, UInt8>(((UInt4x8*)basePtr)[0].Bits);
-
-                    count -= 8;
-                    basePtr = (UInt4x8*)basePtr + 1;
-                }
-
-                acc0 += acc0 >> 32;
-
-                if (count >= 4)
-                {
-                    acc0 += PackUnpack.UpCast32<UInt4, UInt8>(((UInt4x4*)basePtr)[0].Bits);
-
-                    count -= 4;
-                    basePtr = (UInt4x4*)basePtr + 1;
-                }
-
-                if (count >= 2)
-                {
-                    acc0 += PackUnpack.UpCast16<UInt4, UInt8>(((UInt4x2*)basePtr)[0].Bits);
-
-                    count -= 2;
-                    basePtr = (UInt4x2*)basePtr + 1;
-                }
-
-                if (count != 0)
-                {
-                    acc0 += (byte)(*(byte*)basePtr & bitmask8(4));
-                }
-
-                acc0 = PackUnpack.UpCast64<UInt8, UInt16>(acc0);
-                acc0 += acc0 >> 32;
-                acc0 += acc0 >> 16;
-
-                result += (uint)acc0 & bitmask32(16u);
-
-                return result;
-            }
             else
             {
                 switch (range)
@@ -367,10 +300,9 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     case TypeCode.Byte:
                     case TypeCode.SByte:
                     {
-                        if (default(T).IsSigned
-                         && default(T).Bits > 4)
+                        if (default(T).Bits <= 8)
                         {
-                            goto case TypeCode.UInt16;
+                            goto case TypeCode.UInt64;
                         }
 
                         byte32 acc0 = 0;
@@ -463,6 +395,10 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     case TypeCode.Int16:
                     case TypeCode.UInt16:
                     {
+                        if (default(T).Bits <= 8)
+                        {
+                            goto case TypeCode.UInt64;
+                        }
                         if (default(T).IsSigned)
                         {
                             goto case TypeCode.UInt32;
@@ -548,6 +484,10 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                     case TypeCode.Int32:
                     case TypeCode.UInt32:
                     {
+                        if (default(T).Bits <= 8)
+                        {
+                            goto case TypeCode.UInt64;
+                        }
                         if (default(T).IsSigned)
                         {
                             goto case TypeCode.UInt64;
@@ -627,58 +567,144 @@ Assert.IsWithinArrayBounds(startIndex + count - tobyte(count != 0), arrayLength)
                         ulong4 acc1 = 0;
                         ulong4 acc2 = 0;
                         ulong4 acc3 = 0;
-                        while (count >= 16)
+
+                        if (default(T).Bits <= 8)
                         {
-                            acc0 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex +  0, arrayLength);
-                            acc1 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex +  4, arrayLength);
-                            acc2 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex +  8, arrayLength);
-                            acc3 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex + 12, arrayLength);
+                            while (count >= 32 * 4)
+                            {
+                                acc0 += CSumBytes<T>(LoadStore.LoadVector<T, byte32>(basePtr, startIndex +  0, arrayLength));
+                                acc1 += CSumBytes<T>(LoadStore.LoadVector<T, byte32>(basePtr, startIndex + 32, arrayLength));
+                                acc2 += CSumBytes<T>(LoadStore.LoadVector<T, byte32>(basePtr, startIndex + 64, arrayLength));
+                                acc3 += CSumBytes<T>(LoadStore.LoadVector<T, byte32>(basePtr, startIndex + 96, arrayLength));
 
-                            count -= 16;
-                            startIndex += 16;
+                                count -= 32 * 4;
+                                startIndex += 32 * 4;
+                            }
+
+                            acc2 += acc3;
+
+                            if (count >= 32 * 2)
+                            {
+                                acc0 += CSumBytes<T>(LoadStore.LoadVector<T, byte32>(basePtr, startIndex + 0,  arrayLength));
+                                acc1 += CSumBytes<T>(LoadStore.LoadVector<T, byte32>(basePtr, startIndex + 32, arrayLength));
+
+                                count -= 32 * 2;
+                                startIndex += 32 * 2;
+                            }
+
+                            acc1 += acc2;
+
+                            if (count >= 32)
+                            {
+                                acc0 += CSumBytes<T>(LoadStore.LoadVector<T, byte32>(basePtr, startIndex + 0, arrayLength));
+
+                                count -= 32;
+                                startIndex += 32;
+                            }
+
+                            acc0 += acc1;
+
+                            ulong2 acc128 = acc0.xy + acc0.zw;
+
+                            if (count >= 16)
+                            {
+                                acc128 += CSumBytes<T>(LoadStore.LoadVector<T, byte16>(basePtr, startIndex + 0, arrayLength));
+
+                                count -= 16;
+                                startIndex += 16;
+                            }
+
+                            long result = (long)csum(acc128);
+
+                            if (count >= 8)
+                            {
+                                byte8 load = LoadStore.LoadVector<T, byte8>(basePtr, startIndex + 0, arrayLength);
+                                result += default(T).IsSigned ? csum((sbyte8)load) : csum(load);
+
+                                count -= 8;
+                                startIndex += 8;
+                            }
+
+                            if (count >= 4)
+                            {
+                                byte4 load = LoadStore.LoadVector<T, byte4>(basePtr, startIndex + 0, arrayLength);
+                                result += default(T).IsSigned ? csum((sbyte4)load) : csum(load);
+
+                                count -= 4;
+                                startIndex += 4;
+                            }
+
+                            if (count >= 2)
+                            {
+                                byte2 load = LoadStore.LoadVector<T, byte2>(basePtr, startIndex + 0, arrayLength);
+                                result += default(T).IsSigned ? csum((sbyte2)load) : csum(load);
+
+                                count -= 2;
+                                startIndex += 2;
+                            }
+
+                            if (count != 0)
+                            {
+                                result += LoadStore.LoadScalar<T>(basePtr, startIndex + 0, arrayLength);
+                            }
+
+                            return result;
                         }
-
-                        acc2 += acc3;
-
-                        if (count >= 8)
+                        else
                         {
-                            acc0 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex + 0, arrayLength);
-                            acc1 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex + 4, arrayLength);
+                            while (count >= 16)
+                            {
+                                acc0 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex +  0, arrayLength);
+                                acc1 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex +  4, arrayLength);
+                                acc2 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex +  8, arrayLength);
+                                acc3 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex + 12, arrayLength);
 
-                            count -= 8;
-                            startIndex += 8;
+                                count -= 16;
+                                startIndex += 16;
+                            }
+
+                            acc2 += acc3;
+
+                            if (count >= 8)
+                            {
+                                acc0 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex + 0, arrayLength);
+                                acc1 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex + 4, arrayLength);
+
+                                count -= 8;
+                                startIndex += 8;
+                            }
+
+                            acc1 += acc2;
+
+                            if (count >= 4)
+                            {
+                                acc0 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex + 0, arrayLength);
+
+                                count -= 4;
+                                startIndex += 4;
+                            }
+
+                            acc0 += acc1;
+
+                            ulong2 acc128 = acc0.xy + acc0.zw;
+
+                            if (count >= 2)
+                            {
+                                acc128 += LoadStore.LoadVector<T, ulong2>(basePtr, startIndex + 0, arrayLength);
+
+                                count -= 2;
+                                startIndex += 2;
+                            }
+
+                            long result = (long)csum(acc128);
+
+                            if (count != 0)
+                            {
+                                result += LoadStore.LoadScalar<T>(basePtr, startIndex + 0, arrayLength);
+                            }
+
+                            return result;
                         }
-
-                        acc1 += acc2;
-
-                        if (count >= 4)
-                        {
-                            acc0 += LoadStore.LoadVector<T, ulong4>(basePtr, startIndex + 0, arrayLength);
-
-                            count -= 4;
-                            startIndex += 4;
-                        }
-
-                        acc0 += acc1;
-
-                        ulong2 acc128 = acc0.xy + acc0.zw;
-
-                        if (count >= 2)
-                        {
-                            acc128 += LoadStore.LoadVector<T, ulong2>(basePtr, startIndex + 0, arrayLength);
-
-                            count -= 2;
-                            startIndex += 2;
-                        }
-
-                        long result = (long)csum(acc128);
-
-                        if (count != 0)
-                        {
-                            result += LoadStore.LoadScalar<T>(basePtr, startIndex + 0, arrayLength);
-                        }
-
-                        return result;
                     }
 
                     default: throw new System.InvalidCastException();

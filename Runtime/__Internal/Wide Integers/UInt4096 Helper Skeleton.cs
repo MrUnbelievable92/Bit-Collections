@@ -1,8 +1,7 @@
 using System.Runtime.CompilerServices;
 using Unity.Burst.CompilerServices;
 using MaxMath;
-using MaxMath.Intrinsics;
-using static Unity.Burst.Intrinsics.X86;
+using MaxMath.CompilerServices;
 
 namespace BitCollections
 {
@@ -79,39 +78,25 @@ namespace BitCollections
         public static __UInt4096__ operator << (__UInt4096__ value, int n)
         {
             n &= 4095;
-
-            if (Hint.Unlikely(n == 0))
+            
+            if (constexpr.IS_TRUE(n == 0))
             {
                 return value;
             }
             else
             {
-                if (n < 2048)
-                {
-                    if (constexpr.IS_TRUE(n == 1024))
-                    {
-                        return new __UInt4096__(0, value.lo2048.lo1024, value.lo2048.hi1024, value.hi2048.lo1024);
-                    }
+                int n2 = n & 2047;
+                bool upper = n >= 2048;
 
-                    constexpr.ASSUME(n > 0 && n < 2048);
+                __UInt2048__ loShifted = value.lo2048 << n2;
 
-                    return new __UInt4096__(value.lo2048 << n, (value.hi2048 << n) | (value.lo2048 >> (2048 - n)));
-                }
-                else
-                {
-                    if (constexpr.IS_TRUE(n == 2048))
-                    {
-                        return new __UInt4096__(0, value.lo2048);
-                    }
-                    if (constexpr.IS_TRUE(n == 3072))
-                    {
-                        return new __UInt4096__(0, 0, 0, value.lo2048.lo1024);
-                    }
+                __UInt2048__ carry      = (value.lo2048 >> 1) >> (2047 - n2);
+                __UInt2048__ hiCombined = (value.hi2048 << n2) | carry;
 
-                    constexpr.ASSUME(n > 2047 && n < 4096);
+                __UInt2048__ outLo = upper ? 0          : loShifted;
+                __UInt2048__ outHi = upper ? loShifted  : hiCombined;
 
-                    return new __UInt4096__(0, value.lo2048 << (n - 2048));
-                }
+                return new __UInt4096__(outLo, outHi);
             }
         }
 
@@ -119,39 +104,25 @@ namespace BitCollections
         public static __UInt4096__ operator >> (__UInt4096__ value, int n)
         {
             n &= 4095;
-
-            if (Hint.Unlikely(n == 0))
+            
+            if (constexpr.IS_TRUE(n == 0))
             {
                 return value;
             }
             else
             {
-                if (n < 2048)
-                {
-                    if (constexpr.IS_TRUE(n == 1024))
-                    {
-                        return new __UInt4096__(value.lo2048.hi1024, value.hi2048.lo1024, value.hi2048.hi1024, 0);
-                    }
+                int n2 = n & 2047;
+                bool upper = n >= 2048;
 
-                    constexpr.ASSUME(n > 0 && n < 2048);
+                __UInt2048__ hiShifted = value.hi2048 >> n2;
 
-                    return new __UInt4096__((value.lo2048 >> n) | (value.hi2048 << (2048 - n)), value.hi2048 >> n);
-                }
-                else
-                {
-                    if (constexpr.IS_TRUE(n == 2048))
-                    {
-                        return new __UInt4096__(value.hi2048, 0);
-                    }
-                    if (constexpr.IS_TRUE(n == 3072))
-                    {
-                        return new __UInt4096__(value.hi2048.hi1024, 0, 0, 0);
-                    }
+                __UInt2048__ carry      = (value.hi2048 << 1) << (2047 - n2);
+                __UInt2048__ loCombined = (value.lo2048 >> n2) | carry;
 
-                    constexpr.ASSUME(n > 2047 && n < 4096);
+                __UInt2048__ outHi = upper ? 0           : hiShifted;
+                __UInt2048__ outLo = upper ? hiShifted   : loCombined;
 
-                    return new __UInt4096__(value.hi2048 >> (n - 2048), 0);
-                }
+                return new __UInt4096__(outLo, outHi);
             }
         }
 

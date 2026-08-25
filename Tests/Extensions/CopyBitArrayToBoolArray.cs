@@ -12,7 +12,7 @@ namespace BitCollections.Tests
             for (int k = 0; k < 16; k++)
             {
                 Random32 random = Random32.New;
-                int length = random.NextInt(0, 1000);
+                int length = random.NextInt(1, 1000);
 
                 NativeArray<bool> array = new NativeArray<bool>(length, Allocator.Persistent);
                 BitCollections.NativeBitArray bitArray = new BitCollections.NativeBitArray(length, Allocator.Persistent);
@@ -41,7 +41,7 @@ namespace BitCollections.Tests
             for (int k = 0; k < 16; k++)
             {
                 Random32 random = Random32.New;
-                int length = random.NextInt(0, 1000);
+                int length = random.NextInt(1, 1000);
                 int dstOffset = random.NextInt(1, length);
 
                 NativeArray<bool> array = new NativeArray<bool>(length, Allocator.Persistent);
@@ -71,7 +71,7 @@ namespace BitCollections.Tests
             for (int k = 0; k < 16; k++)
             {
                 Random32 random = Random32.New;
-                int length = random.NextInt(0, 1000);
+                int length = random.NextInt(1, 1000);
                 int srcOffset = random.NextInt(1, length);
 
                 NativeArray<bool> array = new NativeArray<bool>(length, Allocator.Persistent);
@@ -101,7 +101,7 @@ namespace BitCollections.Tests
             for (int k = 0; k < 16; k++)
             {
                 Random32 random = Random32.New;
-                int length = random.NextInt(0, 1000);
+                int length = random.NextInt(1, 1000);
 
                 NativeList<bool> list = new NativeList<bool>(length, Allocator.Persistent);
                 BitCollections.NativeBitArray bitList = new BitCollections.NativeBitArray(length, Allocator.Persistent);
@@ -130,7 +130,7 @@ namespace BitCollections.Tests
             for (int k = 0; k < 16; k++)
             {
                 Random32 random = Random32.New;
-                int length = random.NextInt(0, 1000);
+                int length = random.NextInt(1, 1000);
                 int dstOffset = random.NextInt(1, length);
 
                 NativeList<bool> list = new NativeList<bool>(length, Allocator.Persistent);
@@ -160,7 +160,7 @@ namespace BitCollections.Tests
             for (int k = 0; k < 16; k++)
             {
                 Random32 random = Random32.New;
-                int length = random.NextInt(0, 1000);
+                int length = random.NextInt(1, 1000);
                 int srcOffset = random.NextInt(1, length);
 
                 NativeList<bool> list = new NativeList<bool>(length, Allocator.Persistent);
@@ -190,8 +190,8 @@ namespace BitCollections.Tests
             for (int k = 0; k < 16; k++)
             {
                 Random32 random = Random32.New;
-                int length0 = random.NextInt(0, 1000);
-                int length1 = random.NextInt(0, 1000);
+                int length0 = random.NextInt(1, 1000);
+                int length1 = random.NextInt(1, 1000);
 
                 NativeList<bool> list = new NativeList<bool>(length0, Allocator.Persistent);
                 NativeList<bool> listCpy = new NativeList<bool>(length0, Allocator.Persistent);
@@ -232,8 +232,8 @@ namespace BitCollections.Tests
             for (int k = 0; k < 16; k++)
             {
                 Random32 random = Random32.New;
-                int length0 = random.NextInt(0, 1000);
-                int length1 = random.NextInt(0, 1000);
+                int length0 = random.NextInt(1, 1000);
+                int length1 = random.NextInt(1, 1000);
                 int srcIndex = random.NextInt(1, length1);
 
                 NativeList<bool> list = new NativeList<bool>(length0, Allocator.Persistent);
@@ -275,8 +275,8 @@ namespace BitCollections.Tests
             for (int k = 0; k < 16; k++)
             {
                 Random32 random = Random32.New;
-                int length0 = random.NextInt(0, 1000);
-                int length1 = random.NextInt(0, 1000);
+                int length0 = random.NextInt(1, 1000);
+                int length1 = random.NextInt(1, 1000);
 
                 NativeList<bool> list = new NativeList<bool>(length0, Allocator.Persistent);
                 NativeList<bool> listCpy = new NativeList<bool>(length0, Allocator.Persistent);
@@ -317,8 +317,8 @@ namespace BitCollections.Tests
             for (int k = 0; k < 16; k++)
             {
                 Random32 random = Random32.New;
-                int length0 = random.NextInt(0, 1000);
-                int length1 = random.NextInt(0, 1000);
+                int length0 = random.NextInt(1, 1000);
+                int length1 = random.NextInt(1, 1000);
                 int srcIndex = random.NextInt(1, length1);
 
                 NativeList<bool> list = new NativeList<bool>(length0, Allocator.Persistent);

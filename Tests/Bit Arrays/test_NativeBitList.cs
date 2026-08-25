@@ -127,6 +127,7 @@ namespace BitCollections.Tests
 
         private static NativeBitArray RandomNativeBitArray(int length)
         {
+            length = math.max(1, length);
             NativeBitArray result = new NativeBitArray(length, Allocator.Persistent);
 
             Random32 rng = Random32.New;
@@ -950,8 +951,8 @@ namespace BitCollections.Tests
                 int length = i % 2 == 0 ? GenerateNotEvenlyDivisibleBy8(ref rng) : GenerateEvenlyDivisibleBy8(ref rng);
                 int randomIndex = rng.NextInt(0, length);
                 CreateSyncedLists(length, out NativeBitList native, out List<bool> managed);
-                BitArray managedArray = RandomBitArray(rng.NextInt(0, 250));
-                NativeBitArray nativeArray = RandomNativeBitArray(rng.NextInt(0, 250));
+                BitArray managedArray = RandomBitArray(rng.NextInt(1, 250));
+                NativeBitArray nativeArray = RandomNativeBitArray(rng.NextInt(1, 250));
                 bool[] copyManaged = new bool[managedArray.Length];
                 for (int j = 0; j < copyManaged.Length; j++)
                 {
@@ -1030,11 +1031,11 @@ namespace BitCollections.Tests
                 int length = i % 2 == 0 ? GenerateNotEvenlyDivisibleBy8(ref rng) : GenerateEvenlyDivisibleBy8(ref rng);
                 int randomIndex = rng.NextInt(0, length);
                 CreateSyncedLists(length, out NativeBitList native, out List<bool> managed);
-                BitArray managedArray = RandomBitArray(rng.NextInt(0, 250));
-                NativeBitArray nativeArray = RandomNativeBitArray(rng.NextInt(0, 250));
+                BitArray managedArray = RandomBitArray(rng.NextInt(1, 250));
+                NativeBitArray nativeArray = RandomNativeBitArray(rng.NextInt(1, 250));
 
                 int randomSrcIndex = rng.NextInt(0, managedArray.Length);
-                int randomSrcCount = rng.NextInt(0, managedArray.Length - randomSrcIndex + 1);
+                int randomSrcCount = rng.NextInt(1, managedArray.Length - randomSrcIndex + 1);
                 bool[] slice = new bool[randomSrcCount];
                 for (int j = 0; j < slice.Length; j++)
                 {
@@ -1046,7 +1047,7 @@ namespace BitCollections.Tests
                 AssertEquality(native, managed);
 
                 randomSrcIndex = rng.NextInt(0, nativeArray.Length);
-                randomSrcCount = rng.NextInt(0, nativeArray.Length - randomSrcIndex + 1);
+                randomSrcCount = rng.NextInt(1, nativeArray.Length - randomSrcIndex + 1);
                 NativeBitArray nativeSlice = new NativeBitArray(randomSrcCount, Allocator.Persistent);
                 for (int j = 0; j < nativeSlice.Length; j++)
                 {

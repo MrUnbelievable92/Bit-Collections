@@ -200,7 +200,6 @@ Assert.IsGreaterOrEqual(bitsToCopy, bitsToFill);
             }
         }
 
-        // TODO optimize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void CopyDescending<T>(void* srcPtr, int srcStartIndex, void* dstPtr, int dstStartIndex, int count)
             where T : BitInt
@@ -208,12 +207,176 @@ Assert.IsGreaterOrEqual(bitsToCopy, bitsToFill);
 Assert.IsNonNegative(srcStartIndex);
 Assert.IsNonNegative(dstStartIndex);
 Assert.IsNonNegative(count);
-
+ 
             ulong bitsToCopy = (ulong)(uint)count * default(T).Bits;
-
-            for (ulong i = 0; i < (ulong)count; i++)
+ 
+            if (Hint.Unlikely(bitsToCopy == 0))
             {
-                LoadStore.StoreScalar<T>(dstPtr, dstStartIndex--, int.MaxValue, LoadStore.LoadScalar<T>(srcPtr, srcStartIndex--, int.MaxValue));
+                return;
+            }
+ 
+            ulong lo;
+            ulong srcTopBit = (ulong)(uint)srcStartIndex * default(T).Bits + default(T).Bits - 1;
+            ulong dstTopBit = (ulong)(uint)dstStartIndex * default(T).Bits + default(T).Bits - 1;
+            ulong srcByteOffset = divrem(srcTopBit, 8ul, out ulong srcTopBitInByte);
+            ulong dstByteOffset = divrem(dstTopBit, 8ul, out ulong dstTopBitInByte);
+
+            ulong unusedHighBitsInSrcByte = 7ul - srcTopBitInByte;
+            ulong preservedHighBitsInDstByte = 7ul - dstTopBitInByte;
+ 
+            srcPtr = (byte*)srcPtr + srcByteOffset;
+            dstPtr = (byte*)dstPtr + dstByteOffset;
+ 
+            // Completely fill the last byte, adjust variables according to copied bits or return
+            if (Hint.Likely(preservedHighBitsInDstByte != 0))
+            {
+                byte loadSrc = *(byte*)srcPtr;
+                loadSrc <<= (int)unusedHighBitsInSrcByte;
+                loadSrc >>= (int)preservedHighBitsInDstByte;
+ 
+                ulong bitsToFill = 8ul - preservedHighBitsInDstByte;
+ 
+                if (Hint.Unlikely(bitsToCopy < bitsToFill))
+                {
+                    if (Hint.Unlikely(bitsToCopy > 8 - unusedHighBitsInSrcByte))
+                    {
+                        srcPtr = (byte*)srcPtr - 1;
+                        loadSrc |= (byte)(*(byte*)srcPtr >> (int)(8 - unusedHighBitsInSrcByte + preservedHighBitsInDstByte));
+                    }
+ 
+                    byte mask = bitmask8((uint)bitsToCopy, (uint)(bitsToFill - bitsToCopy));
+                    *(byte*)dstPtr = bits_select(*(byte*)dstPtr, loadSrc, mask);
+ 
+                    return;
+                }
+                else
+                {
+                    lo = (byte)(*(byte*)dstPtr & bitmask8((uint)preservedHighBitsInDstByte, (uint)(8 - preservedHighBitsInDstByte)));
+                    lo |= loadSrc;
+ 
+                    ulong copyableBits = 8ul - unusedHighBitsInSrcByte;
+                    ulong occupiedBits = copyableBits + preservedHighBitsInDstByte;
+ 
+                    if (Hint.Unlikely(occupiedBits < 8))
+                    {
+                        bitsToCopy -= copyableBits;
+ 
+Assert.IsGreaterOrEqual(bitsToCopy, 8 - occupiedBits);
+ 
+                        srcPtr = (byte*)srcPtr - 1;
+                        lo |= (byte)(*(byte*)srcPtr >> (int)occupiedBits);
+                        unusedHighBitsInSrcByte = 8 - occupiedBits;
+                        bitsToCopy -= unusedHighBitsInSrcByte;
+                    }
+                    else
+                    {
+                        if (Hint.Likely(occupiedBits == 8))
+                        {
+                            srcPtr = (byte*)srcPtr - 1;
+                            unusedHighBitsInSrcByte = 0;
+                            bitsToCopy -= copyableBits;
+                        }
+                        else
+                        {
+                            bitsToCopy -= 8 - preservedHighBitsInDstByte;
+                            unusedHighBitsInSrcByte = 8 - (occupiedBits % 8);
+                        }
+                    }
+ 
+/////////////////////////////////////////////////////////////////////////////////
+// The following is to avoid overwriting the source if the pointers are the same
+                    byte temp = (byte)(*(byte*)srcPtr << (int)unusedHighBitsInSrcByte);
+                    *(byte*)dstPtr = (byte)lo;
+                    lo = temp;
+                    dstPtr = (byte*)dstPtr - 1;
+                }
+            }
+            else
+            {
+                lo = (byte)(*(byte*)srcPtr << (int)unusedHighBitsInSrcByte);
+            }
+ 
+/////////////////////////////////////////////////////////////////////////////////
+
+            if (Hint.Unlikely(unusedHighBitsInSrcByte == 0))
+            {
+                while (Hint.Likely(bitsToCopy >= 8))
+                {
+                    *(byte*)dstPtr = *(byte*)srcPtr;
+ 
+                    dstPtr = (byte*)dstPtr - 1;
+                    srcPtr = (byte*)srcPtr - 1;
+                    bitsToCopy -= 8;
+                }
+ 
+                if (Hint.Likely(bitsToCopy != 0))
+                {
+                    byte lastMask = bitmask8((uint)bitsToCopy, (uint)(8 - bitsToCopy));
+                    *(byte*)dstPtr = bits_select(*(byte*)dstPtr, *(byte*)srcPtr, lastMask);
+                }
+            }
+            else
+            {
+                srcPtr = (byte*)srcPtr - 1;
+ 
+                while (Hint.Likely(bitsToCopy >= 64))
+                {
+                    ulong load = *(ulong*)((byte*)srcPtr - 7);
+                    ulong hi = load >> (8 - (int)unusedHighBitsInSrcByte);
+                    *(ulong*)((byte*)dstPtr - 7) = (lo << 56) | hi;
+                    lo = (byte)(load << (int)unusedHighBitsInSrcByte);
+ 
+                    bitsToCopy -= 64;
+                    dstPtr = (byte*)dstPtr - 8;
+                    srcPtr = (byte*)srcPtr - 8;
+                }
+ 
+                if (Hint.Likely(bitsToCopy >= 32))
+                {
+                    uint load = *(uint*)((byte*)srcPtr - 3);
+                    uint hi = load >> (8 - (int)unusedHighBitsInSrcByte);
+                    *(uint*)((byte*)dstPtr - 3) = ((uint)lo << 24) | hi;
+                    lo = (byte)(load << (int)unusedHighBitsInSrcByte);
+ 
+                    bitsToCopy -= 32;
+                    dstPtr = (byte*)dstPtr - 4;
+                    srcPtr = (byte*)srcPtr - 4;
+                }
+ 
+                if (Hint.Likely(bitsToCopy >= 16))
+                {
+                    ushort load = *(ushort*)((byte*)srcPtr - 1);
+                    ushort hi = (ushort)(load >> (8 - (int)unusedHighBitsInSrcByte));
+                    *(ushort*)((byte*)dstPtr - 1) = (ushort)(((ushort)lo << 8) | hi);
+                    lo = (byte)(load << (int)unusedHighBitsInSrcByte);
+ 
+                    bitsToCopy -= 16;
+                    dstPtr = (byte*)dstPtr - 2;
+                    srcPtr = (byte*)srcPtr - 2;
+                }
+ 
+                if (Hint.Likely(bitsToCopy >= 8))
+                {
+                    byte load = *(byte*)srcPtr;
+                    byte hi = (byte)(load >> (8 - (int)unusedHighBitsInSrcByte));
+                    *(byte*)dstPtr = (byte)((byte)lo | hi);
+                    lo = (byte)(load << (int)unusedHighBitsInSrcByte);
+ 
+                    bitsToCopy -= 8;
+                    dstPtr = (byte*)dstPtr - 1;
+                    srcPtr = (byte*)srcPtr - 1;
+                }
+ 
+                if (Hint.Likely(bitsToCopy != 0))
+                {
+                    if (Hint.Unlikely(bitsToCopy > 8 - unusedHighBitsInSrcByte))
+                    {
+                        lo |= (byte)(*(byte*)srcPtr >> (int)(8 - unusedHighBitsInSrcByte));
+                    }
+ 
+                    byte lastMask = bitmask8((uint)bitsToCopy, (uint)(8 - bitsToCopy));
+                    *(byte*)dstPtr = bits_select(*(byte*)dstPtr, (byte)lo, lastMask);
+                }
             }
         }
     }

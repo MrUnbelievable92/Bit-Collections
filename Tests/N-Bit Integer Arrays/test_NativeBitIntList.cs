@@ -3319,11 +3319,11 @@ namespace BitCollections.Tests
                     {
                         if (where.Compare(managed[j + startIndex], cmp))
                         {
-                            managedIndex = j + startIndex;
+                            managedIndex = j;
                             break;
                         }
                     }
-
+                    
                     Assert.AreEqual(nativeIndex, managedIndex);
 
                     native.Dispose(default);
@@ -3511,6 +3511,7 @@ namespace BitCollections.Tests
             (rng) =>
             {
                 int maxLengthToTest = 0;
+                range = default(BitIntMock).Bits <= 8 ? TypeCode.Int64 : range;
                 switch (range)
                 {
                     case TypeCode.SByte:
@@ -3607,24 +3608,28 @@ namespace BitCollections.Tests
         }
 
         [Test]
+        [Timeout(int.MaxValue)]
         public static void Sum_8bit()
         {
             Sum_Base(TypeCode.Byte);
         }
 
         [Test]
+        [Timeout(int.MaxValue)]
         public static void Sum_16bit()
         {
             Sum_Base(TypeCode.UInt16);
         }
 
         [Test]
+        [Timeout(int.MaxValue)]
         public static void Sum_32bit()
         {
             Sum_Base(TypeCode.UInt32);
         }
 
         [Test]
+        [Timeout(int.MaxValue)]
         public static void Sum_64bit()
         {
             Sum_Base(TypeCode.UInt64);

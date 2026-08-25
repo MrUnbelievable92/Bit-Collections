@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using Unity.Burst.Intrinsics;
 using Unity.Collections;
 using MaxMath;
-using MaxMath.Intrinsics;
+using MaxMath.CompilerServices;
 using SIMDAlgorithms;
 
 using static MaxMath.math;

@@ -3,8 +3,10 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Burst.CompilerServices;
 using DevTools;
+using SIMDAlgorithms;
 
 using static MaxMath.math;
+using MaxMath;
 
 namespace BitCollections
 {
@@ -45,13 +47,12 @@ namespace BitCollections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: AssumeRange(0ul, int.MaxValue)]
         internal static ulong Capacity<T>(int numNumbers)
             where T : BitInt
         {
             if (IsMemoryOptimized<T>())
             {
-                return ceilmultiple(default(T).Bits * (ulong)numNumbers, default(T).MinFullyPackedBytes * 8ul) / default(T).Bits;
+                return ceilmultiple(default(T).Bits * (ulong)numNumbers, default(T).MinFullyPackedBytes * 8ul, Promise.NoOverflow) / default(T).Bits;
             }
             else
             {
@@ -60,18 +61,17 @@ namespace BitCollections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: AssumeRange(0ul, int.MaxValue)]
         internal static ulong SizeInBytes<T>(int numNumbers)
             where T : BitInt
         {
             if (IsMemoryOptimized<T>())
             {
-                return ceilmultiple(default(T).Bits * (ulong)numNumbers, default(T).MinFullyPackedBytes * 8ul) / 8;
+                return ceilmultiple(default(T).Bits * (ulong)numNumbers, default(T).MinFullyPackedBytes * 8ul, Promise.NoOverflow) / 8;
             }
             else
             {
                 uint safetyPadding = numNumbers == 0 ? 0 : (uint)AlignOf<T>() - 1;
-                return (default(T).Bits * (ulong)(uint)numNumbers) / 8u + safetyPadding;
+                return ceilmultiple(default(T).Bits * (ulong)(uint)numNumbers, 8u, Promise.Unsafe0 | Promise.NoOverflow) / 8u + safetyPadding;
             }
         }
 
@@ -89,7 +89,7 @@ Assert.IsNotNull(ptr);
 
             if (options == NativeArrayOptions.ClearMemory)
             {
-                UnsafeUtility.MemClear(ptr, (long)SizeInBytes<T>(numNumbers));
+                Memory.MemClear(ptr, (long)SizeInBytes<T>(numNumbers));
             }
 
             return ptr;
